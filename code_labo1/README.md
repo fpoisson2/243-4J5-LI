@@ -8,6 +8,20 @@ principal lorsque l'on démarre la session via SSH.
 ## Fichiers
 - `touchscreen_app.py` : fenêtre plein écran affichant un message simple.
 
+## Prérequis
+- Python 3 installé depuis l'image Raspberry Pi OS (par exemple `/usr/bin/python3`).
+- Tkinter côté système :
+  ```bash
+  sudo apt update && sudo apt install -y python3-tk
+  ```
+  (Tkinter ne s'installe pas via `pip`, il doit provenir des paquets Debian.)
+- Optionnel : un environnement virtuel basé sur Python 3 pour isoler les dépendances :
+  ```bash
+  sudo apt install -y python3-venv
+  python3 -m venv venv
+  source venv/bin/activate
+  ```
+
 ## Démarrage manuel
 1. Connectez-vous en SSH.
 2. Exécutez le script :

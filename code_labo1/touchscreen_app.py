@@ -14,7 +14,16 @@ from __future__ import annotations
 import os
 import signal
 import sys
-import tkinter as tk
+
+try:
+    import tkinter as tk
+except ImportError as exc:  # pragma: no cover - guidance for missing system dep
+    sys.stderr.write(
+        "Tkinter n'est pas disponible. Installez-le avec :\n"
+        "  sudo apt update && sudo apt install -y python3-tk\n"
+        "Puis relancez le script avec /usr/bin/python3 (ou dans un venv basé sur python3).\n"
+    )
+    raise SystemExit(1) from exc
 from dataclasses import dataclass
 from typing import Callable
 
