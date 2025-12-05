@@ -17,6 +17,7 @@ import sys
 
 try:
     import tkinter as tk
+    from tkinter import TclError
 except ImportError as exc:  # pragma: no cover - guidance for missing system dep
     sys.stderr.write(
         "Tkinter n'est pas disponible. Installez-le avec :\n"
@@ -39,7 +40,7 @@ class TouchscreenApp:
 
     def __post_init__(self) -> None:
         self._ensure_display()
-        self.root = tk.Tk()
+        self.root = self._create_root()
         self.root.title(self.title)
         self.root.configure(bg=self.background)
         self.root.attributes("-fullscreen", True)
@@ -51,6 +52,24 @@ class TouchscreenApp:
         """Force the UI to launch on the main display when started over SSH."""
         if "DISPLAY" not in os.environ:
             os.environ["DISPLAY"] = ":0"
+
+    def _create_root(self) -> tk.Tk:
+        try:
+            return tk.Tk()
+        except TclError as exc:
+            sys.stderr.write(
+                "Impossible de se connecter à l'affichage"
+                f" "
+                f"{os.environ.get('DISPLAY', 'non défini')}\n"
+                "Vérifiez qu'une session graphique est ouverte sur le Pi (ex. "
+                "le bureau ou `startx`) et que le fichier Xauthority est"
+                " accessible à l'utilisateur qui lance le script.\n"
+                "Depuis une connexion SSH, exportez par exemple :\n"
+                "  export DISPLAY=:0\n"
+                "  export XAUTHORITY=/home/pi/.Xauthority\n"
+                "Puis relancez le script lorsque l'écran est actif.\n"
+            )
+            raise SystemExit(1) from exc
 
     def _register_signal_handlers(self) -> None:
         for sig in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):

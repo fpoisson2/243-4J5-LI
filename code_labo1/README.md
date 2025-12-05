@@ -30,6 +30,15 @@ principal lorsque l'on démarre la session via SSH.
    ```
    Si `DISPLAY` n'est pas défini, il sera automatiquement réglé sur `:0` pour
    cibler l'écran du Pi.
+   - Si vous obtenez « couldn't connect to display ":0" », vérifiez qu'une
+     session graphique est bien ouverte sur le Raspberry Pi (le bureau ou
+     `startx`). Depuis SSH, assurez-vous aussi que l'utilisateur a accès au
+     fichier Xauthority, par exemple :
+     ```bash
+     export DISPLAY=:0
+     export XAUTHORITY=/home/pi/.Xauthority
+     python3 code_labo1/touchscreen_app.py
+     ```
 
 ### Arrêt propre
 - Utilisez `Ctrl+C` dans le terminal ou appuyez sur la touche **Échap** ou sur
