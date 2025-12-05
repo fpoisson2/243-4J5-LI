@@ -33,7 +33,8 @@ Choisissez le mode adapté via `--mode` :
   sans planter.
 - `gui` : force Tk (échoue si Tkinter n'est pas disponible ou si l'affichage
   est inaccessible).
-- `console` : interface texte uniquement.
+- `console` : interface texte uniquement (par défaut sur le TTY local si vous
+  lancez depuis une session SSH).
 
 Exemples :
 - Mode auto (utile en SSH) :
@@ -50,6 +51,13 @@ Exemples :
   ```bash
   python3 code_labo1/touchscreen_app.py --mode console
   ```
+  - En SSH, la console est automatiquement redirigée vers l'écran local via
+    `/dev/tty1`. Pour cibler un autre TTY :
+    ```bash
+    python3 code_labo1/touchscreen_app.py --mode console --console-tty /dev/tty2
+    ```
+  - Pour garder la console dans votre session SSH (ne pas rediriger vers
+    l'écran local), exportez `PREFER_SSH_CONSOLE=1` avant de lancer le script.
 - Forcer le mode graphique (Pi avec écran actif) :
   ```bash
   python3 code_labo1/touchscreen_app.py --mode gui

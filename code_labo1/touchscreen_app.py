@@ -14,7 +14,7 @@ import signal
 import sys
 from dataclasses import dataclass
 from types import ModuleType
-from typing import Callable, Optional
+from typing import Callable, Optional, TextIO
 
 
 class DisplayUnavailable(RuntimeError):
@@ -183,6 +183,8 @@ class ConsoleApp:
         "- Appuyez sur Q puis Entrée pour quitter proprement.\n"
         "- Ou envoyez Ctrl+C / un signal pour fermer.\n"
     )
+    input_stream: TextIO = sys.stdin
+    output_stream: TextIO = sys.stdout
     running: bool = False
 
     def __post_init__(self) -> None:
@@ -201,23 +203,25 @@ class ConsoleApp:
 
     def run(self) -> None:
         self.running = True
-        print(self.prompt)
+        print(self.prompt, file=self.output_stream, end="", flush=True)
         while self.running:
             try:
-                user_input = input(">>> ")
+                self.output_stream.write(">>> ")
+                self.output_stream.flush()
+                user_input = self.input_stream.readline()
             except (EOFError, KeyboardInterrupt):
-                print("Fermeture demandée.")
+                print("Fermeture demandée.", file=self.output_stream, flush=True)
                 self.stop()
                 continue
 
             if user_input.strip().lower() in {"q", "quit", "exit"}:
                 self.stop()
                 break
-            print("Tapez Q puis Entrée pour quitter, ou Ctrl+C.")
+            print("Tapez Q puis Entrée pour quitter, ou Ctrl+C.", file=self.output_stream, flush=True)
 
     def stop(self) -> None:
         self.running = False
-        print("Arrêt propre de l'interface console.")
+        print("Arrêt propre de l'interface console.", file=self.output_stream, flush=True)
 
 
 def _parse_args(argv: list[str]) -> argparse.Namespace:
@@ -228,7 +232,46 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
         default="auto",
         help="auto: Tk si dispo, sinon console ; gui: force Tk ; console: texte",
     )
+    parser.add_argument(
+        "--console-tty",
+        default=None,
+        help=(
+            "TTY à utiliser pour l'interface console (ex. /dev/tty1)."
+            " Par défaut, en SSH on cible /dev/tty1 pour afficher sur l'écran"
+            " local ; désactivez avec PREFER_SSH_CONSOLE=1."
+        ),
+    )
     return parser.parse_args(argv)
+
+
+def _select_console_streams(preferred_tty: Optional[str]) -> tuple[TextIO, TextIO, bool]:
+    """Retourne (stdin, stdout, should_close) pour la console.
+
+    - En SSH, on cible /dev/tty1 (ou le TTY fourni) pour afficher sur l'écran
+      local, sauf si ``PREFER_SSH_CONSOLE=1`` force la console dans la session
+      distante.
+    - Si l'ouverture échoue, on se rabat sur les flux standards.
+    """
+
+    prefer_ssh_console = os.environ.get("PREFER_SSH_CONSOLE") == "1"
+    tty_path = preferred_tty
+
+    if tty_path is None and _is_ssh_session() and not prefer_ssh_console:
+        tty_path = "/dev/tty1"
+
+    if tty_path:
+        try:
+            stream = open(tty_path, "r+")
+        except OSError as exc:
+            sys.stderr.write(
+                f"Impossible d'ouvrir {tty_path} ({exc}); "
+                "utilisation de la session SSH pour la console.\n"
+            )
+        else:
+            sys.stderr.write(f"Console redirigée vers {tty_path}.\n")
+            return stream, stream, True
+
+    return sys.stdin, sys.stdout, False
 
 
 def _launch_gui(tk_mod: ModuleType, tcl_error: type) -> None:
@@ -240,7 +283,12 @@ def main(argv: Optional[list[str]] = None) -> None:
     args = _parse_args(argv or sys.argv[1:])
 
     if args.mode == "console":
-        ConsoleApp().run()
+        console_stdin, console_stdout, should_close = _select_console_streams(args.console_tty)
+        try:
+            ConsoleApp(input_stream=console_stdin, output_stream=console_stdout).run()
+        finally:
+            if should_close:
+                console_stdin.close()
         return
 
     tk_mod, tcl_error = _load_tkinter()
