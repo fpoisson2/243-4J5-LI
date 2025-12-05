@@ -47,6 +47,29 @@ principal lorsque l'on démarre la session via SSH.
   Tkinter sans laisser de processus bloqué, ce qui garantit un redémarrage
   sain du service lors des prochains lancements.
 
+### Faut-il créer un fichier `~/.xinitrc` ?
+- **Si l'environnement graphique du Pi est déjà lancé** (bureau ouvert ou
+  session autologin sur l'écran), vous n'avez rien à créer : exportez
+  simplement `DISPLAY` et, si besoin, `XAUTHORITY` comme indiqué ci-dessus.
+- **Si vous démarrez le Pi sans environnement graphique** (par exemple en
+  mode console uniquement) et que vous souhaitez lancer l'interface via
+  `startx`, un fichier `~/.xinitrc` peut être utile pour démarrer une session
+  X minimale qui ouvre uniquement l'application. Exemple de fichier
+  `~/.xinitrc` pour l'utilisateur `pi` :
+  ```bash
+  #!/usr/bin/env bash
+  export DISPLAY=:0
+  export XAUTHORITY=/home/pi/.Xauthority
+  /usr/bin/python3 /home/pi/code_labo1/touchscreen_app.py
+  ```
+  Rendre le fichier exécutable puis lancer la session graphique minimaliste :
+  ```bash
+  chmod +x ~/.xinitrc
+  startx
+  ```
+  Avec cette approche, `startx` ouvrira directement l'application sur
+  l'écran, même si vous êtes connecté en SSH, sans nécessiter d'autre bureau.
+
 ## Lancement au boot (via systemd)
 Pour que l'interface démarre automatiquement, créez un service systemd minimal
 sur le Raspberry Pi :
