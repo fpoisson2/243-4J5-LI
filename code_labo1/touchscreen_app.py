@@ -38,6 +38,24 @@ def _load_tkinter() -> tuple[Optional[ModuleType], Optional[type]]:
     return module, tcl_error
 
 
+def _is_ssh_session() -> bool:
+    return any(var in os.environ for var in ("SSH_CONNECTION", "SSH_CLIENT", "SSH_TTY"))
+
+
+def _is_forwarded_display(display: str) -> bool:
+    return display.startswith("localhost:") or display.startswith("127.0.0.1:") or display.startswith("::1:")
+
+
+def _guess_xauthority() -> Optional[str]:
+    """Retourne un chemin Xauthority plausible si absent."""
+
+    candidates = [os.environ.get("XAUTHORITY"), os.path.expanduser("~/.Xauthority")]
+    for candidate in candidates:
+        if candidate and os.path.exists(candidate):
+            return candidate
+    return None
+
+
 @dataclass
 class TouchscreenApp:
     """Interface graphique Tk pour écran tactile."""
@@ -60,10 +78,20 @@ class TouchscreenApp:
         self._build_ui()
 
     def _ensure_display(self) -> None:
-        """Force le lancement sur l'écran principal en SSH."""
+        """Force le lancement sur l'écran local même en session SSH avec X11."""
 
-        if "DISPLAY" not in os.environ:
+        prefer_ssh_display = os.environ.get("PREFER_SSH_DISPLAY") == "1"
+        display = os.environ.get("DISPLAY")
+
+        if display is None:
             os.environ["DISPLAY"] = ":0"
+        elif _is_ssh_session() and _is_forwarded_display(display) and not prefer_ssh_display:
+            os.environ["DISPLAY"] = ":0"
+
+        if "XAUTHORITY" not in os.environ:
+            guessed = _guess_xauthority()
+            if guessed:
+                os.environ["XAUTHORITY"] = guessed
 
     def _create_root(self):  # type: ignore[override]
         try:

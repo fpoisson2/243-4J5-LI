@@ -3,7 +3,8 @@
 Ce dossier contient un exemple minimal pour lancer une interface tactile sur
 l'écran officiel du Raspberry Pi 5. Le script utilise Tkinter (inclus dans la
 plupart des images Raspberry Pi OS) et force l'utilisation de l'affichage
-principal lorsque l'on démarre la session via SSH.
+principal lorsque l'on démarre la session via SSH (il ignore par défaut un
+DISPLAY redirigé de type `localhost:10.0` afin d'ouvrir sur l'écran du Pi).
 
 ## Fichiers
 - `touchscreen_app.py` :
@@ -40,7 +41,10 @@ Exemples :
   python3 code_labo1/touchscreen_app.py
   ```
   Si `DISPLAY` n'est pas défini, il sera automatiquement réglé sur `:0` pour
-  cibler l'écran du Pi.
+  cibler l'écran du Pi. Si vous êtes connecté en SSH avec un X11 forwardé
+  (`DISPLAY=localhost:...`), l'application ignorera ce DISPLAY pour cibler
+  l'écran local. Pour forcer l'affichage sur le forward SSH, exportez
+  `PREFER_SSH_DISPLAY=1` avant de lancer le script.
 - Forcer le mode console (Ubuntu headless ou si vous voulez un prompt texte
   directement sur la console reliée à l'écran sans X/Wayland) :
   ```bash
