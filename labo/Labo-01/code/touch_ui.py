@@ -1,5 +1,6 @@
 import threading
 import time
+import os
 from queue import Queue
 
 import curses
@@ -86,7 +87,7 @@ class CoolConsoleUI:
         if start_row < 3:
             start_row = 3
 
-        labels = ["STATUS", "LOGS", "QUIT"]
+        labels = ["STATUS", "LOGS", "REBOOT", "QUIT"]
         for i, label in enumerate(labels):
             row = start_row + i * (btn_height + 1)
             col = (w - btn_width) // 2
@@ -182,6 +183,9 @@ class CoolConsoleUI:
             self.status_message = f"STATUS: Tout roule. Touch={row},{col}"
         elif label == "LOGS":
             self.status_message = "LOGS: (ici tu pourrais afficher des logs système, etc.)"
+        elif label == "REBOOT":
+            self.status_message = "Redémarrage en cours..."
+            os.system("sudo reboot")
         elif label == "QUIT":
             self.status_message = "Quit demandé..."
             self.running = False

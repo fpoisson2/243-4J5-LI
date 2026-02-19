@@ -9,4 +9,6 @@ echo "Basculement vers TTY1..."
 chvt 1
 
 # Lancer l'interface sur TTY1
-setsid sh -c 'exec </dev/tty1 >/dev/tty1 2>&1 python3 /home/fpoisson/243-4J5-LI/labo1/led-control/touch_ui_led.py'
+# On définit TERM=linux pour que curses s'initialise correctement sur la console
+SCRIPT_DIR=$(dirname "$(realpath "$0")")
+setsid sh -c "export TERM=linux; exec </dev/tty1 >/dev/tty1 2>&1 python3 $SCRIPT_DIR/touch_ui_led.py"
