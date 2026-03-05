@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "PCB_Projet_Mi_Session-eagle-import")(type "KiCad")(uri "${KIPRJMOD}/PCB_Projet_Mi_Session-eagle-import.kicad_sym")(options "")(descr ""))
+)

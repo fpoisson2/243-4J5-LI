@@ -1,0 +1,101 @@
+(footprint "Adafruit_MPU6050"
+  (version 20231120)
+  (generator "manual")
+  (layer "F.Cu")
+  (attr through_hole)
+  (fp_text reference "REF**"
+    (at 0 -4.5)
+    (layer "F.SilkS")
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
+  (fp_text value "Adafruit_MPU6050"
+    (at 0 19.0)
+    (layer "F.Fab")
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
+
+  ;; Board outline on F.Fab
+  (fp_rect
+    (start -5.0 -3.0)
+    (end 5.0 18.24)
+    (stroke (width 0.1) (type default))
+    (fill none)
+    (layer "F.Fab")
+  )
+
+  ;; Courtyard
+  (fp_rect
+    (start -5.5 -3.5)
+    (end 5.5 18.74)
+    (stroke (width 0.05) (type default))
+    (fill none)
+    (layer "F.CrtYd")
+  )
+
+  ;; Silkscreen outline
+  (fp_rect
+    (start -5.0 -3.0)
+    (end 5.0 18.24)
+    (stroke (width 0.12) (type default))
+    (fill none)
+    (layer "F.SilkS")
+  )
+
+  ;; Pin 1 indicator (small triangle on silkscreen)
+  (fp_line (start -1.5 -0.5) (end -1.5 0.5)
+    (stroke (width 0.12) (type default)) (layer "F.SilkS"))
+  (fp_line (start -1.5 0.5) (end -1.0 0.0)
+    (stroke (width 0.12) (type default)) (layer "F.SilkS"))
+  (fp_line (start -1.0 0.0) (end -1.5 -0.5)
+    (stroke (width 0.12) (type default)) (layer "F.SilkS"))
+
+  ;; Pad 1 - VIN (rectangular for pin 1 indicator)
+  (pad "1" thru_hole rect
+    (at 0 0)
+    (size 1.7 1.7)
+    (drill 1.0)
+    (layers "*.Cu" "*.Mask")
+  )
+  ;; Pad 2 - 3Vo
+  (pad "2" thru_hole circle
+    (at 0 2.54)
+    (size 1.7 1.7)
+    (drill 1.0)
+    (layers "*.Cu" "*.Mask")
+  )
+  ;; Pad 3 - GND
+  (pad "3" thru_hole circle
+    (at 0 5.08)
+    (size 1.7 1.7)
+    (drill 1.0)
+    (layers "*.Cu" "*.Mask")
+  )
+  ;; Pad 4 - SCL
+  (pad "4" thru_hole circle
+    (at 0 7.62)
+    (size 1.7 1.7)
+    (drill 1.0)
+    (layers "*.Cu" "*.Mask")
+  )
+  ;; Pad 5 - SDA
+  (pad "5" thru_hole circle
+    (at 0 10.16)
+    (size 1.7 1.7)
+    (drill 1.0)
+    (layers "*.Cu" "*.Mask")
+  )
+  ;; Pad 6 - AD0
+  (pad "6" thru_hole circle
+    (at 0 12.70)
+    (size 1.7 1.7)
+    (drill 1.0)
+    (layers "*.Cu" "*.Mask")
+  )
+  ;; Pad 7 - INT
+  (pad "7" thru_hole circle
+    (at 0 15.24)
+    (size 1.7 1.7)
+    (drill 1.0)
+    (layers "*.Cu" "*.Mask")
+  )
+)
