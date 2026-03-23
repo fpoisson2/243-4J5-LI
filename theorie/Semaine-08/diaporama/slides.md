@@ -28,6 +28,231 @@ Semaine 8 - Configuration avancée LoRa et réseau mesh
 </div>
 
 ---
+layout: two-cols
+---
+
+# Où s'en va-t-on?
+
+### Deuxième moitié de la session
+
+<v-clicks>
+
+- Nouveaux modules : **LilyGO T-Beam SUPREME**
+- Technologie **LoRa** — communication longue portée
+- Firmware **Meshtastic** — réseau mesh décentralisé
+- Communication **sans infrastructure** cellulaire
+- Tests terrain et cartographie de couverture
+
+</v-clicks>
+
+::right::
+
+<div class="pl-4 pt-8">
+
+<v-click>
+
+### LilyGO T-Beam SUPREME
+
+- Microcontrôleur **ESP32-S3**
+- Radio **LoRa SX1262** (915 MHz)
+- **GPS** intégré
+- Batterie rechargeable
+- Parfait pour Meshtastic
+
+</v-click>
+
+<v-click>
+
+<div class="mt-4 p-3 bg-blue-500 bg-opacity-20 rounded-lg text-sm">
+
+On passe du **LTE/MQTT** (infrastructure) au **LoRa/Mesh** (autonome) — deux approches complémentaires pour l'IoT.
+
+</div>
+
+</v-click>
+
+</div>
+
+---
+layout: section
+---
+
+# Introduction à LoRa
+## Long Range - Communication longue portée
+
+---
+
+# Qu'est-ce que LoRa?
+
+### Long Range - Communication longue portée
+
+<div class="grid grid-cols-2 gap-6">
+
+<div>
+
+<v-clicks>
+
+- **Lo**ng **Ra**nge = Longue portée
+- Technologie radio **propriétaire** (Semtech)
+- Portée : **2-15 km** (rural), **1-5 km** (urbain)
+- Faible consommation énergétique
+- Faible débit (0.3 - 50 kbps)
+- Bande ISM **sans licence** (915 MHz)
+
+</v-clicks>
+
+</div>
+
+<div>
+
+<v-click>
+
+### Caractéristiques clés
+
+| Paramètre | Valeur |
+|-----------|--------|
+| Fréquence | 915 MHz (Amérique) |
+| Portée | 2-15 km |
+| Débit | 0.3-50 kbps |
+| Consommation | ~50 mA TX |
+| Sensibilité | -137 dBm |
+
+</v-click>
+
+</div>
+
+</div>
+
+<v-click>
+
+<div class="mt-2 p-2 bg-blue-500 bg-opacity-20 rounded-lg text-center text-sm">
+
+LoRa sacrifie le **débit** pour gagner en **portée** et **efficacité énergétique**.
+
+</div>
+
+</v-click>
+
+---
+
+# LoRa vs autres technologies
+
+### Comparaison
+
+<v-click>
+
+| Technologie | Portée | Débit | Conso. | Coût |
+|-------------|--------|-------|--------|------|
+| **LoRa** | 15 km | 50 kbps | Faible | Faible |
+| WiFi | 100 m | 100+ Mbps | Élevée | Faible |
+| LTE | 10 km | 100 Mbps | Élevée | Abonnement |
+| Bluetooth | 10 m | 2 Mbps | Faible | Faible |
+| Zigbee | 100 m | 250 kbps | Faible | Moyen |
+
+</v-click>
+
+<v-click>
+
+<div class="mt-2 p-2 bg-blue-500 bg-opacity-20 rounded-lg text-center text-sm">
+
+On passe du **LTE** (semaines 1-6) au **LoRa** — deux approches complémentaires pour l'IoT.
+
+</div>
+
+</v-click>
+
+---
+
+# Qu'est-ce que Meshtastic?
+
+### Réseau mesh décentralisé
+
+<div class="grid grid-cols-2 gap-6">
+
+<div>
+
+<v-clicks>
+
+- **Firmware open source** pour radios LoRa
+- Réseau **mesh** (maillé) peer-to-peer
+- **Aucune infrastructure** requise
+- Communication **hors réseau**
+- Chiffrement **AES-256**
+- GPS intégré pour localisation
+
+</v-clicks>
+
+</div>
+
+<div>
+
+<v-click>
+
+### Fonctionnalités
+
+- Messagerie texte
+- Partage de position GPS
+- Telemetry (capteurs)
+- Canaux multiples
+- Répétition automatique
+- Interface smartphone (Bluetooth)
+
+</v-click>
+
+</div>
+
+</div>
+
+<v-click>
+
+<div class="mt-2 p-2 bg-green-500 bg-opacity-20 rounded-lg text-center text-sm">
+
+Meshtastic transforme des radios LoRa en **réseau de communication autonome**.
+
+</div>
+
+</v-click>
+
+---
+
+# Architecture mesh
+
+### Comment ça fonctionne?
+
+<v-click>
+
+```mermaid {scale: 0.55}
+graph LR
+    subgraph "Réseau Meshtastic"
+        A[Node A] <-->|LoRa| B[Node B]
+        B <-->|LoRa| C[Node C]
+        C <-->|LoRa| D[Node D]
+        A <-->|LoRa| C
+
+        A ---|Bluetooth| PA[Phone A]
+        D ---|Bluetooth| PD[Phone D]
+    end
+
+    style A fill:#f96
+    style B fill:#69f
+    style C fill:#69f
+    style D fill:#6f6
+```
+
+</v-click>
+
+<v-click>
+
+### Caractéristiques du mesh
+
+- Chaque noeud peut **relayer** les messages (multi-hop)
+- Pas de noeud **central** — réseau décentralisé
+- Le réseau s'**auto-configure**
+- **Résilience** : si un noeud tombe, le réseau s'adapte
+
+</v-click>
+
+---
 layout: section
 ---
 
