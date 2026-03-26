@@ -654,834 +654,15 @@ La carte **idéale** pour Meshtastic : LoRa + GPS + batterie intégrée!
 </v-click>
 
 ---
-
-# Anatomie du T-Beam SUPREME
-
-### Composants principaux
-
-<v-click>
-
-```
-┌─────────────────────────────────────────────┐
-│  [GPS]                              [LoRa]  │
-│   ANT                                 ANT   │
-│    ○                                   ○    │
-│                                             │
-│  ┌─────────────────────────────────────┐   │
-│  │                                     │   │
-│  │           ESP32-S3                  │   │
-│  │                                     │   │
-│  └─────────────────────────────────────┘   │
-│                                             │
-│  [USB-C]    [PWR]    [RST]    [USR]        │
-│     □         ○        ○        ○          │
-│                                             │
-│  ╔═════════════════════════════════════╗   │
-│  ║         Batterie 18650              ║   │
-│  ╚═════════════════════════════════════╝   │
-└─────────────────────────────────────────────┘
-```
-
-</v-click>
-
-<v-click>
-
-<div class="mt-2 p-2 bg-red-500 bg-opacity-20 rounded-lg text-center text-sm">
-
-**ATTENTION** : Ne JAMAIS alimenter sans antenne LoRa! Risque de dommage au module.
-
-</div>
-
-</v-click>
-
----
-
-# Flash du firmware Meshtastic
-
-### Installation sur T-Beam SUPREME
-
-<div class="grid grid-cols-2 gap-4">
-
-<div>
-
-<v-click>
-
-### Méthode 1 : Web Flasher
-
-1. Aller sur **flasher.meshtastic.org**
-2. Connecter le T-Beam en USB
-3. Sélectionner **T-Beam Supreme**
-4. Cliquer **Flash**
-5. Attendre la fin
-
-</v-click>
-
-<v-click>
-
-<div class="p-2 bg-green-500 bg-opacity-20 rounded-lg text-sm mt-2">
-
-**Recommandé** : Simple et fiable!
-
-</div>
-
-</v-click>
-
-</div>
-
-<div>
-
-<v-click>
-
-### Méthode 2 : CLI Python
-
-```bash
-# Installer le CLI
-pip install meshtastic
-
-# Flasher le firmware
-meshtastic --flash
-
-# Ou version spécifique
-meshtastic --flash --version 2.x.x
-```
-
-</v-click>
-
-<v-click>
-
-<div class="p-2 bg-blue-500 bg-opacity-20 rounded-lg text-sm mt-2">
-
-Utile pour scripts et automatisation.
-
-</div>
-
-</v-click>
-
-</div>
-
-</div>
-
----
-
-# Configuration initiale
-
-### Premiers pas avec Meshtastic
-
-<v-clicks>
-
-1. **Connecter l'antenne LoRa** (IMPORTANT!)
-2. **Alimenter** le T-Beam (USB ou batterie)
-3. **Attendre** le boot (LED clignote)
-4. **Connecter** l'app mobile via Bluetooth
-5. **Configurer** :
-   - Nom du noeud
-   - Région : **US** (915 MHz)
-   - Canal : garder défaut ou créer
-6. **Tester** : envoyer un message
-
-</v-clicks>
-
-<v-click>
-
-### Commandes CLI essentielles
-
-```bash
-meshtastic --info                          # Voir la config actuelle
-meshtastic --set-owner "MonT-Beam"         # Nom du noeud
-meshtastic --set lora.region US            # Région (obligatoire!)
-meshtastic --nodes                         # Voir les noeuds du réseau
-meshtastic --sendtext "Hello Mesh!"        # Envoyer un message
-```
-
-</v-click>
-
----
 layout: section
 ---
 
-# Partie 3
-## Paramètres radio LoRa avancés
+# Prochain projet
+## Pipeline LoRa + LLM pour IoT
 
 ---
 
-# Impact du Spreading Factor
-
-### Analyse détaillée
-
-<v-click>
-
-```
-SF7  ████                    Rapide, courte portée
-SF8  ████████
-SF9  ████████████            ← Défaut Meshtastic
-SF10 ████████████████
-SF11 ████████████████████
-SF12 ████████████████████████ Lent, longue portée
-
-     |----|----|----|----|
-     0    2    4    6    8 secondes (pour 256 bytes)
-```
-
-</v-click>
-
-<v-click>
-
-| SF | Sensibilité | Portée typ. | Débit | Temps/256B |
-|:--:|:-----------:|:-----------:|:-----:|:----------:|
-| 7 | -123 dBm | 2-3 km | 5.5 kbps | 0.4s |
-| 9 | -129 dBm | 5-7 km | 1.8 kbps | 1.3s |
-| 12 | -137 dBm | 13-15 km | 0.3 kbps | 7.4s |
-
-</v-click>
-
----
-
-# Sensibilité du récepteur
-
-### Comprendre les dBm
-
-<div class="grid grid-cols-2 gap-6">
-
-<div>
-
-<v-click>
-
-### Échelle logarithmique
-
-- **0 dBm** = 1 mW
-- **-10 dBm** = 0.1 mW
-- **-100 dBm** = 0.0000000001 mW
-- **-137 dBm** = niveau de bruit thermique
-
-</v-click>
-
-<v-click>
-
-### Plus c'est négatif, plus c'est faible
-
-```
-Fort    -50 dBm  ████████████
-        -70 dBm  ████████
-        -90 dBm  ████
-       -110 dBm  ██
-Faible -130 dBm  █
-```
-
-</v-click>
-
-</div>
-
-<div>
-
-<v-click>
-
-### Budget de liaison
-
-$$
-P_{reçue} = P_{TX} + G_{TX} - L_{path} + G_{RX}
-$$
-
-**Exemple** :
-- TX : +22 dBm
-- Antenne TX : +2 dBi
-- Pertes : -130 dB (10 km)
-- Antenne RX : +2 dBi
-- **Reçu : -104 dBm**
-
-</v-click>
-
-<v-click>
-
-<div class="mt-2 p-2 bg-green-500 bg-opacity-20 rounded-lg text-sm">
-
-Si sensibilité = -129 dBm, marge = **25 dB**
-
-</div>
-
-</v-click>
-
-</div>
-
-</div>
-
----
-
-# Bandwidth et compromis
-
-### Impact sur les performances
-
-<v-click>
-
-| BW | Avantages | Inconvénients |
-|:--:|-----------|---------------|
-| 125 kHz | Meilleure sensibilité (+3dB) | Débit plus lent |
-| 250 kHz | Bon compromis | Standard |
-| 500 kHz | Débit maximum | Portée réduite |
-
-</v-click>
-
-<v-click>
-
-### Formule du débit
-
-$$
-Débit = SF \times \frac{BW}{2^{SF}} \times CR
-$$
-
-</v-click>
-
-<v-click>
-
-<div class="mt-2 p-2 bg-blue-500 bg-opacity-20 rounded-lg text-center text-sm">
-
-**Recommandation Meshtastic** : BW 250 kHz pour un bon équilibre.
-
-</div>
-
-</v-click>
-
----
-
-# Coding Rate et robustesse
-
-### Protection contre les erreurs
-
-<div class="grid grid-cols-2 gap-6">
-
-<div>
-
-<v-click>
-
-### Fonctionnement
-
-- **4/5** : 4 bits utiles, 1 bit redondant (20%)
-- **4/6** : 4 bits utiles, 2 bits redondants (33%)
-- **4/7** : 4 bits utiles, 3 bits redondants (43%)
-- **4/8** : 4 bits utiles, 4 bits redondants (50%)
-
-</v-click>
-
-<v-click>
-
-### Quand augmenter le CR?
-
-- Environnement très bruité
-- Interférences fréquentes
-- Importance critique des données
-
-</v-click>
-
-</div>
-
-<div>
-
-<v-click>
-
-### Impact sur le temps d'air
-
-```
-CR 4/5  ████████████
-CR 4/6  ██████████████
-CR 4/7  ████████████████
-CR 4/8  ██████████████████
-
-        Temps de transmission →
-```
-
-</v-click>
-
-<v-click>
-
-<div class="mt-2 p-2 bg-orange-500 bg-opacity-20 rounded-lg text-sm">
-
-Plus de redondance = plus de temps d'air = plus de consommation.
-
-</div>
-
-</v-click>
-
-</div>
-
-</div>
-
----
-
-# Presets Meshtastic
-
-### Configurations prédéfinies
-
-<v-click>
-
-| Preset | SF | BW | CR | Usage |
-|--------|:--:|:--:|:--:|-------|
-| SHORT_FAST | 7 | 250 | 4/5 | Courte portée, rapide |
-| SHORT_SLOW | 8 | 250 | 4/5 | Courte, plus fiable |
-| **MEDIUM_FAST** | 9 | 250 | 4/5 | **Défaut** |
-| MEDIUM_SLOW | 10 | 250 | 4/5 | Moyenne portée |
-| LONG_FAST | 11 | 250 | 4/5 | Longue portée |
-| LONG_SLOW | 11 | 125 | 4/8 | Maximum portée |
-| VERY_LONG_SLOW | 12 | 125 | 4/8 | Extrême |
-
-</v-click>
-
-<v-click>
-
-### Arbre de décision rapide
-
-```mermaid {scale: 0.4}
-graph TD
-    A[Distance entre noeuds?] -->|< 2 km| B[SHORT_FAST]
-    A -->|2-5 km| C[MEDIUM_FAST]
-    A -->|5-10 km| D[LONG_FAST]
-    A -->|> 10 km| E[LONG_SLOW]
-
-    style C fill:#6f6
-```
-
-</v-click>
-
----
-layout: section
----
-
-# Partie 4
-## Architecture mesh Meshtastic
-
----
-
-# Types de noeuds
-
-### Rôles dans le réseau
-
-<div class="grid grid-cols-2 gap-4">
-
-<div class="p-3 bg-blue-500 bg-opacity-20 rounded-lg text-sm">
-
-### CLIENT
-
-<v-click>
-
-- Noeud **utilisateur** standard
-- Envoie et reçoit des messages
-- **Relaye** les messages des autres
-- Connecté à l'app mobile
-- Mode par défaut
-
-</v-click>
-
-</div>
-
-<div class="p-3 bg-green-500 bg-opacity-20 rounded-lg text-sm">
-
-### CLIENT_MUTE
-
-<v-click>
-
-- Reçoit les messages
-- **Ne transmet pas**
-- Monitoring silencieux
-- Économie d'énergie
-- Pas de contribution au mesh
-
-</v-click>
-
-</div>
-
-<div class="p-3 bg-purple-500 bg-opacity-20 rounded-lg text-sm">
-
-### ROUTER
-
-<v-click>
-
-- **Priorité** au relayage
-- Pas d'écran/interface
-- Position fixe idéale
-- Consommation optimisée
-- Infrastructure réseau
-
-</v-click>
-
-</div>
-
-<div class="p-3 bg-orange-500 bg-opacity-20 rounded-lg text-sm">
-
-### ROUTER_CLIENT
-
-<v-click>
-
-- Router **+** Client
-- Relaye avec priorité
-- Utilisable comme client
-- Flexible
-- Notre choix pour le cours
-
-</v-click>
-
-</div>
-
-</div>
-
----
-
-# Topologies mesh
-
-### Configurations de réseau
-
-<div class="grid grid-cols-2 gap-6">
-
-<div>
-
-<v-click>
-
-### Étoile (Star)
-
-```
-        [Client]
-           │
-    [Client]─[Router]─[Client]
-           │
-        [Client]
-```
-
-- Router central
-- Clients autour
-- Simple mais point de défaillance
-
-</v-click>
-
-</div>
-
-<div>
-
-<v-click>
-
-### Maillé (Mesh)
-
-```
-    [Node]───[Node]
-       │ ╲   ╱ │
-       │  ╲ ╱  │
-    [Node]─X─[Node]
-       │  ╱ ╲  │
-       │ ╱   ╲ │
-    [Node]───[Node]
-```
-
-- Connexions multiples
-- Résilient
-- Auto-configuration
-
-</v-click>
-
-</div>
-
-</div>
-
----
-
-# Algorithme de routage
-
-### Comment les messages traversent le mesh
-
-<v-click>
-
-```mermaid {scale: 0.55}
-sequenceDiagram
-    participant A as Node A
-    participant B as Node B (Router)
-    participant C as Node C
-    participant D as Node D (Dest)
-
-    A->>B: Message pour D (hop 0)
-    A->>C: Message pour D (hop 0)
-    Note over B,C: B et C reçoivent
-    B->>D: Relais (hop 1)
-    C->>D: Relais (hop 1)
-    Note over D: D reçoit, envoie ACK
-    D->>B: ACK
-    D->>C: ACK
-    B->>A: ACK relayé
-```
-
-</v-click>
-
----
-
-# Gestion des doublons
-
-### Éviter la tempête de broadcast
-
-<v-click>
-
-### Problème : Flooding
-
-Sans contrôle, un message serait relayé à l'infini!
-
-</v-click>
-
-<v-click>
-
-### Solutions Meshtastic
-
-1. **Hop limit** : Maximum de sauts (défaut: 3)
-2. **Packet ID** : Identifier les messages déjà vus
-3. **SNR-based** : Ne relayer que si meilleur signal
-4. **Timing** : Délai aléatoire avant relais
-
-</v-click>
-
-<v-click>
-
-### Configuration
-
-```bash
-# Définir le nombre max de hops
-meshtastic --set lora.hop_limit 3
-```
-
-</v-click>
-
----
-layout: section
----
-
-# Partie 5
-## Tests et mesures
-
----
-
-# Métriques de performance
-
-### Ce qu'il faut mesurer
-
-<v-click>
-
-| Métrique | Description | Valeur idéale |
-|----------|-------------|---------------|
-| **RSSI** | Force du signal reçu | > -100 dBm |
-| **SNR** | Rapport signal/bruit | > 0 dB |
-| **Hops** | Nombre de sauts | ≤ 3 |
-| **Latence** | Temps aller-retour | < 5 s |
-| **PDR** | Taux de livraison | > 95% |
-
-</v-click>
-
-<v-click>
-
-### Où trouver ces métriques?
-
-- **App Meshtastic** : Onglet "Nodes"
-- **CLI** : `meshtastic --nodes`
-- **Debug** : `meshtastic --debug`
-
-</v-click>
-
----
-
-# Interpréter RSSI et SNR
-
-### Guide de diagnostic
-
-<div class="grid grid-cols-2 gap-6">
-
-<div>
-
-<v-click>
-
-### RSSI (Received Signal Strength)
-
-| RSSI | Qualité |
-|:----:|---------|
-| > -70 dBm | Excellent |
-| -70 à -85 | Bon |
-| -85 à -100 | Acceptable |
-| -100 à -110 | Faible |
-| < -110 | Critique |
-
-</v-click>
-
-</div>
-
-<div>
-
-<v-click>
-
-### SNR (Signal-to-Noise Ratio)
-
-| SNR | Qualité |
-|:---:|---------|
-| > 10 dB | Excellent |
-| 5 à 10 | Bon |
-| 0 à 5 | Acceptable |
-| -5 à 0 | Faible |
-| < -5 | LoRa uniquement |
-
-</v-click>
-
-</div>
-
-</div>
-
-<v-click>
-
-<div class="mt-4 p-2 bg-green-500 bg-opacity-20 rounded-lg text-center text-sm">
-
-**LoRa peut fonctionner avec un SNR négatif!** C'est sa force.
-
-</div>
-
-</v-click>
-
----
-
-# Outils de diagnostic
-
-### Commandes CLI utiles
-
-```bash {all|1-2|4-5|7-8|10-11}
-# Voir tous les noeuds et leurs métriques
-meshtastic --nodes
-
-# Informations détaillées du noeud local
-meshtastic --info
-
-# Activer le debug pour voir les paquets
-meshtastic --debug
-
-# Envoyer un ping et mesurer le temps
-meshtastic --sendping
-```
-
-<v-click>
-
-### Dans l'application
-
-- **Node list** : RSSI, SNR, hops, dernière activité
-- **Map** : Positions GPS des noeuds
-- **Statistics** : Métriques réseau
-
-</v-click>
-
----
-layout: section
----
-
-# Travail de la semaine
-## Configuration réseau multi-noeuds
-
----
-
-# Objectifs du laboratoire
-
-### Mise en place d'un réseau mesh complet
-
-<div class="grid grid-cols-2 gap-4">
-
-<div>
-
-### Configuration (1h30)
-
-<v-clicks>
-
-- [ ] Former des équipes (4-6 noeuds)
-- [ ] Flash du firmware Meshtastic
-- [ ] Attribuer les rôles (1-2 Routers, reste Clients)
-- [ ] Configurer les paramètres radio
-- [ ] Tester différents presets
-- [ ] Documenter les configurations
-
-</v-clicks>
-
-</div>
-
-<div>
-
-### Tests (1h30)
-
-<v-clicks>
-
-- [ ] Tests de communication inter-noeuds
-- [ ] Mesure RSSI/SNR pour chaque liaison
-- [ ] Test de portée (intérieur/extérieur)
-- [ ] Identification des zones mortes
-- [ ] Documentation des résultats
-
-</v-clicks>
-
-</div>
-
-</div>
-
----
-
-# Configuration recommandée
-
-### Pour le laboratoire
-
-<v-click>
-
-```bash
-# Configuration commune à tous les noeuds
-meshtastic --set lora.region US
-meshtastic --set lora.modem_preset MEDIUM_FAST
-meshtastic --set lora.hop_limit 3
-
-# Pour les routers (1-2 par groupe)
-meshtastic --set device.role ROUTER_CLIENT
-
-# Pour les clients
-meshtastic --set device.role CLIENT
-
-# Définir un nom unique
-meshtastic --set-owner "Equipe1-Node1"
-```
-
-</v-click>
-
-<v-click>
-
-<div class="mt-4 p-2 bg-blue-500 bg-opacity-20 rounded-lg text-center text-sm">
-
-**Tous les noeuds du groupe** doivent être sur le même canal avec la même clé!
-
-</div>
-
-</v-click>
-
----
-
-# Fiche de test
-
-### Template à remplir
-
-| Test | Node A | Node B | Distance | RSSI | SNR | Succès |
-|------|--------|--------|----------|:----:|:---:|:------:|
-| 1 | R1 | C1 | 10m | | | |
-| 2 | R1 | C2 | 50m | | | |
-| 3 | R1 | C1 | 100m | | | |
-| ... | | | | | | |
-
-<v-click>
-
-### Questions à répondre
-
-1. Quelle est la portée maximale observée?
-2. Quel preset donne les meilleurs résultats?
-3. Quels obstacles affectent le plus le signal?
-4. Le mesh fonctionne-t-il correctement (multi-hop)?
-
-</v-click>
-
----
-layout: section
----
-
-# Prochaine évaluation
-## Projet Pipeline LLM pour IoT
-
----
-
-# Projet LLM-IoT
+# Projet LoRa-LLM
 
 ### Évaluation sommative 3 — 20% de la note finale
 
@@ -1493,18 +674,18 @@ layout: section
 
 ### Objectif
 
-Intégrer un **modèle de langage** (LLM) dans votre système IoT pour ajouter une couche d'**intelligence artificielle** capable d'analyser vos données de capteurs.
+Construire un pipeline qui collecte des données via **LoRa/Meshtastic**, les achemine vers un **serveur MQTT**, puis utilise un **LLM** pour analyser intelligemment les données et déclencher des actions.
 
 </v-click>
 
 <v-click>
 
-### Technologies
+### Le lien LoRa + LLM
 
-- **API LLM** : OpenAI (GPT) ou Anthropic (Claude)
-- **MQTT** : Réception des données capteurs
-- **Python** : Pipeline de traitement
-- **JSON** : Format de données structuré
+- **LoRa** : Transport longue portée sans infrastructure
+- **MQTT** : Passerelle entre le mesh et le cloud
+- **LLM** : Intelligence pour interpréter les données
+- Un pipeline **bout en bout** complet
 
 </v-click>
 
@@ -1517,24 +698,100 @@ Intégrer un **modèle de langage** (LLM) dans votre système IoT pour ajouter u
 ### Pipeline à construire
 
 ```
-┌──────────┐   ┌──────────┐
-│ Capteurs │──▶│   MQTT   │
-└──────────┘   └────┬─────┘
-                    │
-              ┌─────▼─────┐
-              │ Validation│
-              └─────┬─────┘
-                    │
-              ┌─────▼─────┐
-              │ Analyse   │
-              │   LLM     │
-              └─────┬─────┘
-                    │
-              ┌─────▼─────┐
-              │  Actions  │
-              │automatiques│
-              └───────────┘
+┌──────────┐   ┌───────────┐
+│ Capteurs │──▶│ Meshtastic│
+│  (T-Beam)│   │   (LoRa)  │
+└──────────┘   └─────┬─────┘
+                     │
+               ┌─────▼─────┐
+               │  Gateway   │
+               │ MQTT Bridge│
+               └─────┬─────┘
+                     │
+               ┌─────▼─────┐
+               │ Validation │
+               └─────┬─────┘
+                     │
+               ┌─────▼─────┐
+               │ Analyse    │
+               │   LLM      │
+               └─────┬─────┘
+                     │
+               ┌─────▼─────┐
+               │  Actions   │
+               │automatiques│
+               └────────────┘
 ```
+
+</v-click>
+
+</div>
+
+</div>
+
+---
+
+# Technologies du projet
+
+### De la radio au LLM
+
+<div class="grid grid-cols-2 gap-4">
+
+<div class="p-3 bg-blue-500 bg-opacity-20 rounded-lg text-sm">
+
+### Couche radio (LoRa)
+
+<v-click>
+
+- T-Beam SUPREME avec Meshtastic
+- Capteurs : GPS, telemetry, messages
+- Communication **sans infrastructure**
+- Données transmises via le mesh
+
+</v-click>
+
+</div>
+
+<div class="p-3 bg-green-500 bg-opacity-20 rounded-lg text-sm">
+
+### Couche passerelle (MQTT)
+
+<v-click>
+
+- Gateway Meshtastic → MQTT
+- Broker Mosquitto
+- Topics structurés par noeud
+- Format JSON standardisé
+
+</v-click>
+
+</div>
+
+<div class="p-3 bg-purple-500 bg-opacity-20 rounded-lg text-sm">
+
+### Couche intelligence (LLM)
+
+<v-click>
+
+- **API** : OpenAI (GPT) ou Anthropic (Claude)
+- Prompt système adapté à l'IoT
+- Réponses **JSON structuré**
+- Analyse contextuelle des données
+
+</v-click>
+
+</div>
+
+<div class="p-3 bg-orange-500 bg-opacity-20 rounded-lg text-sm">
+
+### Couche action
+
+<v-click>
+
+- Alertes et notifications
+- Publication MQTT de commandes
+- Journalisation des analyses
+- Tableau de bord (bonus)
 
 </v-click>
 
@@ -1571,9 +828,9 @@ Intégrer un **modèle de langage** (LLM) dans votre système IoT pour ajouter u
 <v-click>
 
 - Rédiger un **prompt système** efficace
-- Définir le rôle : analyste IoT
+- Définir le rôle : analyste IoT/LoRa
 - Format de réponse **JSON structuré**
-- Formatage intelligent des données
+- Contexte : données de capteurs mesh
 
 </v-click>
 
@@ -1585,7 +842,7 @@ Intégrer un **modèle de langage** (LLM) dans votre système IoT pour ajouter u
 
 <v-click>
 
-- Réception MQTT robuste
+- Réception MQTT des données Meshtastic
 - Validation des données entrantes
 - Analyse LLM **intelligente** (pas à chaque message)
 - Exécution d'actions automatiques
@@ -1621,10 +878,10 @@ Intégrer un **modèle de langage** (LLM) dans votre système IoT pour ajouter u
 
 | Semaine | Activité |
 |:-------:|----------|
-| **8** (cette semaine) | Présentation du projet, début LoRa/Meshtastic |
-| **9-10** | Travail sur LoRa + début pipeline LLM |
-| **11** | Intégration LLM dans le pipeline IoT |
-| **12** | **Remise du projet LLM-IoT** |
+| **8** (cette semaine) | Introduction LoRa, flash Meshtastic |
+| **9-10** | Réseau mesh + gateway MQTT + début pipeline LLM |
+| **11** | Intégration complète LoRa → MQTT → LLM |
+| **12** | **Remise du projet LoRa-LLM** |
 
 </v-click>
 
@@ -1634,15 +891,15 @@ Intégrer un **modèle de langage** (LLM) dans votre système IoT pour ajouter u
 
 - **Dépôt Git** : branche `prenom-nom/projet-llm`
 - **Structure** : `src/`, `prompts/`, `docs/`, `.env.example`
-- **Démonstration** : Pipeline fonctionnel
+- **Démonstration** : Pipeline fonctionnel (données LoRa → analyse LLM)
 
 </v-click>
 
 <v-click>
 
-<div class="mt-4 p-2 bg-red-500 bg-opacity-20 rounded-lg text-center text-sm">
+<div class="mt-2 p-1 bg-red-500 bg-opacity-20 rounded-lg text-center text-sm">
 
-**Critère de sécurité** : Toute clé API exposée dans le code ou l'historique git entraîne une pénalité automatique (-20 points).
+**Sécurité** : Toute clé API exposée dans le code ou l'historique git = pénalité automatique (-20 points).
 
 </div>
 
