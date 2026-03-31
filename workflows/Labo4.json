@@ -1,0 +1,350 @@
+{
+  "nodes": [
+    {
+      "id": 1,
+      "slug": "start",
+      "kind": "start",
+      "display_name": "Debut",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 1,
+      "is_enabled": true,
+      "parameters": {
+        "auto_start": true
+      },
+      "metadata": { "order": 1 }
+    },
+    {
+      "id": 2,
+      "slug": "msg-intro",
+      "kind": "assistant_message",
+      "display_name": "Introduction",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 2,
+      "is_enabled": true,
+      "parameters": {
+        "message": "# Labo 4 — Soudure PCB et introduction aux LLM\n\nDeux activités aujourd'hui :\n\n**Partie 1 (1h30)** — Souder les composants sur ton shield PCB du projet de mi-session, puis le tester avec ton LilyGO A7670E.\n\n**Partie 2 (1h30)** — Faire parler un LLM depuis le T-Beam Supreme et afficher la réponse sur l'écran OLED.\n\n## Matériel requis\n\n| Partie 1 | Partie 2 |\n|----------|----------|\n| Shield PCB + composants | LilyGO T-Beam Supreme |\n| LilyGO A7670E | Potentiomètre 10 kΩ |\n| Fer à souder, étain | Fils de connexion |\n| Multimètre | Câble USB-C |\n\n> **Rappel évaluation** : le prototype fonctionnel (shield soudé et testé) vaut **5%** du projet de mi-session (critère 1.4). Le programme embarqué (30%) et l'interface RPi (20%) dépendent aussi d'un shield fonctionnel.",
+        "simulate_stream_delay_ms": 5
+      },
+      "metadata": { "order": 2 }
+    },
+    {
+      "id": 3,
+      "slug": "widget-pret",
+      "kind": "widget",
+      "display_name": "Pret a debuter?",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 3,
+      "is_enabled": true,
+      "parameters": {
+        "widget": {
+          "slug": "pret-a-debuter",
+          "source": "library",
+          "variables": {
+            "text": "J'ai mon matériel de soudure et mon PCB!",
+            "title": "Tu as tout le matériel pour commencer?"
+          }
+        }
+      },
+      "metadata": { "order": 3 }
+    },
+    {
+      "id": 4,
+      "slug": "cond-widget-pret",
+      "kind": "condition",
+      "display_name": "Pret?",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 4,
+      "is_enabled": true,
+      "parameters": {
+        "mode": "value",
+        "path": "input.action.raw_payload.value."
+      },
+      "metadata": { "order": 4 }
+    },
+    {
+      "id": 5,
+      "slug": "end-abandonne",
+      "kind": "end",
+      "display_name": "Abandon",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 5,
+      "is_enabled": true,
+      "parameters": {
+        "status": { "type": "closed", "reason": "Pas pret" },
+        "message": "Reviens quand tu as ton matériel de soudure et ton PCB."
+      },
+      "metadata": { "order": 5 }
+    },
+
+    {
+      "id": 10,
+      "slug": "msg-soudure",
+      "kind": "assistant_message",
+      "display_name": "Instructions soudure",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 6,
+      "is_enabled": true,
+      "parameters": {
+        "message": "## Partie 1 — Soudure du shield PCB\n\n### Ordre de soudure (du plus bas au plus haut)\n\n1. **Résistances 330 Ω** pour les LEDs\n2. **Condensateurs** (céramiques d'abord)\n3. **Headers** pour la connexion au LilyGO A7670E\n4. **Boutons poussoirs**\n5. **LEDs** (patte longue = anode +)\n6. **Potentiomètres**\n7. **MPU6050** (attention à l'orientation)\n\n### Rappel technique\n\n- Température du fer : **300-350 °C**\n- Fer sur la pastille ET la patte (2-3 s)\n- Étain sur la jonction, pas sur le fer\n- Soudure réussie = brillante, forme de cône\n\nSoude tes composants, puis passe au test.",
+        "simulate_stream_delay_ms": 5
+      },
+      "metadata": { "order": 6 }
+    },
+    {
+      "id": 15,
+      "slug": "msg-photo-pcb",
+      "kind": "assistant_message",
+      "display_name": "Demande photo PCB",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 7,
+      "is_enabled": true,
+      "parameters": {
+        "message": "## Photo — PCB soudé\n\nQuand ta soudure est terminée, **prends une photo** de ton PCB (face composants et face soudures) et dépose-la ici.",
+        "simulate_stream_delay_ms": 5
+      },
+      "metadata": { "order": 7 }
+    },
+    {
+      "id": 16,
+      "slug": "wait-photo-pcb",
+      "kind": "wait_for_user_input",
+      "display_name": "Attente photo PCB",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 8,
+      "is_enabled": true,
+      "parameters": {},
+      "metadata": { "order": 8 }
+    },
+    {
+      "id": 17,
+      "slug": "msg-ack-pcb",
+      "kind": "assistant_message",
+      "display_name": "Accuse reception photo PCB",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 9,
+      "is_enabled": true,
+      "parameters": {
+        "message": "Photo reçue. Maintenant, branche ton shield sur le **LilyGO A7670E** et teste avec ton firmware de mi-session.",
+        "simulate_stream_delay_ms": 5
+      },
+      "metadata": { "order": 9 }
+    },
+
+    {
+      "id": 20,
+      "slug": "eval-a-test-shield",
+      "kind": "evaluated_step",
+      "display_name": "Partie A - Test du shield",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 10,
+      "is_enabled": true,
+      "parameters": {
+        "instruction": "## Test du shield avec le LilyGO A7670E\n\nBranche ton shield sur le LilyGO A7670E, téléverse ton firmware de mi-session et ouvre le moniteur série (115200 baud).\n\nVérifie chaque composant :\n- **LEDs** — s'allument via MQTT\n- **Boutons** — changement d'état dans le moniteur série\n- **Potentiomètres** — valeurs 0-4095 qui varient\n- **MPU6050** — données d'accélération visibles\n\n---\n\n**Colle la sortie du moniteur série** montrant que tes capteurs fonctionnent (boutons, pots, MPU6050). Si un composant ne fonctionne pas, indique lequel et ce que tu as vérifié.",
+        "evaluation_prompt": "L'étudiant montre la sortie du moniteur série de son firmware. ok=true si la sortie montre au moins 2 types de capteurs fonctionnels parmi : boutons (PRESSED/RELEASED), potentiomètres (valeurs numériques 0-4095), MPU6050 (données X/Y/Z ou accel). ok=false si aucune donnée de capteur visible ou si la sortie montre uniquement des erreurs. Sois indulgent. Réponds avec {\"ok\": true, \"feedback\": \"...\"} ou {\"ok\": false, \"feedback\": \"...\"}.",
+        "feedback_prompt": "Rétroaction brève (1-2 phrases). Si des composants ne marchent pas, suggérer de vérifier les soudures avec le multimètre.",
+        "teacher_code": "ENSEIGNANT: L4-ALPHA",
+        "max_attempts": 3,
+        "success_message": "{{input.output_structured.feedback}}",
+        "escalation_behavior": "wait_for_teacher",
+        "escalation_message": "Demande à ton enseignant de venir vérifier tes soudures.",
+        "masked": true,
+        "model": "gpt-5-nano",
+        "model_provider_slug": "openai"
+      },
+      "metadata": { "order": 10 }
+    },
+
+    {
+      "id": 30,
+      "slug": "msg-partie2-intro",
+      "kind": "assistant_message",
+      "display_name": "Introduction partie 2",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 11,
+      "is_enabled": true,
+      "parameters": {
+        "message": "## Partie 2 — LLM sur le T-Beam Supreme\n\nMaintenant, on passe au T-Beam Supreme pour faire un appel API à un LLM.\n\n### Étape 1 — Créer le dépôt Git\n\n1. Ouvre **GitHub Desktop**\n2. **File > New Repository...**\n3. Nom : `labo4-llm-esp32`\n4. Choisis un emplacement local\n5. Coche **Initialize this repository with a README**\n6. Git Ignore : `None`\n7. Clique **Create Repository**\n\n### Étape 2 — Créer le .gitignore\n\nDans le dossier du dépôt, crée un fichier `.gitignore` contenant :\n```\nconfig.h\n```\n\nC'est tout! Le fichier `config.h` contient tes clés API — il ne doit **jamais** être commité.\n\n### Étape 3 — Fichiers du projet\n\nCrée 3 fichiers dans le dossier :\n- `config.example.h` — template sans secrets (sera commité)\n- `config.h` — tes vrais identifiants (ignoré par git)\n- `labo4-llm-esp32.ino` — code principal\n\nCopie le code fourni dans le document de laboratoire.\n\n### Étape 4 — Bibliothèques Arduino\n\nDans Arduino IDE, **Outils > Gérer les bibliothèques**, installe :\n- **ArduinoJson** par Benoit Blanchon\n- **Adafruit SSD1306** par Adafruit (accepte les dépendances)\n\nDis-moi quand ton dépôt est créé et que le code compile!",
+        "simulate_stream_delay_ms": 5
+      },
+      "metadata": { "order": 11 }
+    },
+    {
+      "id": 31,
+      "slug": "msg-screenshot-depot",
+      "kind": "assistant_message",
+      "display_name": "Demande screenshot depot",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 12,
+      "is_enabled": true,
+      "parameters": {
+        "message": "## Capture d'écran — GitHub Desktop\n\nDépose une **capture d'écran de GitHub Desktop** montrant ton dépôt. On doit voir que `config.h` n'apparaît pas dans les fichiers suivis (grâce au `.gitignore`).",
+        "simulate_stream_delay_ms": 5
+      },
+      "metadata": { "order": 12 }
+    },
+    {
+      "id": 32,
+      "slug": "wait-screenshot-depot",
+      "kind": "wait_for_user_input",
+      "display_name": "Attente screenshot depot",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 13,
+      "is_enabled": true,
+      "parameters": {},
+      "metadata": { "order": 13 }
+    },
+    {
+      "id": 33,
+      "slug": "msg-ack-depot",
+      "kind": "assistant_message",
+      "display_name": "Accuse reception screenshot",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 14,
+      "is_enabled": true,
+      "parameters": {
+        "message": "Capture reçue.\n\nMaintenant, personnalise ton **SYSTEM_PROMPT** dans `config.h`. Invente ta propre mise en situation où la valeur du potentiomètre (0 à 4095) influence la réponse du LLM.\n\nExemples :\n- Entraîneur sportif (0 = encourager, 4095 = féliciter)\n- Chef cuisinier (0 = plat raté, 4095 = chef étoilé)\n- Météo émotionnelle (0 = tempête, 4095 = grand soleil)\n\nPense aussi à la longueur des réponses — l'écran OLED est petit!\n\nTéléverse le code, tourne le potentiomètre et observe l'OLED.",
+        "simulate_stream_delay_ms": 5
+      },
+      "metadata": { "order": 14 }
+    },
+
+    {
+      "id": 40,
+      "slug": "msg-photo-oled",
+      "kind": "assistant_message",
+      "display_name": "Demande photo OLED",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 15,
+      "is_enabled": true,
+      "parameters": {
+        "message": "## Photo — LLM en action\n\nQuand ça fonctionne, **prends une photo** de l'écran OLED du T-Beam Supreme affichant une réponse du LLM et dépose-la ici.",
+        "simulate_stream_delay_ms": 5
+      },
+      "metadata": { "order": 15 }
+    },
+    {
+      "id": 41,
+      "slug": "wait-photo-oled",
+      "kind": "wait_for_user_input",
+      "display_name": "Attente photo OLED",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 16,
+      "is_enabled": true,
+      "parameters": {},
+      "metadata": { "order": 16 }
+    },
+    {
+      "id": 42,
+      "slug": "msg-ack-oled",
+      "kind": "assistant_message",
+      "display_name": "Accuse reception photo OLED",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 17,
+      "is_enabled": true,
+      "parameters": {
+        "message": "Photo reçue.\n\nDernière étape : crée ton propre compte sur **https://console.groq.com** (connexion Google ou GitHub), génère une clé API, et modifie ton `config.h` pour utiliser Groq au lieu du endpoint du cours.\n\nVérifie que ça fonctionne aussi avec Groq, puis fais ton **commit** dans GitHub Desktop (`.gitignore`, `config.example.h`, `labo4-llm-esp32.ino`).",
+        "simulate_stream_delay_ms": 5
+      },
+      "metadata": { "order": 17 }
+    },
+
+    {
+      "id": 50,
+      "slug": "eval-b-groq-commit",
+      "kind": "evaluated_step",
+      "display_name": "Partie B - Groq et commit",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 18,
+      "is_enabled": true,
+      "parameters": {
+        "instruction": "## Validation finale\n\nConfirme que :\n1. Tu as un **compte Groq** fonctionnel\n2. Le LLM répond via **l'API Groq** (pas juste le endpoint du cours)\n3. Tu as fait un **commit** dans GitHub Desktop\n\n---\n\n**Colle la sortie du moniteur série** montrant un appel réussi via Groq, ET une **capture d'écran de GitHub Desktop** montrant ton commit (on doit voir que `config.h` n'est PAS dans le commit).",
+        "evaluation_prompt": "L'étudiant doit montrer : (1) une sortie série avec une réponse LLM fonctionnelle (texte généré, pas une erreur HTTP), ET (2) un commit dans GitHub Desktop où config.h n'apparaît pas. ok=true si au minimum la sortie série montre une réponse textuelle d'un LLM. ok=false si que des erreurs ou rien du tout. Sois indulgent. Réponds avec {\"ok\": true, \"feedback\": \"...\"} ou {\"ok\": false, \"feedback\": \"...\"}.",
+        "feedback_prompt": "Rétroaction brève (1-2 phrases). Vérifier que config.h n'est pas commité.",
+        "teacher_code": "ENSEIGNANT: L4-BRAVO",
+        "max_attempts": 3,
+        "success_message": "{{input.output_structured.feedback}}",
+        "escalation_behavior": "wait_for_teacher",
+        "escalation_message": "Demande à ton enseignant de venir valider.",
+        "masked": true,
+        "model": "gpt-5-nano",
+        "model_provider_slug": "openai"
+      },
+      "metadata": { "order": 18 }
+    },
+
+    {
+      "id": 60,
+      "slug": "msg-conclusion",
+      "kind": "assistant_message",
+      "display_name": "Conclusion",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 19,
+      "is_enabled": true,
+      "parameters": {
+        "message": "# Laboratoire complété\n\nTu as réussi à :\n- **Souder** ton shield PCB et le tester avec le LilyGO A7670E\n- **Appeler un LLM** depuis le T-Beam Supreme via HTTP POST\n- **Afficher** la réponse sur l'écran OLED\n- **Créer un compte Groq** avec ta propre clé API\n- **Commiter** proprement sans exposer tes secrets\n\n## Pour aller plus loin\n- Utiliser d'autres capteurs (boutons, MPU6050) pour enrichir le contexte\n- Essayer différents modèles sur Groq\n- Implémenter un cache pour éviter les appels répétitifs",
+        "simulate_stream_delay_ms": 5
+      },
+      "metadata": { "order": 19 }
+    },
+    {
+      "id": 61,
+      "slug": "end",
+      "kind": "end",
+      "display_name": "Fin",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 20,
+      "is_enabled": true,
+      "parameters": {
+        "status": { "type": "closed", "reason": "Laboratoire complete" },
+        "message": ""
+      },
+      "metadata": { "order": 20 }
+    }
+  ],
+  "edges": [
+    { "id": 100, "source": "start", "target": "msg-intro", "condition": null, "metadata": { "label": "", "order": 1 } },
+    { "id": 101, "source": "msg-intro", "target": "widget-pret", "condition": null, "metadata": { "label": "", "order": 2 } },
+    { "id": 102, "source": "widget-pret", "target": "cond-widget-pret", "condition": null, "metadata": { "label": "", "order": 3 } },
+    { "id": 103, "source": "cond-widget-pret", "target": "msg-soudure", "condition": "true", "metadata": { "label": "true", "order": 4 } },
+    { "id": 104, "source": "cond-widget-pret", "target": "end-abandonne", "condition": null, "metadata": { "label": "autre", "order": 5 } },
+
+    { "id": 110, "source": "msg-soudure", "target": "msg-photo-pcb", "condition": null, "metadata": { "label": "", "order": 6 } },
+    { "id": 111, "source": "msg-photo-pcb", "target": "wait-photo-pcb", "condition": null, "metadata": { "label": "", "order": 7 } },
+    { "id": 112, "source": "wait-photo-pcb", "target": "msg-ack-pcb", "condition": null, "metadata": { "label": "", "order": 8 } },
+    { "id": 113, "source": "msg-ack-pcb", "target": "eval-a-test-shield", "condition": null, "metadata": { "label": "", "order": 9 } },
+
+    { "id": 120, "source": "eval-a-test-shield", "target": "msg-partie2-intro", "condition": null, "metadata": { "label": "", "order": 10 } },
+    { "id": 121, "source": "msg-partie2-intro", "target": "msg-screenshot-depot", "condition": null, "metadata": { "label": "", "order": 11 } },
+    { "id": 122, "source": "msg-screenshot-depot", "target": "wait-screenshot-depot", "condition": null, "metadata": { "label": "", "order": 12 } },
+    { "id": 123, "source": "wait-screenshot-depot", "target": "msg-ack-depot", "condition": null, "metadata": { "label": "", "order": 13 } },
+
+    { "id": 130, "source": "msg-ack-depot", "target": "msg-photo-oled", "condition": null, "metadata": { "label": "", "order": 14 } },
+    { "id": 131, "source": "msg-photo-oled", "target": "wait-photo-oled", "condition": null, "metadata": { "label": "", "order": 15 } },
+    { "id": 132, "source": "wait-photo-oled", "target": "msg-ack-oled", "condition": null, "metadata": { "label": "", "order": 16 } },
+
+    { "id": 140, "source": "msg-ack-oled", "target": "eval-b-groq-commit", "condition": null, "metadata": { "label": "", "order": 17 } },
+    { "id": 141, "source": "eval-b-groq-commit", "target": "msg-conclusion", "condition": null, "metadata": { "label": "", "order": 18 } },
+
+    { "id": 150, "source": "msg-conclusion", "target": "end", "condition": null, "metadata": { "label": "", "order": 19 } }
+  ]
+}

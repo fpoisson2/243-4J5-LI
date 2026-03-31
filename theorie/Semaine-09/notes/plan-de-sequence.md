@@ -1,52 +1,45 @@
 # Plan de séquence - Semaine 09
 
 ## Titre
-LilyGO T-Beam SUPREME - Gateway WiFi autonome + Tests terrain
+Soudure PCB et introduction aux LLM sur ESP32
 
 ## Objectifs de la semaine
-- Configurer le T-Beam comme gateway WiFi vers MQTT
-- Réaliser des tests de portée sur le terrain
-- Cartographier la couverture avec les données GPS
-- Intégrer l'architecture complète (LoRa + LTE + MQTT)
+- Assembler les composants sur le PCB conçu en semaine 7
+- Créer un dépôt Git structuré pour un projet Arduino
+- Effectuer un appel HTTP à une API LLM depuis un ESP32
+- Concevoir un prompt créatif lié à une valeur analogique
 
-## Contenu théorique
+## Contenu théorique (bref, contextuel)
 
-### Gateway WiFi/MQTT
-- Configuration du T-Beam comme pont LoRa → WiFi → MQTT
-- Connexion au broker Mosquitto existant
-- Flux bidirectionnels LoRa ↔ MQTT
-- Gestion des messages et topics
+### Soudure THT
+- Ordre de soudure : du plus bas au plus haut
+- Technique : fer sur pastille et patte, étain sur la jonction
+- Vérification : inspection visuelle, test de continuité
 
-### Tests terrain
-- Méthodologie de test de portée
-- Utilisation des données GPS
-- Cartographie de couverture
-- Facteurs influençant la portée (terrain, obstacles)
-
-### Architecture unifiée
-- Intégration LoRa + LTE + MQTT
-- Redondance et basculement
-- Scénarios d'utilisation hybrides
-- Dashboard de monitoring (Node-RED optionnel)
+### LLM et API HTTP
+- Qu'est-ce qu'un LLM (grand modèle de langage)
+- Format d'API compatible OpenAI (requête POST, messages, réponse JSON)
+- Groq : API gratuite pour accéder à des LLM rapides
 
 ## Activités
 
-### Théorie (2h)
-- Configuration de la gateway WiFi
-- Méthodologie des tests terrain
-- Intégration de l'architecture complète
+### Partie 1 : Soudure du PCB (1h30)
+- Soudure des composants THT sur le PCB
+- Vérification et test de continuité
+- Validation du fonctionnement de base
 
-### Laboratoire (3h)
-- Configuration du T-Beam comme gateway
-- Tests bidirectionnels LoRa ↔ MQTT
-- Sortie terrain pour tests de portée
-- Collecte des données GPS
-- Création d'une carte de couverture
+### Partie 2 : Introduction aux LLM sur ESP32 (1h30)
+- Création du dépôt Git avec .gitignore
+- Création du compte Groq et obtention de la clé API
+- Conception du scénario créatif (potentiomètre → prompt)
+- Écriture du code Arduino (WiFi + HTTP POST + parsing JSON)
+- Test et validation avec le moniteur série
+- Commit propre (sans secrets)
 
 ## Travaux hors classe
-- Finalisation de la gateway WiFi
-- Analyse des données de terrain
-- Documentation des tests et résultats
+- Terminer le code si non complété en classe
+- Expérimenter avec différents prompts et modèles
+- Explorer l'ajout d'un écran OLED pour afficher les réponses
 
 ## Évaluation
 - **Évaluation sommative:** TP Intégration LLM et automatisation (20%)
@@ -54,11 +47,12 @@ LilyGO T-Beam SUPREME - Gateway WiFi autonome + Tests terrain
   - Configuration et communication (5% Capacité 2)
 
 ## Ressources
-- Documentation Meshtastic - Gateway
-- Outils de cartographie (QGIS, Google Earth)
-- Guide d'intégration MQTT
+- Documentation Groq : console.groq.com
+- Documentation ArduinoJson
+- Exemples HTTPClient pour ESP32
 
 ## Notes pour l'enseignant
-- Planifier la sortie terrain (météo, lieu)
-- Préparer les équipements de test
-- Avoir un plan B en cas de mauvais temps
+- Les PCB ont été reçus, les distribuer en début de séance
+- Prévoir du matériel de soudure de remplacement (étain, flux)
+- Avoir quelques potentiomètres supplémentaires
+- Vérifier la disponibilité du réseau WiFi dans le local
