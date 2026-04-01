@@ -32,7 +32,7 @@ layout: section
 ---
 
 # Aujourd'hui
-## Deux activités
+## Deux labos
 
 ---
 
@@ -42,7 +42,7 @@ layout: section
 
 <div class="p-4 bg-blue-500 bg-opacity-20 rounded-lg">
 
-### Partie 1 — LLM sur T-Beam Supreme (1h30)
+### Labo 4 — LLM sur T-Beam Supreme (1h30)
 
 <v-clicks>
 
@@ -58,7 +58,7 @@ layout: section
 
 <div class="p-4 bg-orange-500 bg-opacity-20 rounded-lg">
 
-### Partie 2 — Soudure PCB (1h30)
+### Soudure PCB (1h30)
 
 <v-clicks>
 
@@ -76,7 +76,7 @@ layout: section
 layout: section
 ---
 
-# Partie 1
+# Labo 4
 ## Introduction aux LLM sur ESP32
 
 ---
@@ -279,7 +279,6 @@ labo4-llm-esp32/
 4. Tester avec le endpoint du cours sur le T-Beam Supreme
 5. Créer un compte Groq et tester avec votre propre clé
 6. Commit propre dans GitHub Desktop (sans `config.h`!)
-7. Souder le shield PCB et le tester avec le A7670G
 
 </v-clicks>
 
@@ -287,8 +286,8 @@ labo4-llm-esp32/
 layout: section
 ---
 
-# Partie 2
-## Soudure du PCB
+# Soudure du PCB
+## Vos shields sont arrivés!
 
 ---
 
@@ -318,12 +317,12 @@ layout: section
 
 # Ordre de soudure
 
-### Du plus bas au plus haut — composants du shield LilyGO A7670G
+### Du plus bas au plus haut — composants du shield LilyGO A7670E
 
 <v-clicks>
 
 1. **Résistances 330 Ω** — limitation de courant pour les LEDs
-2. **Headers** — connecteurs compatibles LilyGO A7670G
+2. **Headers** — connecteurs compatibles LilyGO A7670E
 3. **Boutons poussoirs** — avec résistances pull-up/pull-down
 4. **Potentiomètres** — reliés aux entrées analogiques (ADC)
 5. **LEDs** — attention à la polarité (patte longue = anode)
@@ -352,7 +351,7 @@ layout: section
 - Inspection visuelle de chaque soudure (brillante, forme de cône)
 - Pas de ponts entre les pistes
 - Test de continuité au multimètre
-- Brancher sur le LilyGO A7670G et vérifier le fonctionnement de base
+- Brancher sur le LilyGO A7670E et vérifier le fonctionnement de base
 
 </v-clicks>
 
