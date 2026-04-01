@@ -1,102 +1,40 @@
-# Laboratoire 04 - Soudure PCB et introduction aux LLM sur ESP32
+# Laboratoire 04 - Introduction aux LLM sur ESP32 et soudure PCB
 
 ## Objectifs
 
-- Souder les composants sur le shield PCB du projet de mi-session
-- Tester le shield avec le LilyGO A7670E et le firmware existant
 - Effectuer un appel HTTP a une API LLM depuis le T-Beam Supreme
 - Afficher la reponse du LLM sur l'ecran OLED integre
 - Concevoir un prompt creatif lie a la valeur du potentiometre
+- Souder les composants sur le shield PCB du projet de mi-session
+- Tester le shield avec le LilyGO A7670G et le firmware existant
 
 ## Materiel requis
 
-### Partie 1 — Soudure
-- Shield PCB du projet de mi-session (recu cette semaine)
-- Composants selon votre assignation (LEDs, boutons, potentiometres, MPU6050)
-- Resistances 330 ohms pour les LEDs
-- Headers male/femelle pour la connexion au LilyGO
-- Fer a souder, etain, flux, tresse a dessouder
-- LilyGO T-SIM A7670E
-- Multimetre
-
-### Partie 2 — LLM
+### Partie 1 — LLM
 - LilyGO T-Beam Supreme (ESP32-S3 avec ecran OLED integre)
 - Potentiometre 10 kohms
 - Fils de connexion
 - Cable USB-C
 - Ordinateur avec Arduino IDE et GitHub Desktop
 
----
-
-## Partie 1 : Soudure et test du shield PCB (1h30)
-
-Vous avez concu ce shield en semaine 7 avec KiCad et demontre son fonctionnement sur breadboard. Aujourd'hui, on passe au PCB!
-
-### Lien avec l'evaluation du projet de mi-session
-
-Le shield PCB represente **30%** de la note du projet de mi-session. Le prototype fonctionnel (critere 1.4) vaut **5%**. De plus, le programme embarque (30%) et l'interface Raspberry Pi (20%) dependent d'un shield fonctionnel — un PCB mal soude affecte 80% du projet.
-
-### 1.1 Preparation du poste
-
-1. Verifier que le fer a souder est propre et etame
-2. Regler la temperature entre 300 et 350 degres C
-3. Sortir votre BOM (liste de materiaux) du projet KiCad
-4. Organiser vos composants selon votre assignation personnelle
-
-### 1.2 Ordre de soudure recommande
-
-Souder les composants du plus bas au plus haut :
-
-1. **Resistances 330 ohms** pour les LEDs
-2. **Condensateurs** (ceramiques d'abord, puis electrolytiques si applicable)
-3. **Headers** pour la connexion au LilyGO A7670E
-4. **Boutons poussoirs**
-5. **LEDs** (attention a la polarite : patte longue = anode +)
-6. **Potentiometres**
-7. **MPU6050** (attention a l'orientation, verifier le marquage)
-
-### 1.3 Technique de soudure THT
-
-1. Inserer le composant, plier legerement les pattes pour le maintenir
-2. Retourner le PCB
-3. Appliquer le fer sur la pastille ET la patte simultanement (2-3 secondes)
-4. Ajouter l'etain sur la jonction (pas sur le fer)
-5. Retirer l'etain, puis le fer
-6. Verifier : la soudure doit etre brillante et en forme de cone
-
-### 1.4 Verification des soudures
-
-- Inspecter visuellement chaque soudure
-- Verifier l'absence de ponts de soudure entre les pistes
-- Tester la continuite avec le multimetre
-
-### 1.5 Test avec le LilyGO A7670E
-
-Branchez le shield sur votre LilyGO A7670E et testez avec le firmware du projet de mi-session :
-
-1. Enficher le shield sur les headers du LilyGO
-2. Brancher le cable USB-C et ouvrir le moniteur serie (115200 baud)
-3. Televersez votre firmware de mi-session si ce n'est pas deja fait
-4. Verifier que chaque composant fonctionne :
-
-| Composant | Verification |
-|-----------|-------------|
-| LEDs | S'allument via les commandes MQTT |
-| Boutons | Changement d'etat visible dans le moniteur serie |
-| Potentiometres | Valeurs 0-4095 qui varient dans le moniteur serie |
-| MPU6050 | Donnees d'acceleration/gyroscope visibles (I2C) |
-
-> Si un composant ne fonctionne pas, verifiez les soudures correspondantes avec le multimetre avant de chercher un probleme logiciel.
+### Partie 2 — Soudure
+- Shield PCB du projet de mi-session (recu cette semaine)
+- Composants selon votre assignation (LEDs, boutons, potentiometres, MPU6050)
+- Resistances 330 ohms pour les LEDs
+- Headers male/femelle pour la connexion au LilyGO
+- Fer a souder, etain, flux, tresse a dessouder
+- LilyGO T-SIM A7670G
+- Multimetre
 
 ---
 
-## Partie 2 : Introduction aux LLM sur le T-Beam Supreme (1h30)
+## Partie 1 : Introduction aux LLM sur le T-Beam Supreme (1h30)
 
 ### Contexte
 
 Les grands modeles de langage (LLM) sont accessibles via des API HTTP. Depuis un ESP32, on peut envoyer une requete HTTP POST contenant un prompt et recevoir une reponse textuelle. L'objectif est de connecter un potentiometre au T-Beam Supreme et d'afficher la reponse du LLM sur l'ecran OLED integre.
 
-### 2.1 Creer le depot Git
+### 1.1 Creer le depot Git
 
 1. Ouvrez **GitHub Desktop**
 2. **File > New Repository...**
@@ -106,7 +44,7 @@ Les grands modeles de langage (LLM) sont accessibles via des API HTTP. Depuis un
 6. Dans le champ **Git Ignore**, selectionnez `None` (on va le creer manuellement)
 7. Cliquez **Create Repository**
 
-### 2.2 Creer le .gitignore
+### 1.2 Creer le .gitignore
 
 Dans le dossier du depot, creez un fichier `.gitignore` avec un editeur de texte :
 
@@ -117,7 +55,7 @@ config.h
 
 > **Important** : le fichier `config.h` contient vos cles API et mots de passe. Il ne doit **jamais** etre commite.
 
-### 2.3 Structure du projet
+### 1.3 Structure du projet
 
 Creez les fichiers suivants dans le dossier du depot :
 
@@ -131,7 +69,7 @@ labo4-llm-esp32/
 
 > Pour ouvrir le projet dans Arduino IDE, ouvrez le fichier `.ino`. Arduino exige que le fichier `.ino` porte le meme nom que son dossier parent.
 
-### 2.4 Fichier config.example.h
+### 1.4 Fichier config.example.h
 
 Creez ce fichier — c'est le template sans secrets qui sera commite :
 
@@ -177,21 +115,21 @@ const char* SYSTEM_PROMPT =
   "Une seule phrase ultra courte. Pas de ponctuation superflue.";
 ```
 
-### 2.5 Fichier config.h
+### 1.5 Fichier config.h
 
 Copiez `config.example.h` vers `config.h` et remplissez vos vraies valeurs :
 
 - Votre SSID et mot de passe WiFi
 - La cle API fournie par l'enseignant (pour le endpoint du cours)
 
-### 2.6 Installer les bibliotheques
+### 1.6 Installer les bibliotheques
 
 Dans Arduino IDE, allez dans **Outils > Gerer les bibliotheques** et installez :
 
 - **ArduinoJson** par Benoit Blanchon
 - **Adafruit SSD1306** par Adafruit (acceptez les dependances)
 
-### 2.7 Code principal — labo4-llm-esp32.ino
+### 1.7 Code principal — labo4-llm-esp32.ino
 
 Copiez le code suivant dans votre fichier `.ino`.
 
@@ -401,7 +339,7 @@ void loop() {
 }
 ```
 
-### 2.8 Ce que vous devez modifier
+### 1.8 Ce que vous devez modifier
 
 Avant de televerser, adaptez ces trois elements dans le code et dans `config.h` :
 
@@ -418,7 +356,7 @@ Avant de televerser, adaptez ces trois elements dans le code et dans `config.h` 
 
 3. **Longueur de la reponse** : L'ecran OLED est petit! Pensez a contraindre le LLM dans votre prompt pour que sa reponse tienne a l'ecran.
 
-### 2.9 Test avec le endpoint du cours
+### 1.9 Test avec le endpoint du cours
 
 L'enseignant vous fournira la cle API pour le endpoint du cours (`chat.ve2fpd.com`) avec le modele `assistant-iot-v2`.
 
@@ -428,7 +366,7 @@ L'enseignant vous fournira la cle API pour le endpoint du cours (`chat.ve2fpd.co
 4. Tournez le potentiometre — la reponse du LLM s'affiche sur l'OLED et dans le moniteur serie
 5. Ajustez votre prompt pour que les reponses soient pertinentes et tiennent sur l'ecran
 
-### 2.10 Passer a Groq — votre propre compte
+### 1.10 Passer a Groq — votre propre compte
 
 Une fois que ca fonctionne avec le endpoint du cours, creez votre propre compte sur Groq :
 
@@ -451,13 +389,74 @@ const char* MODEL_NAME = "meta-llama/llama-4-scout-17b-16e-instruct";
 
 5. Televersez et verifiez que ca fonctionne aussi avec Groq
 
-### 2.11 Commit avec GitHub Desktop
+### 1.11 Commit avec GitHub Desktop
 
 1. Ouvrez **GitHub Desktop** — vous devriez voir vos fichiers modifies
 2. Verifiez que `config.h` **n'apparait pas** dans la liste (il est ignore par `.gitignore`)
 3. Cochez les fichiers : `.gitignore`, `config.example.h`, `labo4-llm-esp32.ino`
 4. Message de commit : `Premier commit - appel LLM depuis ESP32`
 5. Cliquez **Commit to main**
+
+---
+
+## Partie 2 : Soudure et test du shield PCB (1h30)
+
+Vous avez concu ce shield en semaine 7 avec KiCad et demontre son fonctionnement sur breadboard. Aujourd'hui, on passe au PCB!
+
+### Lien avec l'evaluation du projet de mi-session
+
+Le shield PCB represente **30%** de la note du projet de mi-session. Le prototype fonctionnel (critere 1.4) vaut **5%**. De plus, le programme embarque (30%) et l'interface Raspberry Pi (20%) dependent d'un shield fonctionnel — un PCB mal soude affecte 80% du projet.
+
+### 2.1 Preparation du poste
+
+1. Verifier que le fer a souder est propre et etame
+2. Regler la temperature entre 300 et 350 degres C
+3. Sortir votre BOM (liste de materiaux) du projet KiCad
+4. Organiser vos composants selon votre assignation personnelle
+
+### 2.2 Ordre de soudure recommande
+
+Souder les composants du plus bas au plus haut :
+
+1. **Resistances 330 ohms** pour les LEDs
+2. **Headers** pour la connexion au LilyGO A7670G
+3. **Boutons poussoirs** avec resistances pull-up/pull-down
+4. **LEDs** (attention a la polarite : patte longue = anode +)
+5. **Potentiometres** relies aux entrees analogiques (ADC)
+6. **MPU6050** (attention a l'orientation, verifier le marquage)
+
+### 2.3 Technique de soudure THT
+
+1. Inserer le composant, plier legerement les pattes pour le maintenir
+2. Retourner le PCB
+3. Appliquer le fer sur la pastille ET la patte simultanement (2-3 secondes)
+4. Ajouter l'etain sur la jonction (pas sur le fer)
+5. Retirer l'etain, puis le fer
+6. Verifier : la soudure doit etre brillante et en forme de cone
+
+### 2.4 Verification des soudures
+
+- Inspecter visuellement chaque soudure
+- Verifier l'absence de ponts de soudure entre les pistes
+- Tester la continuite avec le multimetre
+
+### 2.5 Test avec le LilyGO A7670G
+
+Branchez le shield sur votre LilyGO A7670G et testez avec le firmware du projet de mi-session :
+
+1. Enficher le shield sur les headers du LilyGO
+2. Brancher le cable USB-C et ouvrir le moniteur serie (115200 baud)
+3. Televersez votre firmware de mi-session si ce n'est pas deja fait
+4. Verifier que chaque composant fonctionne :
+
+| Composant | Verification |
+|-----------|-------------|
+| LEDs | S'allument via les commandes MQTT |
+| Boutons | Changement d'etat visible dans le moniteur serie |
+| Potentiometres | Valeurs 0-4095 qui varient dans le moniteur serie |
+| MPU6050 | Donnees d'acceleration/gyroscope visibles (I2C) |
+
+> Si un composant ne fonctionne pas, verifiez les soudures correspondantes avec le multimetre avant de chercher un probleme logiciel.
 
 ---
 

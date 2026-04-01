@@ -4,7 +4,7 @@ background: https://images.unsplash.com/photo-1518770660439-4636190af475?w=1920
 title: 243-4J5-LI - Objets connectés - Semaine 9
 info: |
   ## Objets connectés
-  Semaine 9 - Soudure PCB et introduction aux LLM sur ESP32
+  Semaine 9 - Introduction aux LLM sur ESP32 et soudure PCB
 
   Cégep Limoilou - Session H26
 class: text-center
@@ -19,7 +19,7 @@ download: true
 # Objets connectés
 ## 243-4J5-LI
 
-Semaine 9 - Soudure PCB et introduction aux LLM
+Semaine 9 - Introduction aux LLM et soudure PCB
 
 <div class="pt-12">
   <span class="px-2 py-1 rounded cursor-pointer" hover="bg-white bg-opacity-10">
@@ -40,23 +40,9 @@ layout: section
 
 <div class="grid grid-cols-2 gap-8 mt-8">
 
-<div class="p-4 bg-orange-500 bg-opacity-20 rounded-lg">
-
-### Partie 1 — Soudure PCB (1h30)
-
-<v-clicks>
-
-- Vos PCB sont arrivés!
-- Soudure des composants THT
-- Vérification et test de continuité
-
-</v-clicks>
-
-</div>
-
 <div class="p-4 bg-blue-500 bg-opacity-20 rounded-lg">
 
-### Partie 2 — LLM sur T-Beam Supreme (1h30)
+### Partie 1 — LLM sur T-Beam Supreme (1h30)
 
 <v-clicks>
 
@@ -70,6 +56,20 @@ layout: section
 
 </div>
 
+<div class="p-4 bg-orange-500 bg-opacity-20 rounded-lg">
+
+### Partie 2 — Soudure PCB (1h30)
+
+<v-clicks>
+
+- Vos PCB sont arrivés!
+- Soudure des composants du shield
+- Vérification et test de continuité
+
+</v-clicks>
+
+</div>
+
 </div>
 
 ---
@@ -77,78 +77,6 @@ layout: section
 ---
 
 # Partie 1
-## Soudure du PCB
-
----
-
-# Vos PCB sont là
-
-### Rappel de la conception (semaine 7)
-
-<v-clicks>
-
-- Schéma et routage dans KiCad
-- Fabrication envoyée chez JLCPCB
-- Aujourd'hui : on assemble!
-
-</v-clicks>
-
-<v-click>
-
-<div class="mt-4 p-2 bg-orange-500 bg-opacity-20 rounded-lg text-center text-sm">
-
-**Objectif** : PCB fonctionnel à la fin de la période.
-
-</div>
-
-</v-click>
-
----
-
-# Ordre de soudure
-
-### Du plus bas au plus haut
-
-<v-clicks>
-
-1. **Résistances** — identifier les valeurs (code couleur ou multimètre)
-2. **Condensateurs céramiques** — pas de polarité
-3. **Condensateurs électrolytiques** — bande = négatif
-4. **Connecteurs** — headers, borniers
-5. **Composants actifs** — CI, régulateurs (attention à l'orientation)
-
-</v-clicks>
-
-<v-click>
-
-<div class="mt-4 p-2 bg-red-500 bg-opacity-20 rounded-lg text-center text-sm">
-
-**Température du fer** : 300-350 °C — fer sur pastille ET patte, étain sur la jonction.
-
-</div>
-
-</v-click>
-
----
-
-# Vérification
-
-### Avant de passer à la partie 2
-
-<v-clicks>
-
-- Inspection visuelle de chaque soudure (brillante, forme de cône)
-- Pas de ponts entre les pistes
-- Test de continuité au multimètre
-- Brancher et vérifier le fonctionnement de base
-
-</v-clicks>
-
----
-layout: section
----
-
-# Partie 2
 ## Introduction aux LLM sur ESP32
 
 ---
@@ -345,13 +273,86 @@ labo4-llm-esp32/
 
 <v-clicks>
 
-1. Souder le shield PCB et le tester avec le A7670E
-2. Créer le dépôt Git avec GitHub Desktop
-3. Copier le code fourni et les fichiers config
-4. Personnaliser votre scénario créatif (prompt système)
-5. Tester avec le endpoint du cours sur le T-Beam Supreme
-6. Créer un compte Groq et tester avec votre propre clé
-7. Commit propre dans GitHub Desktop (sans `config.h`!)
+1. Créer le dépôt Git avec GitHub Desktop
+2. Copier le code fourni et les fichiers config
+3. Personnaliser votre scénario créatif (prompt système)
+4. Tester avec le endpoint du cours sur le T-Beam Supreme
+5. Créer un compte Groq et tester avec votre propre clé
+6. Commit propre dans GitHub Desktop (sans `config.h`!)
+7. Souder le shield PCB et le tester avec le A7670G
+
+</v-clicks>
+
+---
+layout: section
+---
+
+# Partie 2
+## Soudure du PCB
+
+---
+
+# Vos PCB sont là
+
+### Rappel de la conception (semaine 7)
+
+<v-clicks>
+
+- Schéma et routage dans KiCad
+- Fabrication envoyée chez JLCPCB
+- Aujourd'hui : on assemble!
+
+</v-clicks>
+
+<v-click>
+
+<div class="mt-4 p-2 bg-orange-500 bg-opacity-20 rounded-lg text-center text-sm">
+
+**Objectif** : PCB fonctionnel à la fin de la période.
+
+</div>
+
+</v-click>
+
+---
+
+# Ordre de soudure
+
+### Du plus bas au plus haut — composants du shield LilyGO A7670G
+
+<v-clicks>
+
+1. **Résistances 330 Ω** — limitation de courant pour les LEDs
+2. **Headers** — connecteurs compatibles LilyGO A7670G
+3. **Boutons poussoirs** — avec résistances pull-up/pull-down
+4. **Potentiomètres** — reliés aux entrées analogiques (ADC)
+5. **LEDs** — attention à la polarité (patte longue = anode)
+6. **MPU6050** — module I2C (attention à l'orientation)
+
+</v-clicks>
+
+<v-click>
+
+<div class="mt-4 p-2 bg-red-500 bg-opacity-20 rounded-lg text-center text-sm">
+
+**Température du fer** : 300-350 °C — fer sur pastille ET patte, étain sur la jonction.
+
+</div>
+
+</v-click>
+
+---
+
+# Vérification
+
+### Avant de quitter
+
+<v-clicks>
+
+- Inspection visuelle de chaque soudure (brillante, forme de cône)
+- Pas de ponts entre les pistes
+- Test de continuité au multimètre
+- Brancher sur le LilyGO A7670G et vérifier le fonctionnement de base
 
 </v-clicks>
 
@@ -363,7 +364,7 @@ class: text-center
 # Questions?
 
 <div class="text-xl mt-8">
-On soude, puis on code!
+On code, puis on soude!
 </div>
 
 ---

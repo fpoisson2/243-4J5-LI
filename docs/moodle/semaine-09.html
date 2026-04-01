@@ -10,12 +10,7 @@
 </head>
 <body>
 <div style="font-family: 'Segoe UI', system-ui, sans-serif; line-height: 1.6;">
-  <p>Assemblage des <strong>PCB</strong> reçus du fabricant et introduction aux <strong>grands modèles de langage (LLM)</strong> sur ESP32 : appel API HTTP depuis un microcontrôleur.</p>
-  <p><strong>Soudure du PCB :</strong></p>
-  <ul style="margin: 10px 0;">
-    <li><strong>Assemblage THT</strong> — soudure des composants du plus bas au plus haut</li>
-    <li><strong>Vérification</strong> — inspection visuelle et test de continuité au multimètre</li>
-  </ul>
+  <p>Introduction aux <strong>grands modèles de langage (LLM)</strong> sur ESP32 et assemblage des <strong>PCB</strong> reçus du fabricant : appel API HTTP depuis un microcontrôleur, puis soudure du shield du projet de mi-session.</p>
   <p><strong>Introduction aux LLM :</strong></p>
   <ul style="margin: 10px 0;">
     <li><strong>API compatible OpenAI</strong> — requête POST HTTPS avec messages JSON</li>
@@ -23,7 +18,13 @@
     <li><strong>Scénario créatif</strong> — le potentiomètre (0-4095) influence la réponse du LLM</li>
     <li><strong>Sécurité</strong> — fichier config.h ignoré par Git, config.example.h commité</li>
   </ul>
-  <p><strong>Labo :</strong> souder le PCB, créer un dépôt Git structuré, effectuer un appel API LLM depuis l'ESP32 avec un scénario créatif basé sur le potentiomètre.</p>
+  <p><strong>Soudure du PCB :</strong></p>
+  <ul style="margin: 10px 0;">
+    <li><strong>Composants du shield</strong> — résistances 330 Ω, headers LilyGO A7670G, boutons, LEDs, potentiomètres, MPU6050</li>
+    <li><strong>Vérification</strong> — inspection visuelle et test de continuité au multimètre</li>
+    <li><strong>Test fonctionnel</strong> — validation avec le firmware du projet de mi-session</li>
+  </ul>
+  <p><strong>Labo :</strong> créer un dépôt Git structuré, effectuer un appel API LLM depuis le T-Beam Supreme avec un scénario créatif, puis souder et tester le shield PCB avec le LilyGO A7670G.</p>
   <div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-left: 4px solid #2196F3; border-radius: 4px;">
     <p style="margin: 0 0 8px 0;"><strong>À faire pour la semaine prochaine :</strong></p>
     <ul style="margin: 0; padding-left: 20px;">
