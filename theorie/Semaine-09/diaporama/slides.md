@@ -183,6 +183,153 @@ Groq, OpenAI, Anthropic, Ollama — tous utilisent ce même format.
 
 ---
 
+# JSON — JavaScript Object Notation
+
+### Un format universel pour échanger des données
+
+<v-click>
+
+JSON est un format **texte** pour représenter des données structurées — lisible par les humains **et** les machines.
+
+</v-click>
+
+<div class="grid grid-cols-2 gap-4">
+
+<div>
+
+<v-click>
+
+### Syntaxe de base
+
+```json
+{
+  "nom": "ESP32",
+  "temperature": 23.5,
+  "actif": true,
+  "capteurs": ["DHT22", "MPU6050"],
+  "config": {
+    "wifi": "MonReseau",
+    "port": 8080
+  }
+}
+```
+
+</v-click>
+
+</div>
+
+<div>
+
+<v-click>
+
+### Types de données
+
+| Type | Exemple |
+|------|---------|
+| Chaîne | `"Bonjour"` |
+| Nombre | `42`, `3.14` |
+| Booléen | `true`, `false` |
+| Tableau | `[1, 2, 3]` |
+| Objet | `{ "clé": "valeur" }` |
+| Null | `null` |
+
+</v-click>
+
+</div>
+
+</div>
+
+<v-click>
+
+<div class="mt-4 p-2 bg-blue-500 bg-opacity-20 rounded-lg text-center text-sm">
+
+**Utilisé partout** : APIs web, fichiers de config, communication IoT — c'est le format des requêtes et réponses LLM.
+
+</div>
+
+</v-click>
+
+---
+
+# Structured Output — Réponses structurées
+
+### Forcer le LLM à répondre en JSON
+
+<v-click>
+
+Au lieu de recevoir du texte libre, on peut demander une **réponse structurée** (JSON) avec un schéma précis.
+
+</v-click>
+
+<div class="grid grid-cols-2 gap-4">
+
+<div>
+
+<v-click>
+
+### Requête avec `response_format`
+
+```json
+{
+  "model": "nom-du-modele",
+  "messages": [ ... ],
+  "response_format": {
+    "type": "json_schema",
+    "json_schema": {
+      "name": "analyse",
+      "strict": true,
+      "schema": {
+        "type": "object",
+        "required": ["niveau", "message"],
+        "properties": {
+          "niveau": { "type": "integer" },
+          "message": { "type": "string" }
+        }
+      }
+    }
+  }
+}
+```
+
+</v-click>
+
+</div>
+
+<div>
+
+<v-click>
+
+### Réponse garantie
+
+```json
+{
+  "choices": [{
+    "message": {
+      "content": "{\"niveau\": 3, \"message\": \"Bon travail!\"}"
+    }
+  }]
+}
+```
+
+</v-click>
+
+<v-click>
+
+### Pourquoi c'est utile?
+
+- Parsing fiable avec `ArduinoJson`
+- Pas besoin de chercher dans du texte libre
+- Idéal pour l'ESP32 : extraire directement les valeurs
+- Contrôle précis du format de sortie
+
+</v-click>
+
+</div>
+
+</div>
+
+---
+
 # Groq — API gratuite
 
 ### Créer un compte
