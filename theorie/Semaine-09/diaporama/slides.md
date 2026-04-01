@@ -88,7 +88,7 @@ layout: section
 <v-clicks>
 
 - Modèle d'IA entraîné sur du texte (GPT, Claude, Llama, etc.)
-- Accessible via une **API HTTP** : on envoie un prompt, on reçoit du texte
+- Accessible via une **API HTTP** : on envoie une requête ("un prompt"), on reçoit du texte
 - Fonctionne partout où on peut faire un POST HTTPS — y compris un ESP32
 
 </v-clicks>
@@ -201,7 +201,7 @@ Groq, OpenAI, Anthropic, Ollama — tous utilisent ce même format.
 ### Modèle recommandé
 
 ```
-meta-llama/llama-4-scout-17b-16e-instruct
+openai/gpt-oss-20b
 ```
 
 Rapide, capable, gratuit pour l'usage éducatif.
@@ -313,6 +313,16 @@ layout: section
 
 </v-click>
 
+<v-click>
+
+<div class="mt-4 p-2 bg-red-500 bg-opacity-20 rounded-lg text-center text-sm">
+
+**C'est évalué!** — Soudure (1%) et fonctionnement du shield (2%) sur les 30% du projet de mi-session.
+
+</div>
+
+</v-click>
+
 ---
 
 # Ordre de soudure
@@ -329,16 +339,6 @@ layout: section
 6. **MPU6050** — module I2C (attention à l'orientation)
 
 </v-clicks>
-
-<v-click>
-
-<div class="mt-4 p-2 bg-red-500 bg-opacity-20 rounded-lg text-center text-sm">
-
-**Température du fer** : 300-350 °C — fer sur pastille ET patte, étain sur la jonction.
-
-</div>
-
-</v-click>
 
 ---
 
