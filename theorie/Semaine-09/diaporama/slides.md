@@ -42,7 +42,7 @@ layout: section
 
 <div class="p-4 bg-blue-500 bg-opacity-20 rounded-lg">
 
-### Labo 4 — LLM sur T-Beam Supreme (1h30)
+### Labo 4 — LLM sur T-Beam Supreme (~2h30)
 
 <v-clicks>
 
@@ -58,7 +58,7 @@ layout: section
 
 <div class="p-4 bg-orange-500 bg-opacity-20 rounded-lg">
 
-### Soudure PCB (1h30)
+### Soudure PCB (~2h30)
 
 <v-clicks>
 
