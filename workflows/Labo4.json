@@ -24,7 +24,7 @@
       "position": 2,
       "is_enabled": true,
       "parameters": {
-        "message": "# Labo 4 — Soudure PCB et introduction aux LLM\n\nDeux activités aujourd'hui :\n\n**Partie 1 (1h30)** — Souder les composants sur ton shield PCB du projet de mi-session, puis le tester avec ton LilyGO A7670E.\n\n**Partie 2 (1h30)** — Faire parler un LLM depuis le T-Beam Supreme et afficher la réponse sur l'écran OLED.\n\n## Matériel requis\n\n| Partie 1 | Partie 2 |\n|----------|----------|\n| Shield PCB + composants | LilyGO T-Beam Supreme |\n| LilyGO A7670E | Potentiomètre 10 kΩ |\n| Fer à souder, étain | Fils de connexion |\n| Multimètre | Câble USB-C |\n\n> **Rappel évaluation** : le prototype fonctionnel (shield soudé et testé) vaut **5%** du projet de mi-session (critère 1.4). Le programme embarqué (30%) et l'interface RPi (20%) dépendent aussi d'un shield fonctionnel.",
+        "message": "# Labo 4 — Appel LLM depuis le T-Beam Supreme\n\nOn va faire parler un **grand modèle de langage (LLM)** depuis le T-Beam Supreme.\n\n![T-Beam Supreme](https://wiki.lilygo.cc/get_started/en/LoRa_GPS/T-Beam-SUPREME/assets/T-Beam-SUPREME-2.jpg)\n\nLe principe :\n```\nPotentiomètre → Bouton → POST HTTPS → API LLM → Réponse texte → Écran OLED\n```\n\nOn va construire le projet **étape par étape** pour comprendre chaque morceau.\n\n## Matériel\n\n| Composant | Description |\n|-----------|-------------|\n| LilyGO T-Beam Supreme | ESP32-S3 avec OLED SH1106 intégré |\n| Potentiomètre 10 kΩ | Branché sur GPIO 2 |\n| Câble USB-C | Alimentation et programmation |\n\nTu vas aussi avoir besoin de **GitHub Desktop** et **Arduino IDE**.",
         "simulate_stream_delay_ms": 5
       },
       "metadata": { "order": 2 }
@@ -43,7 +43,7 @@
           "slug": "pret-a-debuter",
           "source": "library",
           "variables": {
-            "text": "J'ai mon matériel de soudure et mon PCB!",
+            "text": "J'ai mon T-Beam Supreme et mon potentiomètre!",
             "title": "Tu as tout le matériel pour commencer?"
           }
         }
@@ -76,207 +76,365 @@
       "is_enabled": true,
       "parameters": {
         "status": { "type": "closed", "reason": "Pas pret" },
-        "message": "Reviens quand tu as ton matériel de soudure et ton PCB."
+        "message": "Reviens quand tu as ton matériel prêt."
       },
       "metadata": { "order": 5 }
     },
 
     {
       "id": 10,
-      "slug": "msg-soudure",
+      "slug": "msg-etape1-clone",
       "kind": "assistant_message",
-      "display_name": "Instructions soudure",
+      "display_name": "Etape 1 - Cloner le depot",
       "agent_key": null,
       "parent_slug": null,
       "position": 6,
       "is_enabled": true,
       "parameters": {
-        "message": "## Partie 1 — Soudure du shield PCB\n\n### Ordre de soudure (du plus bas au plus haut)\n\n1. **Résistances 330 Ω** pour les LEDs\n2. **Condensateurs** (céramiques d'abord)\n3. **Headers** pour la connexion au LilyGO A7670E\n4. **Boutons poussoirs**\n5. **LEDs** (patte longue = anode +)\n6. **Potentiomètres**\n7. **MPU6050** (attention à l'orientation)\n\n### Rappel technique\n\n- Température du fer : **300-350 °C**\n- Fer sur la pastille ET la patte (2-3 s)\n- Étain sur la jonction, pas sur le fer\n- Soudure réussie = brillante, forme de cône\n\nSoude tes composants, puis passe au test.",
+        "message": "## Étape 1 — Cloner le dépôt\n\n1. Ouvre **GitHub Desktop**\n2. **File > Clone Repository... > URL**\n3. Colle l'URL : `https://github.com/fpoisson2/llm-t-beam-supreme`\n4. Choisis un emplacement local et clique **Clone**\n\nLe dépôt contient :\n```\nllm-t-beam-supreme/\n├── .gitignore            ← config.h est ignoré\n├── config.example.h      ← Template de configuration\n└── llm-t-beam-supreme.ino  ← Code principal\n```\n\n> Le `.gitignore` contient déjà `config.h` — tes clés API ne seront **jamais** commitées.\n\nOuvre le dossier cloné dans l'explorateur de fichiers.",
         "simulate_stream_delay_ms": 5
       },
       "metadata": { "order": 6 }
     },
     {
-      "id": 15,
-      "slug": "msg-photo-pcb",
+      "id": 11,
+      "slug": "msg-etape2-config",
       "kind": "assistant_message",
-      "display_name": "Demande photo PCB",
+      "display_name": "Etape 2 - Configuration",
       "agent_key": null,
       "parent_slug": null,
       "position": 7,
       "is_enabled": true,
       "parameters": {
-        "message": "## Photo — PCB soudé\n\nQuand ta soudure est terminée, **prends une photo** de ton PCB (face composants et face soudures) et dépose-la ici.",
+        "message": "## Étape 2 — Créer ton fichier config.h\n\nCopie `config.example.h` vers `config.h` dans le même dossier.\n\nVoici ce que contient le template :\n\n```cpp\n#pragma once\n\n// Mettre a true pour WPA2 Entreprise, false pour WPA2 Personnel\n#define USE_WPA2_ENTERPRISE  false\n\n// --- WPA2 Personnel ---\nconst char* WIFI_SSID     = \"MonReseau\";\nconst char* WIFI_PASSWORD = \"MonMotDePasse\";\n\n// --- WPA2 Entreprise (EAP-PEAP) ---\nconst char* EAP_IDENTITY  = \"prenom.nom\";\nconst char* EAP_USERNAME  = \"prenom.nom\";\nconst char* EAP_PASSWORD  = \"motdepasse\";\n\n// Configuration LLM\nconst char* OPENWEBUI_URL = \"http://10.50.0.108:8080/api/chat/completions\";\nconst char* API_KEY       = \"ta-cle-api-ici\";\nconst char* MODEL_NAME    = \"assistant-iot-v2\";\n\nconst char* SYSTEM_PROMPT =\n  \"Tu es un assistant. \"\n  \"Reponds en 2-3 phrases maximum.\";\n```\n\nDans ton `config.h` :\n- Mets `USE_WPA2_ENTERPRISE` à `true`\n- Remplis le **SSID** du réseau du cégep\n- Remplis tes identifiants EAP (`EAP_IDENTITY`, `EAP_USERNAME`, `EAP_PASSWORD`) avec ton compte du cégep\n- Remplis la **clé API** fournie par l'enseignant\n\n> **Règle absolue** : `config.h` ne doit jamais être commité. Vérifie qu'il n'apparaît pas dans GitHub Desktop.",
         "simulate_stream_delay_ms": 5
       },
       "metadata": { "order": 7 }
     },
     {
-      "id": 16,
-      "slug": "wait-photo-pcb",
-      "kind": "wait_for_user_input",
-      "display_name": "Attente photo PCB",
+      "id": 12,
+      "slug": "msg-etape3-libs",
+      "kind": "assistant_message",
+      "display_name": "Etape 3 - Bibliotheques",
       "agent_key": null,
       "parent_slug": null,
       "position": 8,
       "is_enabled": true,
-      "parameters": {},
+      "parameters": {
+        "message": "## Étape 3 — Installer les bibliothèques\n\nDans Arduino IDE, **Outils > Gérer les bibliothèques**, installe ces 3 bibliothèques :\n\n| Bibliothèque | Auteur | Rôle |\n|---|---|---|\n| **ArduinoJson** | Benoit Blanchon | Construire/lire les requêtes JSON pour l'API |\n| **U8g2** | olikraus | Piloter l'écran OLED SH1106 avec support UTF-8 |\n| **XPowersLib** | Lewis He | Contrôler le gestionnaire d'énergie AXP2101 |\n\nCes 3 bibliothèques correspondent aux `#include` au début du code :\n\n```\n#include WiFi.h            → WiFi intégré ESP32\n#include esp_wpa2.h         → Support WPA2 Entreprise\n#include HTTPClient.h       → Requêtes HTTP\n#include ArduinoJson.h      → à installer\n#include U8g2lib.h          → à installer\n#include Wire.h             → I2C intégré ESP32\n#include XPowersLib.h       → à installer\n```\n\n### Configuration Arduino IDE\n\n1. **Installer le support ESP32** : va dans **Outils > Carte > Boards Manager**, cherche **esp32** par Espressif Systems et installe-le\n2. **Sélectionner la carte** : **Outils > Carte > esp32 > ESP32S3 Dev Module**\n3. **Configurer les options** :\n   - USB CDC On Boot : **Enabled**\n   - PSRAM : **OPI PSRAM**\n\nEssaie de compiler (bouton ✓) pour vérifier que tout est en ordre.",
+        "simulate_stream_delay_ms": 5
+      },
       "metadata": { "order": 8 }
     },
     {
-      "id": 17,
-      "slug": "msg-ack-pcb",
+      "id": 13,
+      "slug": "msg-screenshot-compile",
       "kind": "assistant_message",
-      "display_name": "Accuse reception photo PCB",
+      "display_name": "Demande screenshot compilation",
       "agent_key": null,
       "parent_slug": null,
       "position": 9,
       "is_enabled": true,
       "parameters": {
-        "message": "Photo reçue. Maintenant, branche ton shield sur le **LilyGO A7670E** et teste avec ton firmware de mi-session.",
+        "message": "## Checkpoint — Compilation\n\nDépose une **capture d'écran** d'Arduino IDE montrant que la compilation réussit (message \"Done compiling\" ou similaire en bas).\n\nSi tu as des erreurs, vérifie :\n- Les 3 bibliothèques sont bien installées\n- La carte est **ESP32S3 Dev Module**\n- Le fichier `config.h` existe dans le même dossier que le `.ino`",
         "simulate_stream_delay_ms": 5
       },
       "metadata": { "order": 9 }
     },
-
     {
-      "id": 20,
-      "slug": "eval-a-test-shield",
-      "kind": "evaluated_step",
-      "display_name": "Partie A - Test du shield",
+      "id": 14,
+      "slug": "wait-screenshot-compile",
+      "kind": "wait_for_user_input",
+      "display_name": "Attente screenshot compilation",
       "agent_key": null,
       "parent_slug": null,
       "position": 10,
       "is_enabled": true,
-      "parameters": {
-        "instruction": "## Test du shield avec le LilyGO A7670E\n\nBranche ton shield sur le LilyGO A7670E, téléverse ton firmware de mi-session et ouvre le moniteur série (115200 baud).\n\nVérifie chaque composant :\n- **LEDs** — s'allument via MQTT\n- **Boutons** — changement d'état dans le moniteur série\n- **Potentiomètres** — valeurs 0-4095 qui varient\n- **MPU6050** — données d'accélération visibles\n\n---\n\n**Colle la sortie du moniteur série** montrant que tes capteurs fonctionnent (boutons, pots, MPU6050). Si un composant ne fonctionne pas, indique lequel et ce que tu as vérifié.",
-        "evaluation_prompt": "L'étudiant montre la sortie du moniteur série de son firmware. ok=true si la sortie montre au moins 2 types de capteurs fonctionnels parmi : boutons (PRESSED/RELEASED), potentiomètres (valeurs numériques 0-4095), MPU6050 (données X/Y/Z ou accel). ok=false si aucune donnée de capteur visible ou si la sortie montre uniquement des erreurs. Sois indulgent. Réponds avec {\"ok\": true, \"feedback\": \"...\"} ou {\"ok\": false, \"feedback\": \"...\"}.",
-        "feedback_prompt": "Rétroaction brève (1-2 phrases). Si des composants ne marchent pas, suggérer de vérifier les soudures avec le multimètre.",
-        "teacher_code": "ENSEIGNANT: L4-ALPHA",
-        "max_attempts": 3,
-        "success_message": "{{input.output_structured.feedback}}",
-        "escalation_behavior": "wait_for_teacher",
-        "escalation_message": "Demande à ton enseignant de venir vérifier tes soudures.",
-        "masked": true,
-        "model": "gpt-5-nano",
-        "model_provider_slug": "openai"
-      },
+      "parameters": {},
       "metadata": { "order": 10 }
     },
-
     {
-      "id": 30,
-      "slug": "msg-partie2-intro",
+      "id": 15,
+      "slug": "msg-ack-compile",
       "kind": "assistant_message",
-      "display_name": "Introduction partie 2",
+      "display_name": "Ack compilation",
       "agent_key": null,
       "parent_slug": null,
       "position": 11,
       "is_enabled": true,
       "parameters": {
-        "message": "## Partie 2 — LLM sur le T-Beam Supreme\n\nMaintenant, on passe au T-Beam Supreme pour faire un appel API à un LLM.\n\n### Étape 1 — Créer le dépôt Git\n\n1. Ouvre **GitHub Desktop**\n2. **File > New Repository...**\n3. Nom : `labo4-llm-esp32`\n4. Choisis un emplacement local\n5. Coche **Initialize this repository with a README**\n6. Git Ignore : `None`\n7. Clique **Create Repository**\n\n### Étape 2 — Créer le .gitignore\n\nDans le dossier du dépôt, crée un fichier `.gitignore` contenant :\n```\nconfig.h\n```\n\nC'est tout! Le fichier `config.h` contient tes clés API — il ne doit **jamais** être commité.\n\n### Étape 3 — Fichiers du projet\n\nCrée 3 fichiers dans le dossier :\n- `config.example.h` — template sans secrets (sera commité)\n- `config.h` — tes vrais identifiants (ignoré par git)\n- `labo4-llm-esp32.ino` — code principal\n\nCopie le code fourni dans le document de laboratoire.\n\n### Étape 4 — Bibliothèques Arduino\n\nDans Arduino IDE, **Outils > Gérer les bibliothèques**, installe :\n- **ArduinoJson** par Benoit Blanchon\n- **Adafruit SSD1306** par Adafruit (accepte les dépendances)\n\nDis-moi quand ton dépôt est créé et que le code compile!",
+        "message": "Compilation réussie. Maintenant, on va comprendre le code morceau par morceau avant de le téléverser.",
         "simulate_stream_delay_ms": 5
       },
       "metadata": { "order": 11 }
     },
+
     {
-      "id": 31,
-      "slug": "msg-screenshot-depot",
+      "id": 20,
+      "slug": "msg-etape4-pins",
       "kind": "assistant_message",
-      "display_name": "Demande screenshot depot",
+      "display_name": "Etape 4 - Pins et hardware",
       "agent_key": null,
       "parent_slug": null,
       "position": 12,
       "is_enabled": true,
       "parameters": {
-        "message": "## Capture d'écran — GitHub Desktop\n\nDépose une **capture d'écran de GitHub Desktop** montrant ton dépôt. On doit voir que `config.h` n'apparaît pas dans les fichiers suivis (grâce au `.gitignore`).",
+        "message": "## Étape 4 — Comprendre le matériel\n\nLe T-Beam Supreme est composé d'une **carte cœur** (core board) et d'une **carte d'expansion** :\n\n![Core board et expansion board](https://wiki.lilygo.cc/get_started/en/LoRa_GPS/T-Beam-SUPREME/assets/T-BEAM-S3-Core.jpg)\n\nVoici le **pinout** complet :\n\n![Pinout T-Beam Supreme](https://wiki.lilygo.cc/get_started/en/LoRa_GPS/T-Beam-SUPREME/assets/T-BEAM-Supreme-pin-en.jpg)\n\nLe T-Beam Supreme a **deux bus I2C** séparés et un gestionnaire d'énergie (PMU) :\n\n```cpp\n// Pins\n#define PIN_POT         2     // GPIO ADC pour le potentiomètre\n#define PIN_BTN         0     // Bouton intégré du T-Beam Supreme\n\n// I2C bus 0 : OLED + capteurs (SDA=17, SCL=18)\n#define OLED_SDA        17\n#define OLED_SCL        18\n\n// I2C bus 1 : PMU AXP2101 (SDA=42, SCL=41)\n#define PMU_SDA         42\n#define PMU_SCL         41\n```\n\n**Pourquoi 2 bus I2C?** Le PMU (gestion d'énergie) est sur un bus dédié pour ne pas interférer avec l'écran et les capteurs.\n\n**Pourquoi un PMU?** Le T-Beam Supreme a beaucoup de périphériques (OLED, LoRa, GPS, SD). Le PMU AXP2101 gère l'alimentation de chacun. Sans l'initialiser, l'écran ne s'allume pas!\n\n```cpp\nvoid initPMU() {\n  pmu.init(Wire1, AXP2101_SLAVE_ADDRESS, PMU_SDA, PMU_SCL);\n  pmu.setALDO1Voltage(3300);  pmu.enableALDO1();  // capteurs\n  pmu.setALDO2Voltage(3300);  pmu.enableALDO2();  // capteurs\n  pmu.setALDO3Voltage(3300);  pmu.enableALDO3();  // LoRa\n  pmu.setALDO4Voltage(3300);  pmu.enableALDO4();  // GPS\n  // ... autres rails d'alimentation\n}\n```\n\nChaque `enableALDOx()` active un rail de tension 3.3 V pour un périphérique.\n\n### GPIO disponibles sur le header d'expansion\n\nLa plupart des GPIO sont utilisés par les périphériques intégrés (LoRa, GPS, OLED, SD, PMU, etc.). Notre T-Beam Supreme utilise le **SX1262**, qui n'utilise pas DIO0 — le **GPIO 2** est donc libre.\n\n| GPIO | ADC | Utilisation possible |\n|:----:|:---:|---------------------|\n| **2** | Oui (ADC1) | Potentiomètre, capteur analogique |\n| **3** | Oui (ADC1) | Potentiomètre, capteur analogique |\n| **43** | Non | Numérique (bouton, LED) — aussi UART1 TX / QWIIC |\n| **44** | Non | Numérique (bouton, LED) — aussi UART1 RX / QWIIC |\n| **45** | Non | Numérique (strapping pin, utilisable après boot) |\n| **46** | Non | Numérique (strapping pin, utilisable après boot) |\n\nSeuls GPIO 2 et 3 supportent la lecture **analogique** (ADC). Les autres sont utilisables en numérique seulement.\n\n> [Schéma complet (PDF)](http://github.com/Xinyuan-LilyGO/LilyGo-LoRa-Series/blob/master/schematic/LilyGo_T-BeamS3Supreme.pdf)",
         "simulate_stream_delay_ms": 5
       },
       "metadata": { "order": 12 }
     },
+
     {
-      "id": 32,
-      "slug": "wait-screenshot-depot",
-      "kind": "wait_for_user_input",
-      "display_name": "Attente screenshot depot",
+      "id": 80,
+      "slug": "widget-pret-wifi",
+      "kind": "widget",
+      "display_name": "Pret pour le WiFi?",
       "agent_key": null,
       "parent_slug": null,
       "position": 13,
       "is_enabled": true,
-      "parameters": {},
+      "parameters": {
+        "widget": {
+          "slug": "pret-a-continuer",
+          "source": "library",
+          "variables": {
+            "text": "J'ai compris le matériel, on continue!",
+            "title": "Prêt à continuer?"
+          }
+        }
+      },
       "metadata": { "order": 13 }
     },
+
     {
-      "id": 33,
-      "slug": "msg-ack-depot",
+      "id": 21,
+      "slug": "msg-etape5-wifi",
       "kind": "assistant_message",
-      "display_name": "Accuse reception screenshot",
+      "display_name": "Etape 5 - WiFi",
       "agent_key": null,
       "parent_slug": null,
       "position": 14,
       "is_enabled": true,
       "parameters": {
-        "message": "Capture reçue.\n\nMaintenant, personnalise ton **SYSTEM_PROMPT** dans `config.h`. Invente ta propre mise en situation où la valeur du potentiomètre (0 à 4095) influence la réponse du LLM.\n\nExemples :\n- Entraîneur sportif (0 = encourager, 4095 = féliciter)\n- Chef cuisinier (0 = plat raté, 4095 = chef étoilé)\n- Météo émotionnelle (0 = tempête, 4095 = grand soleil)\n\nPense aussi à la longueur des réponses — l'écran OLED est petit!\n\nTéléverse le code, tourne le potentiomètre et observe l'OLED.",
+        "message": "## Étape 5 — Connexion WiFi\n\nLe code supporte deux modes WiFi. Le paramètre `USE_WPA2_ENTERPRISE` dans `config.h` contrôle lequel est utilisé :\n\n| Situation | `USE_WPA2_ENTERPRISE` | Champs à remplir |\n|---|---|---|\n| **Au cégep** (réseau institutionnel) | `true` | `WIFI_SSID`, `EAP_IDENTITY`, `EAP_USERNAME`, `EAP_PASSWORD` |\n| **À la maison** (réseau personnel) | `false` | `WIFI_SSID`, `WIFI_PASSWORD` |\n\n```cpp\nvoid connecterWiFi() {\n  WiFi.disconnect(true);\n  WiFi.mode(WIFI_STA);  // mode station (client)\n\n  if (USE_WPA2_ENTERPRISE) {\n    // WPA2 Entreprise (EAP-PEAP) — réseau du cégep\n    esp_wifi_sta_wpa2_ent_set_identity(...);\n    esp_wifi_sta_wpa2_ent_set_username(...);\n    esp_wifi_sta_wpa2_ent_set_password(...);\n    esp_wifi_sta_wpa2_ent_enable();\n    WiFi.begin(WIFI_SSID);\n  } else {\n    // WPA2 Personnel — réseau maison ou hotspot\n    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);\n  }\n\n  // Attendre la connexion (max 20 secondes)\n  int tentatives = 0;\n  while (WiFi.status() != WL_CONNECTED && tentatives < 40) {\n    delay(500);\n    tentatives++;\n  }\n}\n```\n\n> **En classe** : mets `USE_WPA2_ENTERPRISE` à `true` et utilise tes identifiants du cégep (EAP). Si tu veux continuer à la maison, mets `false` et remplis le SSID et mot de passe de ton réseau personnel.",
         "simulate_stream_delay_ms": 5
       },
       "metadata": { "order": 14 }
     },
-
     {
-      "id": 40,
-      "slug": "msg-photo-oled",
+      "id": 22,
+      "slug": "msg-etape6-api",
       "kind": "assistant_message",
-      "display_name": "Demande photo OLED",
+      "display_name": "Etape 6 - Appel API LLM",
       "agent_key": null,
       "parent_slug": null,
       "position": 15,
       "is_enabled": true,
       "parameters": {
-        "message": "## Photo — LLM en action\n\nQuand ça fonctionne, **prends une photo** de l'écran OLED du T-Beam Supreme affichant une réponse du LLM et dépose-la ici.",
+        "message": "## Étape 6 — L'appel API au LLM\n\nC'est le cœur du labo. On envoie un **POST HTTP** avec un JSON au format OpenAI :\n\n```cpp\nString appelLLM(int valeurPot) {\n  HTTPClient http;\n  http.begin(OPENWEBUI_URL);\n  http.addHeader(\"Content-Type\", \"application/json\");\n  http.addHeader(\"Authorization\", String(\"Bearer \") + API_KEY);\n  http.setTimeout(30000);\n```\n\nOn construit le JSON avec ArduinoJson :\n\n```cpp\n  JsonDocument doc;\n  doc[\"model\"] = MODEL_NAME;\n\n  JsonArray messages = doc[\"messages\"].to<JsonArray>();\n\n  // Le system prompt définit le comportement du LLM\n  JsonObject systemMsg = messages.add<JsonObject>();\n  systemMsg[\"role\"]    = \"system\";\n  systemMsg[\"content\"] = SYSTEM_PROMPT;\n\n  // Le message utilisateur contient la valeur du pot\n  JsonObject userMsg = messages.add<JsonObject>();\n  userMsg[\"role\"]    = \"user\";\n  userMsg[\"content\"] = \"potentiometre: \" + String(valeurPot);\n```\n\nLe JSON envoyé ressemble à :\n```json\n{\n  \"model\": \"assistant-iot-v2\",\n  \"messages\": [\n    {\"role\": \"system\", \"content\": \"Tu es un assistant...\"},\n    {\"role\": \"user\", \"content\": \"potentiometre: 2048\"}\n  ]\n}\n```\n\nLa réponse du LLM se trouve dans `choices[0].message.content` :\n\n```cpp\n  int httpCode = http.POST(payload);\n  if (httpCode == 200) {\n    String body = http.getString();\n    JsonDocument rep;\n    deserializeJson(rep, body);\n    reponse = rep[\"choices\"][0][\"message\"][\"content\"].as<String>();\n  }\n```",
         "simulate_stream_delay_ms": 5
       },
       "metadata": { "order": 15 }
     },
     {
-      "id": 41,
-      "slug": "wait-photo-oled",
-      "kind": "wait_for_user_input",
-      "display_name": "Attente photo OLED",
+      "id": 23,
+      "slug": "msg-etape7-oled",
+      "kind": "assistant_message",
+      "display_name": "Etape 7 - Affichage OLED",
       "agent_key": null,
       "parent_slug": null,
       "position": 16,
       "is_enabled": true,
-      "parameters": {},
+      "parameters": {
+        "message": "## Étape 7 — Affichage sur l'OLED\n\nL'écran du T-Beam Supreme est un **SH1106 128×64 pixels**. On utilise la bibliothèque U8g2 qui supporte les accents français :\n\n```cpp\nU8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);\n\nvoid setup() {\n  Wire.begin(OLED_SDA, OLED_SCL);\n  u8g2.begin();\n  u8g2.enableUTF8Print();  // support des accents\n}\n```\n\nPour afficher un message simple :\n```cpp\nvoid afficherMessage(const char* ligne1, const char* ligne2) {\n  u8g2.clearBuffer();\n  u8g2.setFont(u8g2_font_helvB10_tf);  // police grasse\n  u8g2.drawUTF8(0, 15, ligne1);\n  u8g2.setFont(u8g2_font_helvR08_tf);  // police normale\n  u8g2.drawUTF8(0, 30, ligne2);\n  u8g2.sendBuffer();\n}\n```\n\nPour les réponses du LLM, la fonction `afficherReponse()` fait du **word-wrap automatique** : elle mesure la largeur en pixels de chaque mot avec `u8g2.getUTF8Width()` pour couper la ligne au bon endroit.\n\nC'est pourquoi ton **SYSTEM_PROMPT** doit demander des réponses courtes — l'écran fait seulement 128×64 pixels!",
+        "simulate_stream_delay_ms": 5
+      },
       "metadata": { "order": 16 }
     },
     {
-      "id": 42,
-      "slug": "msg-ack-oled",
+      "id": 24,
+      "slug": "msg-etape8-loop",
       "kind": "assistant_message",
-      "display_name": "Accuse reception photo OLED",
+      "display_name": "Etape 8 - Boucle principale",
       "agent_key": null,
       "parent_slug": null,
       "position": 17,
       "is_enabled": true,
       "parameters": {
-        "message": "Photo reçue.\n\nDernière étape : crée ton propre compte sur **https://console.groq.com** (connexion Google ou GitHub), génère une clé API, et modifie ton `config.h` pour utiliser Groq au lieu du endpoint du cours.\n\nVérifie que ça fonctionne aussi avec Groq, puis fais ton **commit** dans GitHub Desktop (`.gitignore`, `config.example.h`, `labo4-llm-esp32.ino`).",
+        "message": "## Étape 8 — La boucle principale\n\nLe `loop()` gère deux modes avec le **bouton intégré** (GPIO 0) :\n\n```cpp\nvoid loop() {\n  bool btnActuel = digitalRead(PIN_BTN);\n\n  // Détection front descendant (appui bouton)\n  if (btnPrecedent == HIGH && btnActuel == LOW && !enAttente) {\n    if (!afficherPot) {\n      // Mode réponse → retour au mode pot\n      afficherPot = true;\n    } else {\n      // Mode pot → envoyer au LLM\n      int valeurPot = analogRead(PIN_POT);\n      afficherPot = false;\n      enAttente = true;\n\n      String reponse = appelLLM(valeurPot);\n      afficherReponse(reponse, valeurPot);\n\n      enAttente = false;\n    }\n  }\n\n  // Affichage temps réel du pot\n  if (afficherPot && !enAttente) {\n    int valeurPot = analogRead(PIN_POT);\n    if (abs(valeurPot - dernierPotAffiche) > 20) {\n      dernierPotAffiche = valeurPot;\n      afficherMessage((\"Pot: \" + String(valeurPot)).c_str(),\n                       \"Appuie pour envoyer\");\n    }\n  }\n\n  btnPrecedent = btnActuel;\n  delay(50);\n}\n```\n\n**Le cycle** :\n1. L'écran affiche la valeur du potentiomètre en temps réel\n2. Tu appuies sur le bouton → envoi au LLM\n3. La réponse s'affiche sur l'OLED\n4. Tu appuies encore → retour à la lecture du pot\n\nC'est une **machine à états** simple avec la variable `afficherPot`.",
         "simulate_stream_delay_ms": 5
       },
       "metadata": { "order": 17 }
     },
 
     {
-      "id": 50,
-      "slug": "eval-b-groq-commit",
-      "kind": "evaluated_step",
-      "display_name": "Partie B - Groq et commit",
+      "id": 81,
+      "slug": "widget-pret-prompt",
+      "kind": "widget",
+      "display_name": "Pret a personnaliser?",
       "agent_key": null,
       "parent_slug": null,
       "position": 18,
       "is_enabled": true,
       "parameters": {
-        "instruction": "## Validation finale\n\nConfirme que :\n1. Tu as un **compte Groq** fonctionnel\n2. Le LLM répond via **l'API Groq** (pas juste le endpoint du cours)\n3. Tu as fait un **commit** dans GitHub Desktop\n\n---\n\n**Colle la sortie du moniteur série** montrant un appel réussi via Groq, ET une **capture d'écran de GitHub Desktop** montrant ton commit (on doit voir que `config.h` n'est PAS dans le commit).",
-        "evaluation_prompt": "L'étudiant doit montrer : (1) une sortie série avec une réponse LLM fonctionnelle (texte généré, pas une erreur HTTP), ET (2) un commit dans GitHub Desktop où config.h n'apparaît pas. ok=true si au minimum la sortie série montre une réponse textuelle d'un LLM. ok=false si que des erreurs ou rien du tout. Sois indulgent. Réponds avec {\"ok\": true, \"feedback\": \"...\"} ou {\"ok\": false, \"feedback\": \"...\"}.",
+        "widget": {
+          "slug": "pret-a-continuer",
+          "source": "library",
+          "variables": {
+            "text": "J'ai compris le code, on passe à la personnalisation!",
+            "title": "Prêt à continuer?"
+          }
+        }
+      },
+      "metadata": { "order": 18 }
+    },
+
+    {
+      "id": 30,
+      "slug": "msg-etape9-prompt",
+      "kind": "assistant_message",
+      "display_name": "Etape 9 - Personnaliser le prompt",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 19,
+      "is_enabled": true,
+      "parameters": {
+        "message": "## Étape 9 — Personnalise ton SYSTEM_PROMPT\n\nC'est la partie créative! Dans `config.h`, modifie le `SYSTEM_PROMPT` pour inventer ta propre mise en situation.\n\nLa valeur du potentiomètre (0 à 4095) est envoyée comme message utilisateur. Ton prompt doit expliquer au LLM **comment interpréter cette valeur**.\n\nQuelques idées pour t'inspirer :\n\n| Scénario | Pot à 0 | Pot à 4095 |\n|----------|---------|------------|\n| Entraîneur sportif | Encouragement maximal | Félicitations |\n| Météo émotionnelle | Tempête, motiver | Soleil, tout va bien |\n| Chef cuisinier | Plat raté, conseils | Chef étoilé, compliments |\n| Professeur | Étudiant perdu, simplifier | Expert, donner des défis |\n\nGardes en tête que l'écran OLED fait seulement **128×64 pixels** — tu dois contraindre la longueur des réponses dans ton prompt. Expérimente!\n\nQuand ton prompt est prêt, téléverse le code.",
+        "simulate_stream_delay_ms": 5
+      },
+      "metadata": { "order": 19 }
+    },
+    {
+      "id": 31,
+      "slug": "msg-etape10-televerse",
+      "kind": "assistant_message",
+      "display_name": "Etape 10 - Televerser et tester",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 20,
+      "is_enabled": true,
+      "parameters": {
+        "message": "## Étape 10 — Téléverse et teste!\n\n1. Branche le potentiomètre sur **GPIO 2** (et GND + 3.3V)\n2. Branche le T-Beam Supreme en USB-C\n3. Dans Arduino IDE, sélectionne le bon port COM\n4. Clique **Téléverser** (flèche →)\n5. Ouvre le **moniteur série** (115200 baud)\n\n**Test** :\n- L'écran affiche `Pot: XXXX` en temps réel → tourne le potentiomètre\n- Appuie sur le **bouton intégré** (à côté du USB) → le LLM répond\n- Appuie encore → retour à la lecture du pot\n\nLe moniteur série affiche les détails de chaque appel :\n```\n=================================\nBouton pressé!\nPotentiomètre : 2048\nEnvoi au LLM...\n--- Réponse LLM ---\nLâche rien, t'es à mi-chemin!\n===================\n```\n\nQuand ça fonctionne, **colle la sortie du moniteur série** montrant un appel réussi avec la réponse du LLM.",
+        "simulate_stream_delay_ms": 5
+      },
+      "metadata": { "order": 20 }
+    },
+    {
+      "id": 32,
+      "slug": "wait-serial-oled",
+      "kind": "wait_for_user_input",
+      "display_name": "Attente sortie serie",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 21,
+      "is_enabled": true,
+      "parameters": {},
+      "metadata": { "order": 21 }
+    },
+
+    {
+      "id": 40,
+      "slug": "eval-serial-oled",
+      "kind": "evaluated_step",
+      "display_name": "Validation sortie serie",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 22,
+      "is_enabled": true,
+      "parameters": {
+        "instruction": "## Validation — LLM en action\n\n**Colle la sortie du moniteur série** montrant un appel réussi au LLM avec la réponse textuelle.",
+        "evaluation_prompt": "L'étudiant doit coller la sortie du moniteur série montrant un appel LLM réussi. ok=true si on voit une réponse textuelle du LLM dans la sortie série (pas juste des erreurs HTTP ou WiFi). ok=false si que des erreurs, pas de réponse textuelle, ou rien du tout. Sois indulgent. Réponds avec {\"ok\": true, \"feedback\": \"...\"}  ou {\"ok\": false, \"feedback\": \"...\"}.",
+        "feedback_prompt": "Rétroaction brève (1-2 phrases). Si ça ne fonctionne pas, vérifier le WiFi, la clé API et le moniteur série à 115200 baud.",
+        "teacher_code": "ENSEIGNANT: L4-ALPHA",
+        "max_attempts": 3,
+        "success_message": "{{input.output_structured.feedback}}",
+        "escalation_behavior": "wait_for_teacher",
+        "escalation_message": "Demande à ton enseignant de venir vérifier.",
+        "masked": true,
+        "model": "gpt-5-nano",
+        "model_provider_slug": "openai"
+      },
+      "metadata": { "order": 22 }
+    },
+
+    {
+      "id": 82,
+      "slug": "widget-pret-groq",
+      "kind": "widget",
+      "display_name": "Pret pour Groq?",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 23,
+      "is_enabled": true,
+      "parameters": {
+        "widget": {
+          "slug": "pret-a-continuer",
+          "source": "library",
+          "variables": {
+            "text": "Mon LLM fonctionne, on passe à Groq!",
+            "title": "Prêt à continuer?"
+          }
+        }
+      },
+      "metadata": { "order": 23 }
+    },
+
+    {
+      "id": 50,
+      "slug": "msg-etape11-groq",
+      "kind": "assistant_message",
+      "display_name": "Etape 11 - Passer a Groq",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 24,
+      "is_enabled": true,
+      "parameters": {
+        "message": "## Étape 11 — Ton propre compte Groq\n\nMaintenant que ça fonctionne avec le endpoint du cours, crée ton propre compte LLM.\n\n1. Va sur **https://console.groq.com**\n2. Crée un compte (Google ou GitHub)\n3. Va dans **API Keys** → crée une clé\n4. Modifie ton `config.h` :\n\n```cpp\n// Commente le endpoint du cours :\n// const char* OPENWEBUI_URL = \"http://10.50.0.108:8080/api/chat/completions\";\n// const char* API_KEY       = \"cle-du-cours\";\n// const char* MODEL_NAME    = \"assistant-iot-v2\";\n\n// Décommente Groq :\nconst char* OPENWEBUI_URL = \"https://api.groq.com/openai/v1/chat/completions\";\nconst char* API_KEY       = \"gsk_ta_cle_ici\";\nconst char* MODEL_NAME    = \"meta-llama/llama-4-scout-17b-16e-instruct\";\n```\n\n> **Note** : Groq utilise HTTPS. Le code fonctionne tel quel car `HTTPClient` sur ESP32 gère SSL automatiquement.\n\nTéléverse et vérifie que ça fonctionne aussi avec Groq.",
+        "simulate_stream_delay_ms": 5
+      },
+      "metadata": { "order": 24 }
+    },
+    {
+      "id": 51,
+      "slug": "msg-etape12-commit",
+      "kind": "assistant_message",
+      "display_name": "Etape 12 - Commit",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 25,
+      "is_enabled": true,
+      "parameters": {
+        "message": "## Étape 12 — Commit dans GitHub Desktop\n\nDernier pas :\n\n1. Ouvre **GitHub Desktop**\n2. Vérifie que `config.h` **n'apparaît PAS** dans la liste des fichiers modifiés\n3. Fais un commit avec un message descriptif\n4. **Push** vers GitHub\n\n**Colle la sortie du moniteur série** montrant un appel réussi via Groq.",
+        "simulate_stream_delay_ms": 5
+      },
+      "metadata": { "order": 25 }
+    },
+    {
+      "id": 52,
+      "slug": "wait-final",
+      "kind": "wait_for_user_input",
+      "display_name": "Attente validation finale",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 26,
+      "is_enabled": true,
+      "parameters": {},
+      "metadata": { "order": 26 }
+    },
+
+    {
+      "id": 60,
+      "slug": "eval-groq-commit",
+      "kind": "evaluated_step",
+      "display_name": "Validation Groq et commit",
+      "agent_key": null,
+      "parent_slug": null,
+      "position": 27,
+      "is_enabled": true,
+      "parameters": {
+        "instruction": "## Validation finale\n\nConfirme que :\n1. Le LLM répond via **l'API Groq**\n2. Tu as fait un **commit et push** dans GitHub Desktop\n3. `config.h` n'est **pas** dans le commit\n\n**Colle la sortie du moniteur série** montrant un appel réussi via Groq.",
+        "evaluation_prompt": "L'étudiant doit montrer une sortie série avec une réponse LLM fonctionnelle via Groq (texte généré, pas une erreur HTTP). ok=true si la sortie série montre une réponse textuelle d'un LLM. ok=false si que des erreurs ou rien du tout. Sois indulgent. Réponds avec {\"ok\": true, \"feedback\": \"...\"} ou {\"ok\": false, \"feedback\": \"...\"}.",
         "feedback_prompt": "Rétroaction brève (1-2 phrases). Vérifier que config.h n'est pas commité.",
         "teacher_code": "ENSEIGNANT: L4-BRAVO",
         "max_attempts": 3,
@@ -287,64 +445,73 @@
         "model": "gpt-5-nano",
         "model_provider_slug": "openai"
       },
-      "metadata": { "order": 18 }
+      "metadata": { "order": 27 }
     },
 
     {
-      "id": 60,
+      "id": 70,
       "slug": "msg-conclusion",
       "kind": "assistant_message",
       "display_name": "Conclusion",
       "agent_key": null,
       "parent_slug": null,
-      "position": 19,
+      "position": 28,
       "is_enabled": true,
       "parameters": {
-        "message": "# Laboratoire complété\n\nTu as réussi à :\n- **Souder** ton shield PCB et le tester avec le LilyGO A7670E\n- **Appeler un LLM** depuis le T-Beam Supreme via HTTP POST\n- **Afficher** la réponse sur l'écran OLED\n- **Créer un compte Groq** avec ta propre clé API\n- **Commiter** proprement sans exposer tes secrets\n\n## Pour aller plus loin\n- Utiliser d'autres capteurs (boutons, MPU6050) pour enrichir le contexte\n- Essayer différents modèles sur Groq\n- Implémenter un cache pour éviter les appels répétitifs",
+        "message": "# Laboratoire complété\n\nTu as réussi à :\n- **Comprendre** l'architecture du T-Beam Supreme (PMU, 2 bus I2C, OLED)\n- **Appeler un LLM** via HTTP POST au format OpenAI\n- **Afficher** la réponse sur l'écran OLED avec word-wrap\n- **Créer un compte Groq** avec ta propre clé API\n- **Commiter** proprement sans exposer tes secrets\n\n## Pour aller plus loin\n- Ajouter un historique des réponses (naviguer avec le bouton)\n- Utiliser d'autres capteurs du T-Beam (GPS, accéléromètre) dans le prompt\n- Essayer différents modèles sur Groq et comparer les réponses",
         "simulate_stream_delay_ms": 5
       },
-      "metadata": { "order": 19 }
+      "metadata": { "order": 28 }
     },
     {
-      "id": 61,
+      "id": 71,
       "slug": "end",
       "kind": "end",
       "display_name": "Fin",
       "agent_key": null,
       "parent_slug": null,
-      "position": 20,
+      "position": 29,
       "is_enabled": true,
       "parameters": {
         "status": { "type": "closed", "reason": "Laboratoire complete" },
         "message": ""
       },
-      "metadata": { "order": 20 }
+      "metadata": { "order": 29 }
     }
   ],
   "edges": [
     { "id": 100, "source": "start", "target": "msg-intro", "condition": null, "metadata": { "label": "", "order": 1 } },
     { "id": 101, "source": "msg-intro", "target": "widget-pret", "condition": null, "metadata": { "label": "", "order": 2 } },
     { "id": 102, "source": "widget-pret", "target": "cond-widget-pret", "condition": null, "metadata": { "label": "", "order": 3 } },
-    { "id": 103, "source": "cond-widget-pret", "target": "msg-soudure", "condition": "true", "metadata": { "label": "true", "order": 4 } },
+    { "id": 103, "source": "cond-widget-pret", "target": "msg-etape1-clone", "condition": "true", "metadata": { "label": "true", "order": 4 } },
     { "id": 104, "source": "cond-widget-pret", "target": "end-abandonne", "condition": null, "metadata": { "label": "autre", "order": 5 } },
 
-    { "id": 110, "source": "msg-soudure", "target": "msg-photo-pcb", "condition": null, "metadata": { "label": "", "order": 6 } },
-    { "id": 111, "source": "msg-photo-pcb", "target": "wait-photo-pcb", "condition": null, "metadata": { "label": "", "order": 7 } },
-    { "id": 112, "source": "wait-photo-pcb", "target": "msg-ack-pcb", "condition": null, "metadata": { "label": "", "order": 8 } },
-    { "id": 113, "source": "msg-ack-pcb", "target": "eval-a-test-shield", "condition": null, "metadata": { "label": "", "order": 9 } },
+    { "id": 110, "source": "msg-etape1-clone", "target": "msg-etape2-config", "condition": null, "metadata": { "label": "", "order": 6 } },
+    { "id": 111, "source": "msg-etape2-config", "target": "msg-etape3-libs", "condition": null, "metadata": { "label": "", "order": 7 } },
+    { "id": 112, "source": "msg-etape3-libs", "target": "msg-screenshot-compile", "condition": null, "metadata": { "label": "", "order": 8 } },
+    { "id": 113, "source": "msg-screenshot-compile", "target": "wait-screenshot-compile", "condition": null, "metadata": { "label": "", "order": 9 } },
+    { "id": 114, "source": "wait-screenshot-compile", "target": "msg-ack-compile", "condition": null, "metadata": { "label": "", "order": 10 } },
 
-    { "id": 120, "source": "eval-a-test-shield", "target": "msg-partie2-intro", "condition": null, "metadata": { "label": "", "order": 10 } },
-    { "id": 121, "source": "msg-partie2-intro", "target": "msg-screenshot-depot", "condition": null, "metadata": { "label": "", "order": 11 } },
-    { "id": 122, "source": "msg-screenshot-depot", "target": "wait-screenshot-depot", "condition": null, "metadata": { "label": "", "order": 12 } },
-    { "id": 123, "source": "wait-screenshot-depot", "target": "msg-ack-depot", "condition": null, "metadata": { "label": "", "order": 13 } },
+    { "id": 120, "source": "msg-ack-compile", "target": "msg-etape4-pins", "condition": null, "metadata": { "label": "", "order": 11 } },
+    { "id": 121, "source": "msg-etape4-pins", "target": "widget-pret-wifi", "condition": null, "metadata": { "label": "", "order": 12 } },
+    { "id": 122, "source": "widget-pret-wifi", "target": "msg-etape5-wifi", "condition": null, "metadata": { "label": "", "order": 13 } },
+    { "id": 123, "source": "msg-etape5-wifi", "target": "msg-etape6-api", "condition": null, "metadata": { "label": "", "order": 14 } },
+    { "id": 124, "source": "msg-etape6-api", "target": "msg-etape7-oled", "condition": null, "metadata": { "label": "", "order": 15 } },
+    { "id": 125, "source": "msg-etape7-oled", "target": "msg-etape8-loop", "condition": null, "metadata": { "label": "", "order": 16 } },
 
-    { "id": 130, "source": "msg-ack-depot", "target": "msg-photo-oled", "condition": null, "metadata": { "label": "", "order": 14 } },
-    { "id": 131, "source": "msg-photo-oled", "target": "wait-photo-oled", "condition": null, "metadata": { "label": "", "order": 15 } },
-    { "id": 132, "source": "wait-photo-oled", "target": "msg-ack-oled", "condition": null, "metadata": { "label": "", "order": 16 } },
+    { "id": 130, "source": "msg-etape8-loop", "target": "widget-pret-prompt", "condition": null, "metadata": { "label": "", "order": 17 } },
+    { "id": 131, "source": "widget-pret-prompt", "target": "msg-etape9-prompt", "condition": null, "metadata": { "label": "", "order": 18 } },
+    { "id": 132, "source": "msg-etape9-prompt", "target": "msg-etape10-televerse", "condition": null, "metadata": { "label": "", "order": 19 } },
+    { "id": 133, "source": "msg-etape10-televerse", "target": "wait-serial-oled", "condition": null, "metadata": { "label": "", "order": 20 } },
+    { "id": 134, "source": "wait-serial-oled", "target": "eval-serial-oled", "condition": null, "metadata": { "label": "", "order": 21 } },
 
-    { "id": 140, "source": "msg-ack-oled", "target": "eval-b-groq-commit", "condition": null, "metadata": { "label": "", "order": 17 } },
-    { "id": 141, "source": "eval-b-groq-commit", "target": "msg-conclusion", "condition": null, "metadata": { "label": "", "order": 18 } },
+    { "id": 140, "source": "eval-serial-oled", "target": "widget-pret-groq", "condition": null, "metadata": { "label": "", "order": 22 } },
+    { "id": 141, "source": "widget-pret-groq", "target": "msg-etape11-groq", "condition": null, "metadata": { "label": "", "order": 23 } },
+    { "id": 142, "source": "msg-etape11-groq", "target": "msg-etape12-commit", "condition": null, "metadata": { "label": "", "order": 24 } },
+    { "id": 143, "source": "msg-etape12-commit", "target": "wait-final", "condition": null, "metadata": { "label": "", "order": 25 } },
+    { "id": 144, "source": "wait-final", "target": "eval-groq-commit", "condition": null, "metadata": { "label": "", "order": 26 } },
 
-    { "id": 150, "source": "msg-conclusion", "target": "end", "condition": null, "metadata": { "label": "", "order": 19 } }
+    { "id": 150, "source": "eval-groq-commit", "target": "msg-conclusion", "condition": null, "metadata": { "label": "", "order": 27 } },
+    { "id": 151, "source": "msg-conclusion", "target": "end", "condition": null, "metadata": { "label": "", "order": 28 } }
   ]
 }

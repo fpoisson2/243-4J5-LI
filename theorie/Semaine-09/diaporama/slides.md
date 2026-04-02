@@ -4,7 +4,7 @@ background: https://images.unsplash.com/photo-1518770660439-4636190af475?w=1920
 title: 243-4J5-LI - Objets connectés - Semaine 9
 info: |
   ## Objets connectés
-  Semaine 9 - Soudure PCB et introduction aux LLM sur ESP32
+  Semaine 9 - Introduction aux LLM sur ESP32 et soudure PCB
 
   Cégep Limoilou - Session H26
 class: text-center
@@ -19,7 +19,7 @@ download: true
 # Objets connectés
 ## 243-4J5-LI
 
-Semaine 9 - Soudure PCB et introduction aux LLM
+Semaine 9 - Introduction aux LLM et soudure PCB
 
 <div class="pt-12">
   <span class="px-2 py-1 rounded cursor-pointer" hover="bg-white bg-opacity-10">
@@ -32,7 +32,7 @@ layout: section
 ---
 
 # Aujourd'hui
-## Deux activités
+## Deux labos
 
 ---
 
@@ -40,23 +40,9 @@ layout: section
 
 <div class="grid grid-cols-2 gap-8 mt-8">
 
-<div class="p-4 bg-orange-500 bg-opacity-20 rounded-lg">
-
-### Partie 1 — Soudure PCB (1h30)
-
-<v-clicks>
-
-- Vos PCB sont arrivés!
-- Soudure des composants THT
-- Vérification et test de continuité
-
-</v-clicks>
-
-</div>
-
 <div class="p-4 bg-blue-500 bg-opacity-20 rounded-lg">
 
-### Partie 2 — LLM sur T-Beam Supreme (1h30)
+### Labo 4 — LLM sur T-Beam Supreme (~2h30)
 
 <v-clicks>
 
@@ -70,85 +56,27 @@ layout: section
 
 </div>
 
+<div class="p-4 bg-orange-500 bg-opacity-20 rounded-lg">
+
+### Soudure PCB (~2h30)
+
+<v-clicks>
+
+- Vos PCB sont arrivés!
+- Soudure des composants du shield
+- Vérification et test de continuité
+
+</v-clicks>
+
+</div>
+
 </div>
 
 ---
 layout: section
 ---
 
-# Partie 1
-## Soudure du PCB
-
----
-
-# Vos PCB sont là
-
-### Rappel de la conception (semaine 7)
-
-<v-clicks>
-
-- Schéma et routage dans KiCad
-- Fabrication envoyée chez JLCPCB
-- Aujourd'hui : on assemble!
-
-</v-clicks>
-
-<v-click>
-
-<div class="mt-4 p-2 bg-orange-500 bg-opacity-20 rounded-lg text-center text-sm">
-
-**Objectif** : PCB fonctionnel à la fin de la période.
-
-</div>
-
-</v-click>
-
----
-
-# Ordre de soudure
-
-### Du plus bas au plus haut
-
-<v-clicks>
-
-1. **Résistances** — identifier les valeurs (code couleur ou multimètre)
-2. **Condensateurs céramiques** — pas de polarité
-3. **Condensateurs électrolytiques** — bande = négatif
-4. **Connecteurs** — headers, borniers
-5. **Composants actifs** — CI, régulateurs (attention à l'orientation)
-
-</v-clicks>
-
-<v-click>
-
-<div class="mt-4 p-2 bg-red-500 bg-opacity-20 rounded-lg text-center text-sm">
-
-**Température du fer** : 300-350 °C — fer sur pastille ET patte, étain sur la jonction.
-
-</div>
-
-</v-click>
-
----
-
-# Vérification
-
-### Avant de passer à la partie 2
-
-<v-clicks>
-
-- Inspection visuelle de chaque soudure (brillante, forme de cône)
-- Pas de ponts entre les pistes
-- Test de continuité au multimètre
-- Brancher et vérifier le fonctionnement de base
-
-</v-clicks>
-
----
-layout: section
----
-
-# Partie 2
+# Labo 4
 ## Introduction aux LLM sur ESP32
 
 ---
@@ -160,7 +88,7 @@ layout: section
 <v-clicks>
 
 - Modèle d'IA entraîné sur du texte (GPT, Claude, Llama, etc.)
-- Accessible via une **API HTTP** : on envoie un prompt, on reçoit du texte
+- Accessible via une **API HTTP** : on envoie une requête ("un prompt"), on reçoit du texte
 - Fonctionne partout où on peut faire un POST HTTPS — y compris un ESP32
 
 </v-clicks>
@@ -255,6 +183,153 @@ Groq, OpenAI, Anthropic, Ollama — tous utilisent ce même format.
 
 ---
 
+# JSON — JavaScript Object Notation
+
+### Un format universel pour échanger des données
+
+<v-click>
+
+JSON est un format **texte** pour représenter des données structurées — lisible par les humains **et** les machines.
+
+</v-click>
+
+<div class="grid grid-cols-2 gap-4">
+
+<div>
+
+<v-click>
+
+### Syntaxe de base
+
+```json
+{
+  "nom": "ESP32",
+  "temperature": 23.5,
+  "actif": true,
+  "capteurs": ["DHT22", "MPU6050"],
+  "config": {
+    "wifi": "MonReseau",
+    "port": 8080
+  }
+}
+```
+
+</v-click>
+
+</div>
+
+<div>
+
+<v-click>
+
+### Types de données
+
+| Type | Exemple |
+|------|---------|
+| Chaîne | `"Bonjour"` |
+| Nombre | `42`, `3.14` |
+| Booléen | `true`, `false` |
+| Tableau | `[1, 2, 3]` |
+| Objet | `{ "clé": "valeur" }` |
+| Null | `null` |
+
+</v-click>
+
+</div>
+
+</div>
+
+<v-click>
+
+<div class="mt-4 p-2 bg-blue-500 bg-opacity-20 rounded-lg text-center text-sm">
+
+**Utilisé partout** : APIs web, fichiers de config, communication IoT — c'est le format des requêtes et réponses LLM.
+
+</div>
+
+</v-click>
+
+---
+
+# Structured Output — Réponses structurées
+
+### Forcer le LLM à répondre en JSON
+
+<v-click>
+
+Au lieu de recevoir du texte libre, on peut demander une **réponse structurée** (JSON) avec un schéma précis.
+
+</v-click>
+
+<div class="grid grid-cols-2 gap-4">
+
+<div>
+
+<v-click>
+
+### Requête avec `response_format`
+
+```json
+{
+  "model": "nom-du-modele",
+  "messages": [ ... ],
+  "response_format": {
+    "type": "json_schema",
+    "json_schema": {
+      "name": "analyse",
+      "strict": true,
+      "schema": {
+        "type": "object",
+        "required": ["niveau", "message"],
+        "properties": {
+          "niveau": { "type": "integer" },
+          "message": { "type": "string" }
+        }
+      }
+    }
+  }
+}
+```
+
+</v-click>
+
+</div>
+
+<div>
+
+<v-click>
+
+### Réponse garantie
+
+```json
+{
+  "choices": [{
+    "message": {
+      "content": "{\"niveau\": 3, \"message\": \"Bon travail!\"}"
+    }
+  }]
+}
+```
+
+</v-click>
+
+<v-click>
+
+### Pourquoi c'est utile?
+
+- Parsing fiable avec `ArduinoJson`
+- Pas besoin de chercher dans du texte libre
+- Idéal pour l'ESP32 : extraire directement les valeurs
+- Contrôle précis du format de sortie
+
+</v-click>
+
+</div>
+
+</div>
+
+---
+
 # Groq — API gratuite
 
 ### Créer un compte
@@ -273,7 +348,7 @@ Groq, OpenAI, Anthropic, Ollama — tous utilisent ce même format.
 ### Modèle recommandé
 
 ```
-meta-llama/llama-4-scout-17b-16e-instruct
+openai/gpt-oss-20b
 ```
 
 Rapide, capable, gratuit pour l'usage éducatif.
@@ -345,13 +420,85 @@ labo4-llm-esp32/
 
 <v-clicks>
 
-1. Souder le shield PCB et le tester avec le A7670E
-2. Créer le dépôt Git avec GitHub Desktop
-3. Copier le code fourni et les fichiers config
-4. Personnaliser votre scénario créatif (prompt système)
-5. Tester avec le endpoint du cours sur le T-Beam Supreme
-6. Créer un compte Groq et tester avec votre propre clé
-7. Commit propre dans GitHub Desktop (sans `config.h`!)
+1. Créer le dépôt Git avec GitHub Desktop
+2. Copier le code fourni et les fichiers config
+3. Personnaliser votre scénario créatif (prompt système)
+4. Tester avec le endpoint du cours sur le T-Beam Supreme
+5. Créer un compte Groq et tester avec votre propre clé
+6. Commit propre dans GitHub Desktop (sans `config.h`!)
+
+</v-clicks>
+
+---
+layout: section
+---
+
+# Soudure du PCB
+## Vos shields sont arrivés!
+
+---
+
+# Vos PCB sont là
+
+### Rappel de la conception (semaine 7)
+
+<v-clicks>
+
+- Schéma et routage dans KiCad
+- Fabrication envoyée chez JLCPCB
+- Aujourd'hui : on assemble!
+
+</v-clicks>
+
+<v-click>
+
+<div class="mt-4 p-2 bg-orange-500 bg-opacity-20 rounded-lg text-center text-sm">
+
+**Objectif** : PCB fonctionnel à la fin de la période.
+
+</div>
+
+</v-click>
+
+<v-click>
+
+<div class="mt-4 p-2 bg-red-500 bg-opacity-20 rounded-lg text-center text-sm">
+
+**C'est évalué!** — Soudure (1%) et fonctionnement du shield (2%) sur les 30% du projet de mi-session.
+
+</div>
+
+</v-click>
+
+---
+
+# Ordre de soudure
+
+### Du plus bas au plus haut — composants du shield LilyGO A7670E
+
+<v-clicks>
+
+1. **Résistances 330 Ω** — limitation de courant pour les LEDs
+2. **Headers** — connecteurs compatibles LilyGO A7670E
+3. **Boutons poussoirs** — avec résistances pull-up/pull-down
+4. **Potentiomètres** — reliés aux entrées analogiques (ADC)
+5. **LEDs** — attention à la polarité (patte longue = anode)
+6. **MPU6050** — module I2C (attention à l'orientation)
+
+</v-clicks>
+
+---
+
+# Vérification
+
+### Avant de quitter
+
+<v-clicks>
+
+- Inspection visuelle de chaque soudure (brillante, forme de cône)
+- Pas de ponts entre les pistes
+- Test de continuité au multimètre
+- Brancher sur le LilyGO A7670E et vérifier le fonctionnement de base
 
 </v-clicks>
 
@@ -363,7 +510,7 @@ class: text-center
 # Questions?
 
 <div class="text-xl mt-8">
-On soude, puis on code!
+On code, puis on soude!
 </div>
 
 ---
