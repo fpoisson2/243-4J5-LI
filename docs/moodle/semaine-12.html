@@ -10,40 +10,35 @@
 </head>
 <body>
 <div style="font-family: 'Segoe UI', system-ui, sans-serif; line-height: 1.6;">
-  <p><strong>Fiabilité</strong> et <strong>sécurité</strong> des automatisations IoT : passer d'un prototype à un système de production robuste.</p>
-  <p><strong>Gestion des erreurs :</strong></p>
+  <p>Dernière séance du TP évalué : ajout de <strong>MQTT</strong>, gestion des erreurs et <strong>remise</strong>.</p>
+  <p><strong>MQTT depuis Arduino :</strong></p>
   <ul style="margin: 10px 0;">
-    <li><strong>Types d'erreurs</strong> — réseau, API, données invalides, matériel</li>
-    <li><strong>Retry avec backoff</strong> — délai exponentiel entre les tentatives</li>
-    <li><strong>Circuit Breaker</strong> — protection contre les cascades d'erreurs</li>
-    <li><strong>Fallback</strong> — analyse basée sur règles si le LLM est indisponible</li>
+    <li><strong>PubSubClient</strong> — librairie MQTT pour ESP32</li>
+    <li><strong>Topics</strong> — <code>lora/donnees</code>, <code>lora/analyses</code>, <code>lora/actions</code></li>
+    <li><strong>Vérification</strong> — <code>mosquitto_sub -t "lora/#" -v</code></li>
   </ul>
-  <p><strong>Observabilité :</strong></p>
+  <p><strong>Robustesse :</strong></p>
   <ul style="margin: 10px 0;">
-    <li><strong>Logging structuré</strong> — format JSON pour analyse automatisée</li>
-    <li><strong>Métriques</strong> — messages/min, latence, taux d'erreur</li>
-    <li><strong>Alertes proactives</strong> — notification avant que l'utilisateur ne remarque</li>
+    <li><strong>Reconnexion</strong> — WiFi et MQTT automatiques si perdus</li>
+    <li><strong>Retry LLM</strong> — 3 tentatives avec délai croissant</li>
+    <li><strong>Fallback</strong> — réponse par défaut si le LLM est indisponible</li>
   </ul>
-  <p><strong>Sécurité :</strong></p>
-  <ul style="margin: 10px 0;">
-    <li><strong>Gestion des secrets</strong> — fichier .env, variables d'environnement</li>
-    <li><strong>Validation des entrées</strong> — ne jamais faire confiance aux données externes</li>
-    <li><strong>Principe du moindre privilège</strong> — permissions minimales pour chaque composant</li>
-  </ul>
-  <p><strong>Labo 12 :</strong> ajouter la gestion d'erreurs, migrer les secrets vers .env et implémenter le logging structuré.</p>
+  <p><strong>Labo :</strong> ajouter MQTT au récepteur, tester le pipeline complet, documenter et remettre sur GitHub.</p>
+  <div style="margin-top: 15px; padding: 10px; background: #ffebee; border-left: 4px solid #f44336; border-radius: 4px;">
+    <p style="margin: 0 0 8px 0;"><strong>Remise du TP aujourd'hui :</strong></p>
+    <ul style="margin: 0; padding-left: 20px;">
+      <li><strong>En fin de séance</strong> — commit final et push sur GitHub</li>
+      <li>Pipeline fonctionnel + documentation + code sécurisé</li>
+      <li>Vérifier la checklist de sécurité avant de push</li>
+    </ul>
+  </div>
   <div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-left: 4px solid #2196F3; border-radius: 4px;">
     <p style="margin: 0 0 8px 0;"><strong>À faire pour la semaine prochaine :</strong></p>
     <ul style="margin: 0; padding-left: 20px;">
-      <li>Finaliser la gestion d'erreurs et le logging</li>
-      <li>Préparer tous les composants pour l'intégration finale</li>
-      <li>Vérifier que chaque sous-système fonctionne individuellement</li>
+      <li>Aucun travail lié au TP — il est remis!</li>
+      <li>Se préparer pour le prochain sujet</li>
     </ul>
   </div>
-  <p style="margin-top: 15px; padding: 10px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 4px;">
-    <strong>Prochaine évaluation :</strong> Projet final IdO — semaine 15 (30%)<br>
-    <em>Matière couverte :</em> PCB assemblé, intégration Meshtastic, LLM, tests de performance<br>
-    <em>Format :</em> présentation orale (15 min) et démonstration live
-  </p>
 </div>
 <script>
   function sendHeight() {

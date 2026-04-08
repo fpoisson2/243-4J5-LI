@@ -4,7 +4,7 @@ background: https://images.unsplash.com/photo-1518770660439-4636190af475?w=1920
 title: 243-4J5-LI - Objets connectés - Semaine 11
 info: |
   ## Objets connectés
-  Semaine 11 - Automatisation LLM et infrastructure
+  Semaine 11 - Liaison LoRa point à point et LLM
 
   Cégep Limoilou - Session H26
 class: text-center
@@ -19,7 +19,7 @@ download: true
 # Objets connectés
 ## 243-4J5-LI
 
-Semaine 11 - Automatisation LLM et infrastructure
+Semaine 11 - Liaison LoRa point à point et LLM
 
 <div class="pt-12">
   <span class="px-2 py-1 rounded cursor-pointer" hover="bg-white bg-opacity-10">
@@ -31,290 +31,66 @@ Semaine 11 - Automatisation LLM et infrastructure
 layout: section
 ---
 
-# Introduction
-## L'IA au service de l'IoT
+# TP évalué (20%)
+## Semaines 11-12
 
 ---
 
-# Évolution de notre système
+# Vue d'ensemble du TP
 
-### Du capteur à l'intelligence
+### Communication LoRa avec analyse LLM
 
 <v-click>
 
-```mermaid {scale: 0.45}
+### Objectif
+
+Construire une **liaison LoRa point à point** codée dans l'IDE Arduino :
+
+1. Un **émetteur** lit un potentiomètre et envoie la valeur via LoRa
+2. Un **récepteur** reçoit les données, se connecte au WiFi
+3. Le récepteur appelle un **LLM** pour analyser les données
+4. Le récepteur publie les résultats sur le **broker MQTT**
+5. Une **DEL** réagit selon l'analyse du LLM
+
+</v-click>
+
+<v-click>
+
+<div class="mt-4 p-2 bg-orange-500 bg-opacity-20 rounded-lg text-center text-sm">
+
+**Évaluation** : 20% de la note finale. Remise semaine 12.
+
+</div>
+
+</v-click>
+
+---
+
+# Architecture du TP
+
+### Les deux T-Beam communiquent en LoRa
+
+<v-click>
+
+```mermaid {scale: 0.6}
 graph LR
-    subgraph "Acquisition"
-        S[Capteurs] --> M[MQTT]
+    subgraph "Émetteur (Arduino)"
+        POT[Potentiomètre] --> TX[T-Beam TX]
+        LED1[DEL status] --- TX
     end
 
-    subgraph "Traitement"
-        M --> P[Pipeline Python]
-        P --> LLM[API LLM]
-        LLM --> P
+    TX -->|LoRa 915 MHz| RX
+
+    subgraph "Récepteur (Arduino)"
+        RX[T-Beam RX] --> WIFI[WiFi]
+        WIFI --> LLM[API LLM<br/>Groq]
+        WIFI --> MQTT[Broker MQTT]
+        LED2[DEL réaction] --- RX
     end
 
-    subgraph "Action"
-        P --> A[Actionneurs]
-        P --> N[Notifications]
-        P --> D[Dashboard]
-    end
-
+    style TX fill:#69f
+    style RX fill:#6f6
     style LLM fill:#f96
-```
-
-</v-click>
-
-<v-click>
-
-<div class="mt-4 p-2 bg-blue-500 bg-opacity-20 rounded-lg text-center text-sm">
-
-**Nouveau** : Les LLM peuvent analyser, décider et générer des réponses intelligentes!
-
-</div>
-
-</v-click>
-
----
-
-# Qu'est-ce qu'un LLM?
-
-### Large Language Model
-
-<div class="grid grid-cols-2 gap-6">
-
-<div>
-
-<v-clicks>
-
-- **Modèle de langage** entraîné sur des milliards de textes
-- Capable de **comprendre** et **générer** du texte
-- Peut analyser des **données structurées**
-- Accessible via **API** (OpenAI, Anthropic, Google)
-- Exemples : GPT-4, Claude, Gemini
-
-</v-clicks>
-
-</div>
-
-<div>
-
-<v-click>
-
-### Capacités utiles pour l'IoT
-
-- Analyse de données textuelles
-- Classification d'événements
-- Génération de rapports
-- Détection d'anomalies
-- Interaction en langage naturel
-
-</v-click>
-
-</div>
-
-</div>
-
----
-
-# Cas d'utilisation IoT + LLM
-
-### Applications concrètes
-
-<div class="grid grid-cols-2 gap-4">
-
-<div class="p-3 bg-blue-500 bg-opacity-20 rounded-lg text-sm">
-
-### Analyse intelligente
-
-<v-click>
-
-- Interpréter les données capteurs
-- Détecter des patterns anormaux
-- Prédire des pannes
-- Résumer l'état du système
-
-</v-click>
-
-</div>
-
-<div class="p-3 bg-green-500 bg-opacity-20 rounded-lg text-sm">
-
-### Automatisation
-
-<v-click>
-
-- Décisions basées sur le contexte
-- Réponses adaptatives
-- Génération d'alertes intelligentes
-- Scripts auto-générés
-
-</v-click>
-
-</div>
-
-<div class="p-3 bg-purple-500 bg-opacity-20 rounded-lg text-sm">
-
-### Interface utilisateur
-
-<v-click>
-
-- Commandes en langage naturel
-- Chatbot de contrôle
-- Rapports lisibles
-- Assistant de diagnostic
-
-</v-click>
-
-</div>
-
-<div class="p-3 bg-orange-500 bg-opacity-20 rounded-lg text-sm">
-
-### Maintenance
-
-<v-click>
-
-- Analyse des logs
-- Suggestions de correction
-- Documentation automatique
-- Historique intelligent
-
-</v-click>
-
-</div>
-
-</div>
-
----
-layout: section
----
-
-# Partie 1
-## Intégration des API LLM
-
----
-
-# Fournisseurs d'API LLM
-
-### Options disponibles
-
-<v-click>
-
-| Fournisseur | Modèle | Avantages | Coût |
-|-------------|--------|-----------|------|
-| **OpenAI** | GPT-4, GPT-3.5 | Très capable, populaire | $$$ |
-| **Anthropic** | Claude | Sécurité, long contexte | $$ |
-| **Google** | Gemini | Multimodal, gratuit limité | $ |
-| **Local** | Ollama/LLaMA | Gratuit, privé | Matériel |
-
-</v-click>
-
-<v-click>
-
-### Pour ce cours
-
-- API **OpenAI** ou **Anthropic** recommandée
-- Compte gratuit avec crédits de départ
-- Clé API à sécuriser!
-
-</v-click>
-
----
-
-# Configuration de l'API OpenAI
-
-### Installation et setup
-
-```bash
-# Installation
-pip install openai
-
-# Variable d'environnement (recommandé)
-export OPENAI_API_KEY="sk-..."
-```
-
-<v-click>
-
-### Code de base
-
-```python
-from openai import OpenAI
-
-client = OpenAI()  # Utilise OPENAI_API_KEY
-
-response = client.chat.completions.create(
-    model="gpt-3.5-turbo",
-    messages=[
-        {"role": "system", "content": "Tu es un assistant IoT."},
-        {"role": "user", "content": "Analyse ces données: temp=25°C"}
-    ]
-)
-
-print(response.choices[0].message.content)
-```
-
-</v-click>
-
----
-
-# Configuration de l'API Anthropic
-
-### Alternative avec Claude
-
-```bash
-# Installation
-pip install anthropic
-
-# Variable d'environnement
-export ANTHROPIC_API_KEY="sk-ant-..."
-```
-
-<v-click>
-
-### Code de base
-
-```python
-from anthropic import Anthropic
-
-client = Anthropic()
-
-response = client.messages.create(
-    model="claude-3-haiku-20240307",
-    max_tokens=1024,
-    messages=[
-        {"role": "user", "content": "Analyse ces données: temp=25°C, humidity=60%"}
-    ]
-)
-
-print(response.content[0].text)
-```
-
-</v-click>
-
----
-
-# Prompt Engineering pour IoT
-
-### Structurer les requêtes
-
-<v-click>
-
-### Exemple de prompt système
-
-```python
-SYSTEM_PROMPT = """Tu es un assistant d'analyse IoT.
-Tu reçois des données de capteurs au format JSON.
-Tes responsabilités:
-1. Analyser les valeurs reçues
-2. Détecter les anomalies
-3. Suggérer des actions si nécessaire
-4. Répondre de manière concise
-
-Format de réponse: JSON avec les clés:
-- status: "normal" | "warning" | "critical"
-- analysis: description courte
-- action: action suggérée ou null
-"""
 ```
 
 </v-click>
@@ -323,392 +99,426 @@ Format de réponse: JSON avec les clés:
 
 <div class="mt-2 p-2 bg-blue-500 bg-opacity-20 rounded-lg text-center text-sm">
 
-Un bon **prompt système** = réponses cohérentes et exploitables.
+Tout est codé dans l'**IDE Arduino** avec la librairie **RadioLib** pour le LoRa.
 
 </div>
 
 </v-click>
 
 ---
+layout: section
+---
 
-# Analyser des données capteurs
+# Partie 1
+## L'émetteur LoRa
 
-### Exemple complet
+---
 
-```python {all|1-10|12-22|24-30}
-import json
-from openai import OpenAI
+# Librairie RadioLib
 
-client = OpenAI()
+### Communication LoRa sans Meshtastic
 
-def analyze_sensor_data(data: dict) -> dict:
-    """Analyse les données capteurs avec un LLM."""
+<v-click>
 
-    prompt = f"""Analyse ces données capteurs:
-{json.dumps(data, indent=2)}
+### Pourquoi RadioLib?
 
-Réponds en JSON avec: status, analysis, action"""
+- Contrôle **direct** du module SX1262 du T-Beam
+- Pas besoin de firmware Meshtastic
+- On code **notre propre protocole**
+- Compatible avec l'IDE Arduino
 
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": prompt}
-        ],
-        response_format={"type": "json_object"}
-    )
+</v-click>
 
-    return json.loads(response.choices[0].message.content)
+<v-click>
 
-# Utilisation
-data = {"temperature": 85, "humidity": 20, "motion": True}
-result = analyze_sensor_data(data)
-print(result)
-# {"status": "warning", "analysis": "Température élevée...", "action": "Vérifier..."}
+### Installation
+
+1. IDE Arduino → **Gestionnaire de bibliothèques**
+2. Chercher **RadioLib**
+3. Installer la dernière version
+4. Aussi installer : **ArduinoJson**, **WiFi**, **HTTPClient**
+
+</v-click>
+
+---
+
+# Configuration du SX1262
+
+### Initialiser le module LoRa du T-Beam Supreme
+
+```cpp
+#include <RadioLib.h>
+
+// Pins du SX1262 sur le T-Beam Supreme
+#define LORA_SS   10
+#define LORA_DIO1 33
+#define LORA_RST  5
+#define LORA_BUSY 36
+
+SX1262 radio = new Module(LORA_SS, LORA_DIO1, LORA_RST, LORA_BUSY);
+
+void setup() {
+  Serial.begin(115200);
+
+  int state = radio.begin(
+    915.0,    // Fréquence (MHz)
+    125.0,    // Bandwidth (kHz)
+    9,        // Spreading Factor
+    7,        // Coding Rate (4/7)
+    0x12,     // Sync Word
+    22,       // Puissance TX (dBm)
+    8         // Preamble length
+  );
+
+  if (state == RADIOLIB_ERR_NONE) {
+    Serial.println("Radio initialisée!");
+  } else {
+    Serial.println("Erreur radio: " + String(state));
+  }
+}
 ```
+
+---
+
+# Code de l'émetteur
+
+### Lire le potentiomètre et envoyer via LoRa
+
+```cpp
+#define POT_PIN   36   // Pin ADC du potentiomètre
+#define LED_PIN   25   // Pin de la DEL status
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(LED_PIN, OUTPUT);
+  // ... initialisation radio (slide précédente)
+}
+
+void loop() {
+  // Lire le potentiomètre (0-4095)
+  int valeur = analogRead(POT_PIN);
+
+  // Construire le message
+  String message = String(valeur);
+
+  // Envoyer via LoRa
+  digitalWrite(LED_PIN, HIGH);  // DEL allumée = en train d'émettre
+  int state = radio.transmit(message);
+  digitalWrite(LED_PIN, LOW);
+
+  if (state == RADIOLIB_ERR_NONE) {
+    Serial.println("Envoyé: " + message);
+  } else {
+    Serial.println("Erreur envoi: " + String(state));
+  }
+
+  delay(5000);  // Envoyer toutes les 5 secondes
+}
+```
+
+---
+
+# Enrichir le message
+
+### Envoyer plus que le potentiomètre
+
+<v-click>
+
+```cpp
+#include <ArduinoJson.h>
+
+void loop() {
+  int potValue = analogRead(POT_PIN);
+
+  // Construire un JSON
+  JsonDocument doc;
+  doc["pot"] = potValue;
+  doc["millis"] = millis();
+
+  String message;
+  serializeJson(doc, message);
+
+  // Envoyer via LoRa
+  digitalWrite(LED_PIN, HIGH);
+  radio.transmit(message);
+  digitalWrite(LED_PIN, LOW);
+
+  Serial.println("TX: " + message);
+  delay(5000);
+}
+```
+
+</v-click>
+
+<v-click>
+
+### Exemple de message envoyé
+
+```json
+{"pot":2048,"millis":15000}
+```
+
+</v-click>
 
 ---
 layout: section
 ---
 
 # Partie 2
-## Pipelines de données
+## Le récepteur LoRa + WiFi + LLM
 
 ---
 
-# Architecture de pipeline
+# Code du récepteur — Réception LoRa
 
-### Flux de données automatisé
+### Écouter les messages
+
+```cpp
+#define LED_PIN 25
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(LED_PIN, OUTPUT);
+
+  // Initialiser la radio (même config que l'émetteur)
+  radio.begin(915.0, 125.0, 9, 7, 0x12, 22, 8);
+
+  Serial.println("Récepteur prêt, en attente...");
+}
+
+void loop() {
+  String received;
+  int state = radio.receive(received);
+
+  if (state == RADIOLIB_ERR_NONE) {
+    Serial.println("RX: " + received);
+    Serial.println("RSSI: " + String(radio.getRSSI()) + " dBm");
+    Serial.println("SNR: " + String(radio.getSNR()) + " dB");
+
+    // Traiter le message reçu
+    processMessage(received);
+  }
+}
+```
+
+---
+
+# Connexion WiFi
+
+### Le récepteur se connecte au réseau
+
+```cpp
+#include <WiFi.h>
+
+// Dans config.h (ignoré par git!)
+#include "config.h"
+// const char* WIFI_SSID = "...";
+// const char* WIFI_PASS = "...";
+// const char* GROQ_API_KEY = "gsk_...";
+
+void setupWiFi() {
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+
+  Serial.print("Connexion WiFi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println(" OK!");
+  Serial.println("IP: " + WiFi.localIP().toString());
+}
+
+void setup() {
+  Serial.begin(115200);
+  setupWiFi();
+  // ... initialisation radio
+}
+```
+
+---
+
+# Appel LLM depuis le récepteur
+
+### Analyser les données avec Groq
+
+```cpp
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
+
+String callLLM(String sensorData, float rssi, float snr) {
+  HTTPClient http;
+  http.begin("https://api.groq.com/openai/v1/chat/completions");
+  http.addHeader("Content-Type", "application/json");
+  http.addHeader("Authorization", "Bearer " + String(GROQ_API_KEY));
+
+  JsonDocument req;
+  req["model"] = "llama-3.3-70b-versatile";
+  JsonArray msgs = req["messages"].to<JsonArray>();
+
+  JsonObject sys = msgs.add<JsonObject>();
+  sys["role"] = "system";
+  sys["content"] = "Tu analyses des données IoT LoRa. "
+    "Réponds en JSON: {\"status\":\"normal|attention|urgent\","
+    "\"action\":\"on|off|none\"}";
+
+  JsonObject usr = msgs.add<JsonObject>();
+  usr["role"] = "user";
+  usr["content"] = "Données: " + sensorData +
+    " RSSI: " + String(rssi) + " SNR: " + String(snr);
+
+  String body;
+  serializeJson(req, body);
+
+  int code = http.POST(body);
+  String response = http.getString();
+  http.end();
+  return response;
+}
+```
+
+---
+
+# Traiter la réponse et contrôler la DEL
+
+### Boucler la boucle
+
+```cpp
+void processMessage(String received) {
+  float rssi = radio.getRSSI();
+  float snr = radio.getSNR();
+
+  // Appeler le LLM
+  String llmResponse = callLLM(received, rssi, snr);
+
+  // Parser la réponse
+  JsonDocument doc;
+  // ... extraire le contenu de la réponse LLM
+  // ... parser le JSON interne
+
+  String action = doc["action"] | "none";
+
+  // Contrôler la DEL selon l'action du LLM
+  if (action == "on") {
+    digitalWrite(LED_PIN, HIGH);
+    Serial.println("DEL allumée (LLM: on)");
+  } else if (action == "off") {
+    digitalWrite(LED_PIN, LOW);
+    Serial.println("DEL éteinte (LLM: off)");
+  }
+
+  // Publier sur MQTT (semaine 12)
+}
+```
 
 <v-click>
 
-```mermaid {scale: 0.5}
-graph LR
-    subgraph "Sources"
-        MQTT[MQTT Broker]
-        API[API externe]
-    end
+<div class="mt-2 p-2 bg-green-500 bg-opacity-20 rounded-lg text-center text-sm">
 
-    subgraph "Pipeline"
-        ING[Ingestion] --> VAL[Validation]
-        VAL --> TRANS[Transformation]
-        TRANS --> ANAL[Analyse LLM]
-        ANAL --> DEC[Décision]
-    end
+Le LLM décide de l'action, le code l'exécute. La DEL est la preuve visible que le pipeline fonctionne!
 
-    subgraph "Actions"
-        DEC --> ACT[Actionneurs]
-        DEC --> DB[(Database)]
-        DEC --> ALERT[Alertes]
-    end
-
-    MQTT --> ING
-    API --> ING
-
-    style ANAL fill:#f96
-```
+</div>
 
 </v-click>
-
----
-
-# Pipeline avec MQTT
-
-### Écoute et traitement automatique
-
-```python {all|1-8|10-22|24-32}
-import paho.mqtt.client as mqtt
-import json
-from datetime import datetime
-
-# Configuration
-BROKER = "broker.example.com"
-TOPICS = ["iot/+/sensors/#"]
-
-def on_message(client, userdata, msg):
-    """Callback de réception MQTT."""
-    try:
-        data = json.loads(msg.payload.decode())
-        data['topic'] = msg.topic
-        data['timestamp'] = datetime.now().isoformat()
-
-        # Pipeline de traitement
-        validated = validate_data(data)
-        if validated:
-            enriched = enrich_data(validated)
-            analysis = analyze_with_llm(enriched)
-            execute_actions(analysis)
-
-    except Exception as e:
-        log_error(f"Pipeline error: {e}")
-
-client = mqtt.Client()
-client.on_message = on_message
-client.connect(BROKER)
-client.subscribe(TOPICS)
-client.loop_forever()
-```
-
----
-
-# Validation des données
-
-### Première étape du pipeline
-
-```python
-from pydantic import BaseModel, validator
-from typing import Optional
-
-class SensorData(BaseModel):
-    temperature: Optional[float] = None
-    humidity: Optional[float] = None
-    motion: Optional[bool] = None
-    acceleration: Optional[dict] = None
-
-    @validator('temperature')
-    def temp_in_range(cls, v):
-        if v is not None and (v < -40 or v > 85):
-            raise ValueError('Temperature hors limites')
-        return v
-
-def validate_data(raw: dict) -> Optional[SensorData]:
-    """Valide et structure les données."""
-    try:
-        return SensorData(**raw)
-    except Exception as e:
-        log_warning(f"Validation failed: {e}")
-        return None
-```
-
----
-
-# Transformation et enrichissement
-
-### Ajouter du contexte
-
-```python
-def enrich_data(data: SensorData) -> dict:
-    """Enrichit les données avec du contexte."""
-
-    enriched = data.dict()
-
-    # Ajouter des calculs dérivés
-    if data.temperature and data.humidity:
-        enriched['heat_index'] = calculate_heat_index(
-            data.temperature, data.humidity
-        )
-
-    # Ajouter l'historique récent
-    enriched['history'] = get_recent_readings(limit=5)
-
-    # Ajouter les seuils configurés
-    enriched['thresholds'] = {
-        'temp_warning': 30,
-        'temp_critical': 40,
-        'humidity_low': 30
-    }
-
-    return enriched
-```
-
----
-
-# Décisions et actions
-
-### Agir sur l'analyse
-
-```python {all|1-15|17-28}
-def execute_actions(analysis: dict):
-    """Exécute les actions basées sur l'analyse LLM."""
-
-    status = analysis.get('status', 'normal')
-    action = analysis.get('action')
-
-    # Logger l'analyse
-    log_analysis(analysis)
-
-    # Actions basées sur le status
-    if status == 'critical':
-        send_alert(analysis['analysis'], priority='high')
-        trigger_safety_mode()
-    elif status == 'warning':
-        send_notification(analysis['analysis'])
-
-    # Actions spécifiques suggérées par le LLM
-    if action:
-        if 'allumer' in action.lower() and 'led' in action.lower():
-            mqtt_publish("iot/commands/led", {"state": 1})
-        elif 'éteindre' in action.lower():
-            mqtt_publish("iot/commands/led", {"state": 0})
-        elif 'ventilateur' in action.lower():
-            mqtt_publish("iot/commands/fan", {"state": 1})
-
-    # Sauvegarder pour historique
-    save_to_database(analysis)
-```
 
 ---
 layout: section
 ---
 
 # Partie 3
-## Infrastructure de support
+## Sécurité et structure du projet
 
 ---
 
-# Architecture microservices
+# Gestion des secrets
 
-### Organisation modulaire
+### Fichier config.h (comme au labo 4)
+
+<div class="grid grid-cols-2 gap-4">
+
+<div>
 
 <v-click>
 
-```
-project/
-├── services/
-│   ├── ingestion/        # Réception MQTT
-│   │   └── main.py
-│   ├── processor/        # Transformation
-│   │   └── main.py
-│   ├── analyzer/         # LLM
-│   │   └── main.py
-│   └── actuator/         # Actions
-│       └── main.py
-├── shared/
-│   ├── config.py         # Configuration
-│   ├── models.py         # Modèles de données
-│   └── mqtt_client.py    # Client MQTT partagé
-├── docker-compose.yml
-└── requirements.txt
+### config.h (ignoré par git)
+
+```cpp
+// NE PAS COMMITER CE FICHIER
+const char* WIFI_SSID = "MonReseau";
+const char* WIFI_PASS = "MonMotDePasse";
+const char* GROQ_API_KEY = "gsk_abc...";
+const char* MQTT_BROKER = "192.168.1.10";
 ```
 
 </v-click>
 
----
+</div>
 
-# Communication inter-services
+<div>
 
-### Via MQTT interne
+<v-click>
 
-```python
-# Service Ingestion → publie sur topic interne
-mqtt_publish("internal/validated", validated_data)
+### config.example.h (commité)
 
-# Service Processor → souscrit et traite
-@mqtt_subscribe("internal/validated")
-def process(data):
-    enriched = enrich(data)
-    mqtt_publish("internal/enriched", enriched)
-
-# Service Analyzer → souscrit et analyse
-@mqtt_subscribe("internal/enriched")
-def analyze(data):
-    result = llm_analyze(data)
-    mqtt_publish("internal/analyzed", result)
-
-# Service Actuator → souscrit et agit
-@mqtt_subscribe("internal/analyzed")
-def act(analysis):
-    execute_actions(analysis)
+```cpp
+// Copier vers config.h et remplir
+const char* WIFI_SSID = "VOTRE_SSID";
+const char* WIFI_PASS = "VOTRE_PASS";
+const char* GROQ_API_KEY = "VOTRE_CLE";
+const char* MQTT_BROKER = "ADRESSE_BROKER";
 ```
 
----
+</v-click>
 
-# Logging centralisé
+</div>
 
-### Traçabilité des opérations
+</div>
 
-```python
-import logging
-from datetime import datetime
+<v-click>
 
-# Configuration du logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('iot_pipeline.log'),
-        logging.StreamHandler()
-    ]
-)
+### .gitignore
 
-logger = logging.getLogger('iot_pipeline')
-
-def log_analysis(analysis: dict):
-    """Log structuré d'une analyse."""
-    logger.info(f"Analysis: status={analysis['status']}, "
-                f"action={analysis.get('action', 'none')}")
-
-def log_error(message: str):
-    """Log d'erreur."""
-    logger.error(message)
+```
+config.h
 ```
 
----
+</v-click>
 
-# Monitoring simple
+<v-click>
 
-### Métriques de santé
+<div class="mt-2 p-2 bg-red-500 bg-opacity-20 rounded-lg text-center text-sm">
 
-```python
-from dataclasses import dataclass
-from datetime import datetime, timedelta
+Clé API dans le code ou l'historique git = **-20 points**. Vérifiez avant de push!
 
-@dataclass
-class Metrics:
-    messages_received: int = 0
-    messages_processed: int = 0
-    llm_calls: int = 0
-    errors: int = 0
-    last_message: datetime = None
+</div>
 
-metrics = Metrics()
-
-def update_metrics(event: str):
-    """Met à jour les métriques."""
-    if event == 'received':
-        metrics.messages_received += 1
-        metrics.last_message = datetime.now()
-    elif event == 'processed':
-        metrics.messages_processed += 1
-    elif event == 'llm_call':
-        metrics.llm_calls += 1
-    elif event == 'error':
-        metrics.errors += 1
-
-def get_health() -> dict:
-    """Retourne l'état de santé du système."""
-    return {
-        'status': 'healthy' if metrics.errors < 10 else 'degraded',
-        'messages': metrics.messages_processed,
-        'error_rate': metrics.errors / max(metrics.messages_received, 1)
-    }
-```
+</v-click>
 
 ---
 layout: section
 ---
 
 # Travail de la semaine
-## Mise en place du pipeline
+## Coder l'émetteur et le récepteur
 
 ---
 
 # Objectifs du laboratoire
 
-### Créer votre premier pipeline LLM
+### Ce qu'il faut réaliser aujourd'hui
 
 <div class="grid grid-cols-2 gap-4">
 
 <div>
 
-### Configuration (1h)
+### Émetteur (1h)
 
 <v-clicks>
 
-- [ ] Créer un compte API (OpenAI/Anthropic)
-- [ ] Configurer la clé API (variable env)
-- [ ] Tester l'appel API basique
-- [ ] Définir le prompt système
+- [ ] Initialiser RadioLib (SX1262)
+- [ ] Lire le potentiomètre
+- [ ] Envoyer la valeur via LoRa
+- [ ] DEL qui clignote à l'envoi
+- [ ] Tester la réception
 
 </v-clicks>
 
@@ -716,15 +526,16 @@ layout: section
 
 <div>
 
-### Intégration (2h)
+### Récepteur (2h)
 
 <v-clicks>
 
-- [ ] Script de réception MQTT
-- [ ] Fonction de validation
-- [ ] Fonction d'analyse LLM
-- [ ] Actions basées sur l'analyse
-- [ ] Tests avec données réelles
+- [ ] Initialiser RadioLib (même config)
+- [ ] Recevoir les messages LoRa
+- [ ] Connecter au WiFi
+- [ ] Appeler l'API LLM (Groq)
+- [ ] Contrôler la DEL selon la réponse
+- [ ] Afficher RSSI/SNR
 
 </v-clicks>
 
@@ -734,38 +545,29 @@ layout: section
 
 ---
 
-# Template de départ
+# Checklist avant de partir
 
-### Structure minimale
+### Minimum pour aujourd'hui
 
-```python
-# pipeline.py
-import os
-import json
-import paho.mqtt.client as mqtt
-from openai import OpenAI
+<v-click>
 
-# Configuration
-BROKER = os.getenv("MQTT_BROKER", "localhost")
-OPENAI_KEY = os.getenv("OPENAI_API_KEY")
+- [ ] L'émetteur envoie des données du potentiomètre via LoRa
+- [ ] Le récepteur reçoit les messages et affiche RSSI/SNR
+- [ ] Au moins un appel LLM réussi depuis le récepteur
+- [ ] La DEL réagit à la réponse du LLM
 
-client_mqtt = mqtt.Client()
-client_llm = OpenAI(api_key=OPENAI_KEY)
+</v-click>
 
-def analyze(data: dict) -> dict:
-    # TODO: Implémenter l'analyse LLM
-    pass
+<v-click>
 
-def on_message(client, userdata, msg):
-    data = json.loads(msg.payload)
-    result = analyze(data)
-    print(f"Analyse: {result}")
+### Pour la semaine prochaine (remise)
 
-client_mqtt.on_message = on_message
-client_mqtt.connect(BROKER)
-client_mqtt.subscribe("iot/#")
-client_mqtt.loop_forever()
-```
+- [ ] Ajout de la publication MQTT
+- [ ] Gestion des erreurs (retry LLM, reconnexion WiFi)
+- [ ] Documentation (README.md)
+- [ ] Aucun secret dans le code ou l'historique git
+
+</v-click>
 
 ---
 layout: center
@@ -775,11 +577,11 @@ class: text-center
 # Questions?
 
 <div class="text-xl mt-8">
-Prochaine étape : Configurer votre pipeline LLM!
+On code la liaison LoRa!
 </div>
 
 <div class="mt-4 text-sm">
-Semaine prochaine : Fiabilité et sécurité des automatisations
+Semaine prochaine : MQTT, finalisation et remise du TP
 </div>
 
 ---

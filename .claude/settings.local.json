@@ -5,7 +5,8 @@
       "Bash(ren labo2.json \"Labo 2 - Communication sans fil.json\")",
       "Bash(dir:*)",
       "Bash(find /c/Users/franc/OneDrive/Documents/GitHub/243-4J5-LI -name resumes-hebdomadaires.md -o -name *resume*hebdo*)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }

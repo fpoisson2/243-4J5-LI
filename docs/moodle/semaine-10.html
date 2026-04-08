@@ -10,37 +10,40 @@
 </head>
 <body>
 <div style="font-family: 'Segoe UI', system-ui, sans-serif; line-height: 1.6;">
-  <p><strong>Réception des PCB</strong> fabriqués et atelier de <strong>soudure</strong> pour assembler le shield LilyGO. Tests électriques pour valider le fonctionnement.</p>
-  <p><strong>Inspection des PCB :</strong></p>
+  <p>Mise en pratique de <strong>Meshtastic</strong> sur les T-Beam SUPREME : flash du firmware, connexion aux téléphones et <strong>tests de portée terrain</strong> avec collecte de métriques radio.</p>
+  <p><strong>Mise en route :</strong></p>
   <ul style="margin: 10px 0;">
-    <li><strong>Qualité visuelle</strong> — masque uniforme, pistes continues, sérigraphie lisible</li>
-    <li><strong>Défauts courants</strong> — piste coupée, court-circuit, trou décentré</li>
-    <li><strong>Test de continuité</strong> — vérifier GND et VCC avant d'alimenter</li>
+    <li><strong>Flash du firmware</strong> — via le Web Flasher (flasher.meshtastic.org)</li>
+    <li><strong>Connexion Bluetooth</strong> — appairage avec l'application Meshtastic (Android/iOS)</li>
+    <li><strong>Configuration</strong> — nom du noeud, région US (915 MHz), canal de classe</li>
+    <li><strong>Preset MEDIUM_FAST</strong> — bon compromis portée/débit pour les tests</li>
   </ul>
-  <p><strong>Techniques de soudure :</strong></p>
+  <p><strong>Tests de portée :</strong></p>
   <ul style="margin: 10px 0;">
-    <li><strong>Ordre d'assemblage</strong> — composants bas d'abord (résistances), puis hauts (headers)</li>
-    <li><strong>Polarité</strong> — vérifier LEDs (anode/cathode) et condensateurs</li>
-    <li><strong>Temps de contact</strong> — 2-3 secondes par soudure, éviter la surchauffe</li>
+    <li><strong>RSSI</strong> — puissance du signal reçu (dBm), plus proche de 0 = plus fort</li>
+    <li><strong>SNR</strong> — rapport signal/bruit (dB), LoRa fonctionne même en SNR négatif</li>
+    <li><strong>Protocole</strong> — équipes de 2, un fixe + un mobile, mesures tous les 50-100 m</li>
+    <li><strong>Environnements</strong> — intérieur (couloirs), extérieur (terrain dégagé)</li>
   </ul>
-  <p><strong>Tests fonctionnels :</strong></p>
+  <p><strong>Fonctionnalités explorées :</strong></p>
   <ul style="margin: 10px 0;">
-    <li><strong>Alimentation</strong> — vérifier les tensions 3.3V</li>
-    <li><strong>Périphériques</strong> — LEDs, boutons, potentiomètres, accéléromètre (scan I2C)</li>
+    <li><strong>Rôles</strong> — CLIENT, ROUTER, REPEATER, TRACKER, SENSOR</li>
+    <li><strong>Télémétrie</strong> — batterie, utilisation radio, position GPS</li>
+    <li><strong>Traceroute</strong> — visualiser le chemin multi-hop d'un message</li>
   </ul>
-  <p><strong>Labo 10 :</strong> inspecter le PCB, souder tous les composants et valider le fonctionnement avec des tests progressifs.</p>
+  <p><strong>Labo :</strong> flasher le firmware Meshtastic, connecter l'app au téléphone, configurer le réseau de classe et effectuer des tests de portée en extérieur.</p>
   <div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-left: 4px solid #2196F3; border-radius: 4px;">
     <p style="margin: 0 0 8px 0;"><strong>À faire pour la semaine prochaine :</strong></p>
     <ul style="margin: 0; padding-left: 20px;">
-      <li>Finaliser la soudure et les tests du PCB</li>
-      <li>Créer un compte API chez un fournisseur LLM (OpenAI, Anthropic ou Google)</li>
-      <li>Installer les bibliothèques Python nécessaires (openai, anthropic, pydantic)</li>
+      <li>S'assurer que le firmware Meshtastic est fonctionnel sur votre T-Beam</li>
+      <li>Avoir un compte API LLM prêt (Groq, OpenAI ou Anthropic)</li>
+      <li>Revoir vos résultats de tests de portée (RSSI, SNR, distances)</li>
     </ul>
   </div>
   <p style="margin-top: 15px; padding: 10px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 4px;">
-    <strong>Prochaine évaluation :</strong> Projet final IdO — semaine 15 (30%)<br>
-    <em>Matière couverte :</em> PCB assemblé, intégration Meshtastic, LLM, tests de performance<br>
-    <em>Format :</em> présentation orale (15 min) et démonstration live
+    <strong>Prochaine évaluation :</strong> TP évalué — semaines 11-12 (20%)<br>
+    <em>Sujet :</em> liaison LoRa point à point avec gateway WiFi, appels LLM et publication MQTT<br>
+    <em>Format :</em> pipeline fonctionnel + documentation
   </p>
 </div>
 <script>

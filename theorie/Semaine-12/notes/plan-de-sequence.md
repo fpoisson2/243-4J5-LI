@@ -1,63 +1,62 @@
 # Plan de séquence - Semaine 12
 
 ## Titre
-Automatisation LLM et infrastructure - Fiabilité et sécurité
+MQTT, finalisation et remise du TP LoRa-LLM
 
 ## Objectifs de la semaine
-- Mettre en production les automatisations
-- Implémenter une gestion robuste des erreurs
-- Assurer l'observabilité du système
-- Sécuriser les secrets et les accès
+- Ajouter la publication MQTT au récepteur (PubSubClient)
+- Implémenter la gestion robuste des erreurs (retry LLM, reconnexion WiFi/MQTT)
+- Compléter la documentation du projet
+- Remettre le TP évalué
 
 ## Contenu théorique
 
-### Fiabilité des systèmes automatisés
-- Gestion des erreurs et exceptions
-- Retry policies et circuit breakers
-- Fallback et dégradation gracieuse
-- Journalisation des anomalies
+### Publication MQTT depuis Arduino
+- Librairie PubSubClient
+- Connexion au broker
+- Publication sur des topics structurés (lora/donnees, lora/analyses, lora/actions)
+- Vérification avec mosquitto_sub
 
-### Observabilité
-- Métriques clés à surveiller
-- Dashboards de monitoring
-- Alertes proactives
-- Debugging en production
+### Robustesse
+- Reconnexion automatique WiFi et MQTT
+- Retry avec backoff sur les appels LLM
+- Fallback local si le LLM est indisponible
+- mqtt.loop() pour maintenir la connexion
 
-### Sécurité
-- Gestion des secrets (API keys, tokens)
-- Principe du moindre privilège
-- Audit et traçabilité
-- Bonnes pratiques de sécurité IoT
+### Documentation et remise
+- Structure du README.md
+- Checklist de sécurité
+- Vérification de l'historique git
 
 ## Activités
 
-### Théorie (2h)
-- Patterns de fiabilité
-- Implémentation de l'observabilité
-- Sécurisation des accès et secrets
+### Théorie (30 min)
+- Rappel de l'architecture et des critères d'évaluation
+- Publication MQTT depuis Arduino
+- Gestion des erreurs et fallback
 
-### Laboratoire (3h)
-- Mise en production des automatisations
-- Implémentation de la gestion des erreurs
-- Configuration du monitoring
-- Sécurisation des secrets
-- Tests de robustesse
-
-## Travaux hors classe
-- Implantation des communications finales
-- Journal des anomalies et corrections
-- Documentation de la sécurité
+### Laboratoire (2h30)
+1. MQTT (~1h)
+   - Installer PubSubClient
+   - Connecter au broker MQTT
+   - Publier les données brutes et les analyses
+   - Vérifier avec mosquitto_sub
+2. Robustesse (~30 min)
+   - Ajouter la reconnexion automatique
+   - Implémenter le retry LLM
+   - Tester le fallback
+3. Documentation et remise (~1h)
+   - README.md complet
+   - Vérifier .gitignore et l'historique git
+   - config.example.h à jour
+   - Commit final et push
 
 ## Évaluation
-- Point d'étape projet (formatif)
-- Vérification de la robustesse du système
-
-## Ressources
-- Guide de fiabilité des systèmes distribués
-- Documentation des outils de monitoring
-- Bonnes pratiques de sécurité IoT
+- **TP évalué (20%)** — remise en fin de séance
+- Configuration API (25%), Prompt Engineering (25%), Pipeline (30%), Documentation (20%)
 
 ## Notes pour l'enseignant
-- Simuler des scénarios de panne
-- Vérifier la gestion des erreurs
-- S'assurer de la sécurisation des secrets
+- Avoir le broker MQTT fonctionnel et accessible
+- Garder du temps individuel pour aider les étudiants en difficulté
+- Vérifier les remises sur GitHub en fin de séance
+- Vérifier l'absence de secrets dans les dépôts

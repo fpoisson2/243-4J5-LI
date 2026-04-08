@@ -1,62 +1,79 @@
 # Plan de séquence - Semaine 11
 
 ## Titre
-Automatisation LLM et infrastructure - Déclencheurs et pipelines
+Liaison LoRa point à point et intégration LLM (IDE Arduino)
 
 ## Objectifs de la semaine
-- Comprendre l'apport des LLM à l'automatisation IoT
-- Créer des flux de données automatisés
-- Mettre en place l'infrastructure (API, brokers, monitoring)
-- Développer des scripts d'intégration
+- Coder un émetteur LoRa qui lit un potentiomètre et envoie la valeur via RadioLib
+- Coder un récepteur LoRa qui se connecte au WiFi et appelle un LLM
+- Contrôler une DEL selon la réponse du LLM
+- Appliquer les bonnes pratiques de sécurité (config.h ignoré par git)
 
 ## Contenu théorique
 
-### LLM pour l'IoT
-- Modèles de langage et leurs capacités
-- Cas d'utilisation en IoT : analyse, traitement, génération
-- API des fournisseurs (OpenAI, Anthropic, Google)
-- Limitations et considérations éthiques
+### Librairie RadioLib
+- Communication LoRa directe sans Meshtastic
+- Configuration du SX1262 (fréquence, SF, BW, CR)
+- Émission et réception de messages
+- Lecture des métriques (RSSI, SNR)
 
-### Automatisation des flux de données
-- Déclencheurs basés sur les événements MQTT
-- Pipelines de traitement de données
-- Transformation et enrichissement des données
-- Actions automatisées en réponse aux conditions
+### Émetteur LoRa
+- Lecture du potentiomètre (ADC)
+- Construction d'un message JSON (ArduinoJson)
+- Envoi via radio.transmit()
+- DEL de status à l'émission
 
-### Infrastructure de support
-- Architecture microservices pour IoT
-- Monitoring et observabilité
-- Logging centralisé
-- Alertes et notifications
+### Récepteur LoRa + WiFi + LLM
+- Réception des messages (radio.receive())
+- Connexion WiFi depuis le T-Beam
+- Appel HTTP POST à l'API Groq (format compatible OpenAI)
+- Parsing de la réponse JSON
+- Contrôle de la DEL selon l'action du LLM
+
+### Sécurité
+- Fichier config.h pour les secrets (même approche que le labo 4)
+- config.example.h commité (sans valeurs réelles)
+- .gitignore obligatoire
+- Pénalités pour clés exposées
 
 ## Activités
 
-### Théorie (2h)
-- Introduction aux LLM dans l'IoT
-- Conception de pipelines de données
-- Architecture d'automatisation
+### Théorie (1h)
+- Architecture du TP (émetteur/récepteur)
+- Configuration de RadioLib
+- Code de l'émetteur et du récepteur
+- Appel LLM depuis l'ESP32 (rappel du labo 4)
 
-### Laboratoire (3h)
-- Configuration des API LLM
-- Création d'un pipeline de traitement de données
-- Intégration avec le système MQTT existant
-- Test des automatisations de base
+### Laboratoire (2h)
+1. Émetteur (~45 min)
+   - Initialiser RadioLib (SX1262)
+   - Lire le potentiomètre
+   - Envoyer la valeur via LoRa
+   - DEL qui clignote à l'envoi
+2. Récepteur (~1h15)
+   - Initialiser RadioLib (même configuration)
+   - Recevoir les messages LoRa
+   - Connecter au WiFi
+   - Appeler l'API Groq
+   - Contrôler la DEL selon la réponse LLM
+   - Afficher RSSI/SNR dans le moniteur série
 
 ## Travaux hors classe
-- Plan de tests détaillé
-- Mise à jour de la documentation
-- Exploration des possibilités d'automatisation
+- Finaliser le pipeline (ajout MQTT, gestion d'erreurs)
+- Optimiser le prompt système
+- Préparer la documentation (README.md)
+- Se préparer pour la remise de la semaine 12
 
 ## Évaluation
-- Dépôt formatif : schéma/PCB et architecture du projet final
-- Vérification des pipelines fonctionnels
+- TP évalué (20%) — début cette semaine, remise semaine 12
 
 ## Ressources
-- Documentation des API LLM
-- Guide d'automatisation IoT
-- Exemples de pipelines de données
+- RadioLib : github.com/jgromes/RadioLib
+- API Groq : console.groq.com
+- ArduinoJson : arduinojson.org
 
 ## Notes pour l'enseignant
-- Vérifier les accès API des étudiants
-- Préparer des exemples de prompts efficaces
-- Avoir des scénarios d'automatisation de démonstration
+- Vérifier que les pins SX1262 sont corrects pour le T-Beam Supreme
+- Avoir le réseau WiFi accessible depuis les T-Beam
+- Distribuer les credentials WiFi aux étudiants
+- Remettre le firmware Arduino sur les T-Beam (flash par-dessus Meshtastic)

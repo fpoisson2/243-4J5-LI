@@ -4,7 +4,7 @@ background: https://images.unsplash.com/photo-1518770660439-4636190af475?w=1920
 title: 243-4J5-LI - Objets connectés - Semaine 12
 info: |
   ## Objets connectés
-  Semaine 12 - Fiabilité et sécurité des automatisations
+  Semaine 12 - MQTT, finalisation et remise du TP
 
   Cégep Limoilou - Session H26
 class: text-center
@@ -19,7 +19,7 @@ download: true
 # Objets connectés
 ## 243-4J5-LI
 
-Semaine 12 - Fiabilité et sécurité des automatisations
+Semaine 12 - MQTT, finalisation et remise du TP
 
 <div class="pt-12">
   <span class="px-2 py-1 rounded cursor-pointer" hover="bg-white bg-opacity-10">
@@ -31,58 +31,34 @@ Semaine 12 - Fiabilité et sécurité des automatisations
 layout: section
 ---
 
-# Introduction
-## De la démo à la production
+# Rappel du TP
+## Où en sommes-nous?
 
 ---
 
-# Le défi de la production
+# État des lieux
 
-### Ce qui change
-
-<div class="grid grid-cols-2 gap-4">
-
-<div class="p-3 bg-blue-500 bg-opacity-20 rounded-lg">
-
-### En développement
+### Ce qui devrait être fait
 
 <v-click>
 
-- Environnement contrôlé
-- Erreurs = on corrige
-- Données de test
-- Un seul utilisateur
-- Pas de conséquences
+### Semaine 11 (fait)
+
+- Émetteur : potentiomètre → LoRa (RadioLib)
+- Récepteur : réception LoRa → WiFi → appel LLM
+- DEL contrôlée par la réponse du LLM
+- RSSI/SNR affichés dans le moniteur série
 
 </v-click>
 
-</div>
-
-<div class="p-3 bg-orange-500 bg-opacity-20 rounded-lg">
-
-### En production
-
 <v-click>
 
-- Environnement imprévisible
-- Erreurs = pannes visibles
-- Données réelles
-- Multiples utilisateurs
-- Conséquences réelles
+### Aujourd'hui (semaine 12)
 
-</v-click>
-
-</div>
-
-</div>
-
-<v-click>
-
-<div class="mt-4 p-2 bg-red-500 bg-opacity-20 rounded-lg text-center text-sm">
-
-**Objectif** : Un système qui fonctionne 24/7, même quand ça va mal.
-
-</div>
+- Ajouter la **publication MQTT** sur le récepteur
+- **Gestion des erreurs** (retry LLM, reconnexion WiFi)
+- **Documentation** (README.md)
+- **Remise du TP**
 
 </v-click>
 
@@ -91,200 +67,125 @@ layout: section
 ---
 
 # Partie 1
-## Fiabilité des systèmes
+## Ajouter MQTT au récepteur
 
 ---
 
-# Gestion des erreurs
+# Librairie PubSubClient
 
-### Principe fondamental
+### Client MQTT pour Arduino
 
 <v-click>
 
-```python
-# ❌ Mauvais : Erreur non gérée
-def process_data(data):
-    result = api_call(data)  # Peut échouer!
-    return result
+### Installation
 
-# ✅ Bon : Erreur gérée
-def process_data(data):
-    try:
-        result = api_call(data)
-        return result
-    except ConnectionError as e:
-        logger.error(f"API inaccessible: {e}")
-        return None
-    except TimeoutError as e:
-        logger.warning(f"API lente: {e}")
-        return retry_later(data)
-    except Exception as e:
-        logger.critical(f"Erreur inattendue: {e}")
-        raise
+1. IDE Arduino → Gestionnaire de bibliothèques
+2. Chercher **PubSubClient**
+3. Installer la dernière version
+
+</v-click>
+
+<v-click>
+
+### Connexion au broker
+
+```cpp
+#include <PubSubClient.h>
+
+WiFiClient espClient;
+PubSubClient mqtt(espClient);
+
+void setupMQTT() {
+  mqtt.setServer(MQTT_BROKER, 1883);
+
+  while (!mqtt.connected()) {
+    Serial.print("Connexion MQTT...");
+    if (mqtt.connect("lora-receiver")) {
+      Serial.println(" OK!");
+    } else {
+      Serial.println(" échec, retry dans 5s");
+      delay(5000);
+    }
+  }
+}
 ```
 
 </v-click>
 
 ---
 
-# Types d'erreurs IoT
+# Publier les données et l'analyse
 
-### Catégorisation
+### Envoyer sur le broker MQTT
+
+```cpp
+void processMessage(String received) {
+  float rssi = radio.getRSSI();
+  float snr = radio.getSNR();
+
+  // Publier les données brutes
+  JsonDocument raw;
+  raw["pot"] = received.toInt();
+  raw["rssi"] = rssi;
+  raw["snr"] = snr;
+  String rawJson;
+  serializeJson(raw, rawJson);
+  mqtt.publish("lora/donnees", rawJson.c_str());
+
+  // Appeler le LLM
+  String llmResponse = callLLM(received, rssi, snr);
+  // ... parser la réponse
+
+  // Publier l'analyse
+  mqtt.publish("lora/analyses", llmResponse.c_str());
+
+  // Contrôler la DEL
+  String action = doc["action"] | "none";
+  if (action == "on") {
+    digitalWrite(LED_PIN, HIGH);
+    mqtt.publish("lora/actions", "led_on");
+  } else if (action == "off") {
+    digitalWrite(LED_PIN, LOW);
+    mqtt.publish("lora/actions", "led_off");
+  }
+}
+```
+
+---
+
+# Topics MQTT
+
+### Structure de publication
 
 <v-click>
 
-| Type | Exemples | Stratégie |
-|------|----------|-----------|
-| **Réseau** | Timeout, connexion perdue | Retry avec backoff |
-| **API** | Rate limit, erreur serveur | Circuit breaker |
-| **Données** | Format invalide, valeur aberrante | Validation, rejet |
-| **Matériel** | Capteur défaillant | Fallback, alerte |
-| **Logique** | Bug dans le code | Logging, correction |
+| Topic | Contenu | Fréquence |
+|-------|---------|-----------|
+| `lora/donnees` | Valeur du pot + RSSI + SNR | Chaque réception |
+| `lora/analyses` | Réponse JSON du LLM | Chaque analyse |
+| `lora/actions` | Action exécutée (led_on/off) | Quand action |
+| `lora/erreurs` | Messages d'erreur | Si problème |
 
 </v-click>
 
 <v-click>
 
-<div class="mt-4 p-2 bg-blue-500 bg-opacity-20 rounded-lg text-center text-sm">
+### Vérifier avec mosquitto_sub
 
-Chaque type d'erreur nécessite une **stratégie spécifique**.
+```bash
+# Sur le PC ou le Raspberry Pi
+mosquitto_sub -h adresse.du.broker -t "lora/#" -v
+```
+
+</v-click>
+
+<v-click>
+
+<div class="mt-2 p-2 bg-green-500 bg-opacity-20 rounded-lg text-center text-sm">
+
+Si les messages apparaissent dans `mosquitto_sub` : le pipeline **bout en bout** fonctionne!
 
 </div>
-
-</v-click>
-
----
-
-# Retry avec backoff exponentiel
-
-### Ne pas surcharger les services
-
-```python {all|1-6|8-22}
-import time
-import random
-
-MAX_RETRIES = 5
-BASE_DELAY = 1  # secondes
-
-def retry_with_backoff(func, *args, **kwargs):
-    """Exécute une fonction avec retry et backoff exponentiel."""
-    for attempt in range(MAX_RETRIES):
-        try:
-            return func(*args, **kwargs)
-        except Exception as e:
-            if attempt == MAX_RETRIES - 1:
-                raise  # Dernière tentative, on abandonne
-
-            # Calcul du délai avec jitter
-            delay = BASE_DELAY * (2 ** attempt)
-            jitter = random.uniform(0, delay * 0.1)
-
-            logger.warning(f"Tentative {attempt + 1} échouée, "
-                          f"retry dans {delay:.1f}s")
-            time.sleep(delay + jitter)
-```
-
----
-
-# Circuit Breaker
-
-### Protection contre les cascades d'erreurs
-
-<v-click>
-
-```mermaid {scale: 0.6}
-stateDiagram-v2
-    [*] --> Closed
-    Closed --> Open: Échecs > seuil
-    Open --> HalfOpen: Timeout
-    HalfOpen --> Closed: Succès
-    HalfOpen --> Open: Échec
-```
-
-</v-click>
-
-<v-click>
-
-### États
-
-- **Closed** : Fonctionnement normal
-- **Open** : Service considéré en panne, appels bloqués
-- **Half-Open** : Test de récupération
-
-</v-click>
-
----
-
-# Implémentation Circuit Breaker
-
-### Code Python
-
-```python {all|1-11|13-28}
-from enum import Enum
-from datetime import datetime, timedelta
-
-class CircuitState(Enum):
-    CLOSED = "closed"
-    OPEN = "open"
-    HALF_OPEN = "half_open"
-
-class CircuitBreaker:
-    def __init__(self, failure_threshold=5, reset_timeout=60):
-        self.state = CircuitState.CLOSED
-        self.failures = 0
-        self.threshold = failure_threshold
-        self.reset_timeout = reset_timeout
-        self.last_failure = None
-
-    def call(self, func, *args, **kwargs):
-        if self.state == CircuitState.OPEN:
-            if self._should_try_reset():
-                self.state = CircuitState.HALF_OPEN
-            else:
-                raise CircuitOpenError("Circuit ouvert")
-
-        try:
-            result = func(*args, **kwargs)
-            self._on_success()
-            return result
-        except Exception as e:
-            self._on_failure()
-            raise
-```
-
----
-
-# Fallback et dégradation gracieuse
-
-### Plan B quand ça ne marche pas
-
-<v-click>
-
-```python
-def get_analysis(data: dict) -> dict:
-    """Analyse avec fallback en cas d'échec LLM."""
-
-    # Tentative 1: API LLM principale
-    try:
-        return llm_analyze(data)
-    except Exception as e:
-        logger.warning(f"LLM principal indisponible: {e}")
-
-    # Tentative 2: API LLM secondaire
-    try:
-        return backup_llm_analyze(data)
-    except Exception as e:
-        logger.warning(f"LLM backup indisponible: {e}")
-
-    # Fallback: Analyse basée sur règles simples
-    return rule_based_analyze(data)
-
-def rule_based_analyze(data: dict) -> dict:
-    """Analyse simple sans LLM."""
-    if data.get('temperature', 0) > 40:
-        return {"status": "warning", "analysis": "Température élevée"}
-    return {"status": "normal", "analysis": "Valeurs normales"}
-```
 
 </v-click>
 
@@ -293,195 +194,114 @@ layout: section
 ---
 
 # Partie 2
-## Observabilité
+## Robustesse et gestion des erreurs
 
 ---
 
-# Les trois piliers
+# Gestion des erreurs
 
-### Logs, Métriques, Traces
-
-<div class="grid grid-cols-3 gap-3">
-
-<div class="p-3 bg-blue-500 bg-opacity-20 rounded-lg text-sm">
-
-### Logs
+### Rendre le système fiable
 
 <v-click>
 
-- Événements textuels
-- Debug et erreurs
-- Historique des actions
-- Format structuré (JSON)
+```cpp
+void loop() {
+  // Reconnecter WiFi si nécessaire
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("WiFi perdu, reconnexion...");
+    setupWiFi();
+  }
 
-</v-click>
+  // Reconnecter MQTT si nécessaire
+  if (!mqtt.connected()) {
+    setupMQTT();
+  }
+  mqtt.loop();  // Maintenir la connexion MQTT
 
-</div>
+  // Recevoir LoRa
+  String received;
+  int state = radio.receive(received);
 
-<div class="p-3 bg-green-500 bg-opacity-20 rounded-lg text-sm">
-
-### Métriques
-
-<v-click>
-
-- Valeurs numériques
-- Compteurs, jauges
-- Tendances temporelles
-- Alertes sur seuils
-
-</v-click>
-
-</div>
-
-<div class="p-3 bg-purple-500 bg-opacity-20 rounded-lg text-sm">
-
-### Traces
-
-<v-click>
-
-- Parcours d'une requête
-- Latences par étape
-- Identification des goulots
-- Corrélation d'erreurs
-
-</v-click>
-
-</div>
-
-</div>
-
----
-
-# Logging structuré
-
-### Format JSON pour l'analyse
-
-```python {all|1-8|10-20}
-import json
-import logging
-from datetime import datetime
-
-class JSONFormatter(logging.Formatter):
-    def format(self, record):
-        log_data = {
-            "timestamp": datetime.utcnow().isoformat(),
-            "level": record.levelname,
-            "logger": record.name,
-            "message": record.getMessage(),
-            "module": record.module,
-            "function": record.funcName,
-        }
-        if hasattr(record, 'extra'):
-            log_data.update(record.extra)
-        return json.dumps(log_data)
-
-# Usage
-logger.info("Message traité", extra={
-    "topic": "iot/sensors",
-    "latency_ms": 45,
-    "status": "success"
-})
-```
-
----
-
-# Métriques essentielles
-
-### Ce qu'il faut surveiller
-
-<v-click>
-
-| Métrique | Type | Seuil d'alerte |
-|----------|------|----------------|
-| Messages/min | Compteur | < 10 (trop peu) |
-| Latence p95 | Histogramme | > 5s |
-| Taux d'erreur | Ratio | > 5% |
-| Connexions MQTT | Jauge | = 0 (déconnecté) |
-| Appels LLM | Compteur | Coût/jour |
-| CPU/Mémoire | Jauge | > 80% |
-
-</v-click>
-
-<v-click>
-
-### Collecte simple
-
-```python
-from collections import Counter
-from time import time
-
-metrics = {
-    'messages_total': Counter(),
-    'errors_total': Counter(),
-    'latencies': []
+  if (state == RADIOLIB_ERR_NONE) {
+    processMessage(received);
+  }
 }
-
-def record_latency(start_time: float):
-    metrics['latencies'].append(time() - start_time)
 ```
 
 </v-click>
 
 ---
 
-# Alertes proactives
+# Retry sur l'appel LLM
 
-### Réagir avant l'utilisateur
+### L'API peut échouer temporairement
 
-```python
-def check_health_and_alert():
-    """Vérifie la santé et envoie des alertes."""
+```cpp
+String callLLMWithRetry(String data, float rssi, float snr) {
+  for (int attempt = 0; attempt < 3; attempt++) {
+    String response = callLLM(data, rssi, snr);
 
-    # Vérifier le taux d'erreur
-    error_rate = metrics['errors'] / max(metrics['total'], 1)
-    if error_rate > 0.05:
-        send_alert(
-            level="warning",
-            message=f"Taux d'erreur élevé: {error_rate:.1%}"
-        )
+    if (response.length() > 0) {
+      return response;  // Succès
+    }
 
-    # Vérifier la latence
-    if metrics['latencies']:
-        p95 = sorted(metrics['latencies'])[int(len(metrics['latencies']) * 0.95)]
-        if p95 > 5.0:
-            send_alert(
-                level="warning",
-                message=f"Latence p95 élevée: {p95:.1f}s"
-            )
+    Serial.println("LLM tentative " + String(attempt + 1) +
+                   "/3 échouée");
+    delay(1000 * (attempt + 1));  // 1s, 2s, 3s
+  }
 
-    # Vérifier la connexion MQTT
-    if not mqtt_client.is_connected():
-        send_alert(level="critical", message="MQTT déconnecté!")
+  // Fallback : réponse par défaut
+  Serial.println("LLM indisponible, fallback local");
+  return "{\"status\":\"normal\",\"action\":\"none\"}";
+}
 ```
+
+<v-click>
+
+<div class="mt-4 p-2 bg-orange-500 bg-opacity-20 rounded-lg text-center text-sm">
+
+Le **fallback** garantit que le système continue de fonctionner même sans le LLM.
+
+</div>
+
+</v-click>
 
 ---
 layout: section
 ---
 
 # Partie 3
-## Sécurité
+## Documentation et remise
 
 ---
 
-# Gestion des secrets
+# Critères d'évaluation
 
-### Ne jamais exposer les clés!
+### Ce qui sera noté
 
-<div class="grid grid-cols-2 gap-4">
+<div class="grid grid-cols-2 gap-4 text-sm">
 
 <div>
 
-### ❌ À éviter
+<v-click>
+
+### Configuration API (25%)
+
+- Clé API sécurisée (config.h)
+- Appels API fonctionnels
+- Gestion des erreurs
+- Aucune clé dans le code!
+
+</v-click>
 
 <v-click>
 
-```python
-# Dans le code (DANGER!)
-API_KEY = "sk-abc123..."
+### Prompt Engineering (25%)
 
-# Dans git
-# config.py avec clés en clair
-```
+- Prompt système clair et efficace
+- Rôle d'analyste IoT défini
+- Format de réponse JSON
+- Résultats cohérents
 
 </v-click>
 
@@ -489,24 +309,26 @@ API_KEY = "sk-abc123..."
 
 <div>
 
-### ✅ Bonnes pratiques
+<v-click>
+
+### Pipeline (30%)
+
+- Émetteur LoRa fonctionnel
+- Récepteur avec analyse LLM
+- Publication MQTT des résultats
+- DEL contrôlée par le LLM
+- Fallback si LLM indisponible
+
+</v-click>
 
 <v-click>
 
-```python
-# Variables d'environnement
-import os
-API_KEY = os.getenv("API_KEY")
+### Documentation (20%)
 
-# Fichier .env (ignoré par git)
-# .env
-API_KEY=sk-abc123...
-
-# .gitignore
-.env
-*.pem
-*_secret*
-```
+- README complet
+- Architecture documentée
+- Code lisible et structuré
+- Qualité du français
 
 </v-click>
 
@@ -516,184 +338,73 @@ API_KEY=sk-abc123...
 
 ---
 
-# Fichier .env et python-dotenv
+# Pénalités de sécurité
 
-### Gestion propre des secrets
+### Le barème est strict
+
+<v-click>
+
+| Infraction | Pénalité |
+|-----------|----------|
+| Clé API dans le code source | **-20 points** |
+| Clé API dans l'historique git | **-15 points** |
+| Fichier config.h commité | **-10 points** |
+| Pas de .gitignore | **-5 points** |
+
+</v-click>
+
+<v-click>
+
+### Comment vérifier
 
 ```bash
-# .env (NE JAMAIS COMMITER!)
-MQTT_BROKER=broker.example.com
-MQTT_USER=myuser
-MQTT_PASSWORD=supersecret
-OPENAI_API_KEY=sk-abc123...
-```
+# Chercher des clés dans l'historique git
+git log --all -p | grep -i "api_key\|gsk_\|secret"
 
-<v-click>
-
-```python
-from dotenv import load_dotenv
-import os
-
-# Charger les variables d'environnement
-load_dotenv()
-
-# Utilisation sécurisée
-BROKER = os.getenv("MQTT_BROKER")
-MQTT_USER = os.getenv("MQTT_USER")
-MQTT_PASS = os.getenv("MQTT_PASSWORD")
-API_KEY = os.getenv("OPENAI_API_KEY")
-
-if not API_KEY:
-    raise ValueError("OPENAI_API_KEY non configurée!")
+# Vérifier que config.h est ignoré
+git status  # config.h ne doit PAS apparaître
 ```
 
 </v-click>
 
 ---
 
-# Principe du moindre privilège
+# Checklist de remise
 
-### Limiter les accès
+### Vérifications finales
 
-<v-clicks>
-
-- **API Keys** : Créer des clés avec permissions minimales
-- **MQTT** : ACL par topic (lecture/écriture séparées)
-- **Base de données** : Utilisateur en lecture seule si possible
-- **Fichiers** : Permissions restrictives (600, 700)
-
-</v-clicks>
-
-<v-click>
-
-### Exemple ACL Mosquitto
-
-```
-# mosquitto_acl.conf
-user sensor_device
-topic read iot/commands/#
-topic write iot/sensors/#
-
-user dashboard
-topic read iot/#
-
-user admin
-topic readwrite #
-```
-
-</v-click>
-
----
-
-# Validation des entrées
-
-### Ne jamais faire confiance aux données
-
-```python {all|1-12|14-24}
-from pydantic import BaseModel, validator, constr
-
-class SensorPayload(BaseModel):
-    device_id: constr(regex=r'^[a-zA-Z0-9_-]+$', max_length=32)
-    temperature: float
-    humidity: float
-
-    @validator('temperature')
-    def validate_temp(cls, v):
-        if not -50 <= v <= 100:
-            raise ValueError('Température invalide')
-        return v
-
-def process_mqtt_message(payload: bytes) -> Optional[SensorPayload]:
-    """Valide et parse un message MQTT."""
-    try:
-        data = json.loads(payload)
-        return SensorPayload(**data)
-    except json.JSONDecodeError:
-        logger.warning("JSON invalide reçu")
-        return None
-    except ValidationError as e:
-        logger.warning(f"Validation échouée: {e}")
-        return None
-```
-
----
-
-# Audit et traçabilité
-
-### Qui a fait quoi, quand?
-
-```python
-from datetime import datetime
-from typing import Optional
-
-def audit_log(
-    action: str,
-    user: str,
-    resource: str,
-    details: Optional[dict] = None,
-    success: bool = True
-):
-    """Log d'audit pour traçabilité."""
-    audit_entry = {
-        "timestamp": datetime.utcnow().isoformat(),
-        "action": action,
-        "user": user,
-        "resource": resource,
-        "success": success,
-        "details": details or {}
-    }
-
-    # Écrire dans un fichier d'audit séparé
-    with open("audit.log", "a") as f:
-        f.write(json.dumps(audit_entry) + "\n")
-
-# Usage
-audit_log("config_change", "admin", "mqtt_broker", {"new_port": 8883})
-```
-
----
-layout: section
----
-
-# Travail de la semaine
-## Robustesse et sécurité
-
----
-
-# Objectifs du laboratoire
-
-### Durcir votre système
-
-<div class="grid grid-cols-2 gap-4">
+<div class="grid grid-cols-2 gap-4 text-sm">
 
 <div>
 
-### Fiabilité (1h30)
+<v-click>
 
-<v-clicks>
+### Fonctionnel
 
-- [ ] Ajouter try/except sur tous les appels externes
-- [ ] Implémenter retry avec backoff
-- [ ] Ajouter des fallbacks
-- [ ] Tester les cas d'erreur
+- [ ] Émetteur envoie le potentiomètre via LoRa
+- [ ] Récepteur reçoit et affiche RSSI/SNR
+- [ ] Appel LLM fonctionne
+- [ ] DEL réagit à l'analyse
+- [ ] Données publiées sur MQTT
+- [ ] Fallback si LLM indisponible
 
-</v-clicks>
+</v-click>
 
 </div>
 
 <div>
 
-### Sécurité (1h30)
+<v-click>
 
-<v-clicks>
+### Sécurité et documentation
 
-- [ ] Migrer les secrets vers .env
-- [ ] Vérifier le .gitignore
-- [ ] Ajouter la validation des données
-- [ ] Implémenter le logging structuré
-- [ ] Documenter la sécurité
+- [ ] config.h ignoré par git
+- [ ] config.example.h commité
+- [ ] Aucun secret dans l'historique
+- [ ] README.md complet
+- [ ] Code commenté si nécessaire
 
-</v-clicks>
+</v-click>
 
 </div>
 
@@ -701,26 +412,23 @@ layout: section
 
 ---
 
-# Checklist de sécurité
+# Plan de la séance
 
-### Avant la remise du projet
+### 3 heures pour finaliser
 
-<v-click>
+<v-clicks>
 
-- [ ] **Aucun secret** dans le code ou git
-- [ ] **.gitignore** inclut : .env, *.pem, *_secret*
-- [ ] **Validation** de toutes les entrées externes
-- [ ] **TLS/SSL** pour les connexions réseau
-- [ ] **Logs** ne contiennent pas de données sensibles
-- [ ] **Documentation** des accès requis
+1. **Heure 1** : Ajouter MQTT au récepteur, tester avec `mosquitto_sub`
+2. **Heure 2** : Gestion des erreurs, fallback, tests complets
+3. **Heure 3** : Documentation (README.md), vérification sécurité, remise
 
-</v-click>
+</v-clicks>
 
 <v-click>
 
 <div class="mt-4 p-2 bg-red-500 bg-opacity-20 rounded-lg text-center text-sm">
 
-**Un secret exposé = projet compromis.** Vérifiez deux fois!
+Commit final et push sur GitHub **avant la fin de la séance**.
 
 </div>
 
@@ -734,11 +442,7 @@ class: text-center
 # Questions?
 
 <div class="text-xl mt-8">
-Prochaine étape : Sécuriser votre pipeline!
-</div>
-
-<div class="mt-4 text-sm">
-Semaine prochaine : Intégration finale du projet
+Dernière ligne droite — finalisez et remettez!
 </div>
 
 ---

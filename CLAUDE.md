@@ -143,6 +143,7 @@ Préfixer les IDs SVG avec le nom du composant pour éviter les conflits
 Utiliser Vue 3 Composition API (<script setup>)
 Limiter les animations CSS pour la performance
 Tester sur la résolution cible (1920x1080)
+**Ne jamais utiliser d'ASCII art** dans les slides (ni boîtes, ni schémas en caractères). Utiliser des tableaux Markdown, des diagrammes Mermaid, ou des images à la place.
 Documents de laboratoire (labo/)
 Format Markdown
 Les laboratoires utilisent le format Markdown avec :

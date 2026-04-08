@@ -10,34 +10,48 @@
 </head>
 <body>
 <div style="font-family: 'Segoe UI', system-ui, sans-serif; line-height: 1.6;">
-  <p>Intégration des <strong>API LLM</strong> (Large Language Models) dans les systèmes IoT pour l'analyse intelligente des données et l'automatisation des décisions.</p>
-  <p><strong>LLM pour l'IoT :</strong></p>
+  <p>Début du <strong>TP évalué (20%)</strong> : liaison <strong>LoRa point à point</strong> codée dans l'IDE Arduino avec analyse <strong>LLM</strong> et contrôle d'une DEL.</p>
+  <p><strong>Émetteur LoRa :</strong></p>
   <ul style="margin: 10px 0;">
-    <li><strong>Analyse intelligente</strong> — interpréter les données capteurs, détecter les anomalies</li>
-    <li><strong>Fournisseurs</strong> — OpenAI (GPT), Anthropic (Claude), Google (Gemini)</li>
-    <li><strong>Prompt engineering</strong> — structurer les requêtes pour des réponses exploitables</li>
+    <li><strong>RadioLib</strong> — librairie pour contrôler directement le SX1262 du T-Beam</li>
+    <li><strong>Potentiomètre</strong> — lecture ADC (0-4095) envoyée via LoRa</li>
+    <li><strong>DEL status</strong> — clignote à chaque émission</li>
+    <li><strong>Format JSON</strong> — message structuré avec ArduinoJson</li>
   </ul>
-  <p><strong>Pipeline de données :</strong></p>
+  <p><strong>Récepteur LoRa + WiFi + LLM :</strong></p>
   <ul style="margin: 10px 0;">
-    <li><strong>Ingestion</strong> — réception des messages MQTT</li>
-    <li><strong>Validation</strong> — vérifier le format et les plages de valeurs (Pydantic)</li>
-    <li><strong>Transformation</strong> — enrichir avec contexte et historique</li>
-    <li><strong>Analyse LLM</strong> — classification, détection d'anomalies, génération de rapports</li>
-    <li><strong>Actions</strong> — alertes, commandes aux actionneurs, logging</li>
+    <li><strong>Réception LoRa</strong> — avec métriques RSSI et SNR</li>
+    <li><strong>Connexion WiFi</strong> — pour accéder à l'API LLM</li>
+    <li><strong>Appel Groq</strong> — analyse des données par un LLM (comme au labo 4)</li>
+    <li><strong>DEL</strong> — contrôlée par la réponse du LLM (on/off selon l'analyse)</li>
   </ul>
-  <p><strong>Labo 11 :</strong> créer un compte API, configurer le pipeline Python et intégrer l'analyse LLM aux données du shield.</p>
+  <p><strong>Sécurité :</strong></p>
+  <ul style="margin: 10px 0;">
+    <li><strong>config.h</strong> — secrets (WiFi, API key), jamais commité</li>
+    <li><strong>config.example.h</strong> — template sans valeurs, commité</li>
+    <li><strong>Pénalités</strong> — clé API dans le code = -20 points</li>
+  </ul>
+  <p><strong>Labo :</strong> coder l'émetteur (potentiomètre → LoRa) et le récepteur (LoRa → WiFi → LLM → DEL) dans l'IDE Arduino.</p>
+  <div style="margin-top: 15px; padding: 10px; background: #ffebee; border-left: 4px solid #f44336; border-radius: 4px;">
+    <p style="margin: 0 0 8px 0;"><strong>Remise du TP :</strong></p>
+    <ul style="margin: 0; padding-left: 20px;">
+      <li><strong>Semaine prochaine (semaine 12)</strong> — remise en fin de séance</li>
+      <li>Pipeline complet (avec MQTT), documentation et code sécurisé sur GitHub</li>
+    </ul>
+  </div>
   <div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-left: 4px solid #2196F3; border-radius: 4px;">
     <p style="margin: 0 0 8px 0;"><strong>À faire pour la semaine prochaine :</strong></p>
     <ul style="margin: 0; padding-left: 20px;">
-      <li>Tester le pipeline LLM avec des données réelles</li>
-      <li>Documenter les prompts utilisés</li>
-      <li>Identifier les cas d'erreur potentiels</li>
+      <li>Ajouter la publication MQTT au récepteur</li>
+      <li>Ajouter la gestion des erreurs (retry LLM, reconnexion WiFi)</li>
+      <li>Rédiger le README.md</li>
+      <li>Vérifier qu'aucun secret n'est dans le code ou l'historique git</li>
     </ul>
   </div>
   <p style="margin-top: 15px; padding: 10px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 4px;">
-    <strong>Prochaine évaluation :</strong> Projet final IdO — semaine 15 (30%)<br>
-    <em>Matière couverte :</em> PCB assemblé, intégration Meshtastic, LLM, tests de performance<br>
-    <em>Format :</em> présentation orale (15 min) et démonstration live
+    <strong>Évaluation en cours :</strong> TP LoRa-LLM — 20% de la note finale<br>
+    <em>Critères :</em> configuration API (25%), prompt engineering (25%), pipeline (30%), documentation (20%)<br>
+    <em>Remise :</em> semaine 12 en fin de séance sur GitHub
   </p>
 </div>
 <script>
