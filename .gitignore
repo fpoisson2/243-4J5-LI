@@ -30,3 +30,8 @@ ENV/
 Thumbs.db
 /theorie/node_modules
 theorie/pnpm-lock.yaml
+
+# Corrections (fichiers locaux)
+evaluations/Evaluation-02/grille-*.pdf
+evaluations/Evaluation-02/*-schema.pdf
+evaluations/Evaluation-02/corrections-mi-session.md
