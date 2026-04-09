@@ -1,0 +1,11 @@
+/* Cache la barre de navigation en production - visible uniquement au survol */
+#page-root .absolute.bottom-0.left-0 {
+  opacity: 0 !important;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+#page-root .absolute.bottom-0.left-0:hover,
+#page-root:hover .absolute.bottom-0.left-0:hover {
+  opacity: 1 !important;
+  pointer-events: auto;
+}
