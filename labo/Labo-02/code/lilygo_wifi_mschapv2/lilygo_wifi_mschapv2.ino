@@ -22,8 +22,8 @@ char LED2_SET_TOPIC[50];
 // --- Configuration des broches (Pins) ---
 const int LED1_PIN = 32;
 const int LED2_PIN = 33;
-const int BUTTON1_PIN = 34;
-const int BUTTON2_PIN = 35;
+const int BUTTON1_PIN = 25;
+const int BUTTON2_PIN = 26;
 
 // ============================================================================
 // CLASSE WRAPPER WEBSOCKET POUR PUBSUBCLIENT
@@ -307,20 +307,24 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
   if (strcmp(topic, LED1_SET_TOPIC) == 0) {
     if (msg == "ON") {
       digitalWrite(LED1_PIN, HIGH);
-      Serial.println("[LED1] Allumee (ROUGE)");
     } else if (msg == "OFF") {
       digitalWrite(LED1_PIN, LOW);
-      Serial.println("[LED1] Eteinte");
+    } else {
+      digitalWrite(LED1_PIN, !digitalRead(LED1_PIN));
     }
+    Serial.print("[LED1] ROUGE: ");
+    Serial.println(digitalRead(LED1_PIN) ? "ON" : "OFF");
   }
   else if (strcmp(topic, LED2_SET_TOPIC) == 0) {
     if (msg == "ON") {
       digitalWrite(LED2_PIN, HIGH);
-      Serial.println("[LED2] Allumee (VERTE)");
     } else if (msg == "OFF") {
       digitalWrite(LED2_PIN, LOW);
-      Serial.println("[LED2] Eteinte");
+    } else {
+      digitalWrite(LED2_PIN, !digitalRead(LED2_PIN));
     }
+    Serial.print("[LED2] VERTE: ");
+    Serial.println(digitalRead(LED2_PIN) ? "ON" : "OFF");
   }
 }
 

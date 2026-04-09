@@ -41,12 +41,14 @@ char BUTTON1_STATE_TOPIC[50];
 char BUTTON2_STATE_TOPIC[50];
 char LED1_SET_TOPIC[50];
 char LED2_SET_TOPIC[50];
+char LED1_STATE_TOPIC[50];
+char LED2_STATE_TOPIC[50];
 
 // --- Configuration des broches (Pins) ---
 const int LED1_PIN = 32;
 const int LED2_PIN = 33;
-const int BUTTON1_PIN = 34;
-const int BUTTON2_PIN = 35;
+const int BUTTON1_PIN = 18;
+const int BUTTON2_PIN = 19;
 
 // Serial pour le modem
 HardwareSerial SerialAT(1);
@@ -313,9 +315,15 @@ WebSocketClient wsClient(&sslClient);
 PubSubClient mqttClient(wsClient);
 
 // État
-long lastButtonCheck = 0;
 int lastButton1State = HIGH;
 int lastButton2State = HIGH;
+int button1StableState = HIGH;
+int button2StableState = HIGH;
+unsigned long lastButton1Debounce = 0;
+unsigned long lastButton2Debounce = 0;
+const unsigned long BUTTON_DEBOUNCE_MS = 50;
+bool led1State = false;
+bool led2State = false;
 unsigned long lastGprsCheck = 0;
 const unsigned long GPRS_CHECK_INTERVAL = 30000;
 
@@ -336,19 +344,27 @@ void mqttCallback(char* topic, byte* payload, unsigned int length) {
 
   if (strcmp(topic, LED1_SET_TOPIC) == 0) {
     if (msg == "ON") {
+      led1State = true;
       digitalWrite(LED1_PIN, HIGH);
+      mqttClient.publish(LED1_STATE_TOPIC, "ON");
       Serial.println("[LED1] Allumee (ROUGE)");
     } else if (msg == "OFF") {
+      led1State = false;
       digitalWrite(LED1_PIN, LOW);
+      mqttClient.publish(LED1_STATE_TOPIC, "OFF");
       Serial.println("[LED1] Eteinte");
     }
   }
   else if (strcmp(topic, LED2_SET_TOPIC) == 0) {
     if (msg == "ON") {
+      led2State = true;
       digitalWrite(LED2_PIN, HIGH);
+      mqttClient.publish(LED2_STATE_TOPIC, "ON");
       Serial.println("[LED2] Allumee (VERTE)");
     } else if (msg == "OFF") {
+      led2State = false;
       digitalWrite(LED2_PIN, LOW);
+      mqttClient.publish(LED2_STATE_TOPIC, "OFF");
       Serial.println("[LED2] Eteinte");
     }
   }
@@ -394,6 +410,8 @@ bool initModem() {
 
   snprintf(LED1_SET_TOPIC, sizeof(LED1_SET_TOPIC), "%s/led/1/set", MQTT_CLIENT_ID);
   snprintf(LED2_SET_TOPIC, sizeof(LED2_SET_TOPIC), "%s/led/2/set", MQTT_CLIENT_ID);
+  snprintf(LED1_STATE_TOPIC, sizeof(LED1_STATE_TOPIC), "%s/led/1/state", MQTT_CLIENT_ID);
+  snprintf(LED2_STATE_TOPIC, sizeof(LED2_STATE_TOPIC), "%s/led/2/state", MQTT_CLIENT_ID);
   snprintf(BUTTON1_STATE_TOPIC, sizeof(BUTTON1_STATE_TOPIC), "%s/button/1/state", MQTT_CLIENT_ID);
   snprintf(BUTTON2_STATE_TOPIC, sizeof(BUTTON2_STATE_TOPIC), "%s/button/2/state", MQTT_CLIENT_ID);
 
@@ -447,32 +465,36 @@ bool connectToNetwork() {
 }
 
 void checkButtons() {
-  long now = millis();
-
-  if (now - lastButtonCheck < 100) {
-    return;
-  }
-  lastButtonCheck = now;
-
-  if (!mqttClient.connected()) return;
-
+  unsigned long now = millis();
   int button1State = digitalRead(BUTTON1_PIN);
-  if (button1State != lastButton1State) {
-    lastButton1State = button1State;
-    const char* state = (button1State == LOW) ? "PRESSED" : "RELEASED";
-    mqttClient.publish(BUTTON1_STATE_TOPIC, state);
-    Serial.print("[BTN1] -> ");
-    Serial.println(state);
+  if (button1State != lastButton1State) lastButton1Debounce = now;
+  if ((now - lastButton1Debounce) > BUTTON_DEBOUNCE_MS && button1State != button1StableState) {
+    button1StableState = button1State;
+    if (mqttClient.connected()) mqttClient.publish(BUTTON1_STATE_TOPIC, button1StableState == LOW ? "PRESSED" : "RELEASED");
+    if (button1StableState == LOW) {
+      led1State = !led1State;
+      digitalWrite(LED1_PIN, led1State ? HIGH : LOW);
+      if (mqttClient.connected()) mqttClient.publish(LED1_STATE_TOPIC, led1State ? "ON" : "OFF");
+      Serial.print("[BTN1] Toggle LED1 -> ");
+      Serial.println(led1State ? "ON" : "OFF");
+    }
   }
+  lastButton1State = button1State;
 
   int button2State = digitalRead(BUTTON2_PIN);
-  if (button2State != lastButton2State) {
-    lastButton2State = button2State;
-    const char* state = (button2State == LOW) ? "PRESSED" : "RELEASED";
-    mqttClient.publish(BUTTON2_STATE_TOPIC, state);
-    Serial.print("[BTN2] -> ");
-    Serial.println(state);
+  if (button2State != lastButton2State) lastButton2Debounce = now;
+  if ((now - lastButton2Debounce) > BUTTON_DEBOUNCE_MS && button2State != button2StableState) {
+    button2StableState = button2State;
+    if (mqttClient.connected()) mqttClient.publish(BUTTON2_STATE_TOPIC, button2StableState == LOW ? "PRESSED" : "RELEASED");
+    if (button2StableState == LOW) {
+      led2State = !led2State;
+      digitalWrite(LED2_PIN, led2State ? HIGH : LOW);
+      if (mqttClient.connected()) mqttClient.publish(LED2_STATE_TOPIC, led2State ? "ON" : "OFF");
+      Serial.print("[BTN2] Toggle LED2 -> ");
+      Serial.println(led2State ? "ON" : "OFF");
+    }
   }
+  lastButton2State = button2State;
 }
 
 bool reconnectMQTT() {
@@ -512,6 +534,8 @@ void setup() {
 
   digitalWrite(LED1_PIN, LOW);
   digitalWrite(LED2_PIN, LOW);
+  led1State = false;
+  led2State = false;
 
   modemPowerOn();
 
