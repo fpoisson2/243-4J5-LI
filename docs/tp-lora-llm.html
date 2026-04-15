@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TP Intégration LoRa + LLM — 243-4J5-LI</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      background: #f8fafc;
+      color: #1e293b;
+      line-height: 1.6;
+    }
+    h1 {
+      color: #2563eb;
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 15px;
+    }
+    h2 { color: #334155; margin-top: 35px; }
+    h3 { color: #475569; margin-top: 25px; }
+    a { color: #2563eb; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .back { margin-bottom: 20px; }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.85em;
+      font-weight: 500;
+      margin-right: 6px;
+    }
+    .badge-weight { background: #fef3c7; color: #92400e; }
+    .badge-date { background: #dbeafe; color: #1e40af; }
+    .badge-capacity { background: #e9d5ff; color: #6b21a8; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    th { background: #2563eb; color: white; }
+    tr:hover { background: #f1f5f9; }
+    code {
+      background: #e2e8f0;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+      font-family: 'Consolas', 'Monaco', monospace;
+    }
+    .architecture {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin: 20px 0;
+    }
+    .step {
+      background: white;
+      padding: 15px 20px;
+      border-left: 4px solid #2563eb;
+      border-radius: 4px;
+      margin: 10px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .step strong { color: #2563eb; }
+    .warning {
+      background: #fef2f2;
+      border-left: 4px solid #dc2626;
+      padding: 12px 16px;
+      border-radius: 4px;
+      margin: 20px 0;
+    }
+    .info {
+      background: #eff6ff;
+      border-left: 4px solid #2563eb;
+      padding: 12px 16px;
+      border-radius: 4px;
+      margin: 20px 0;
+    }
+    ul { padding-left: 22px; }
+    li { margin: 6px 0; }
+  </style>
+</head>
+<body>
+  <p class="back"><a href="./">&larr; Retour à l'accueil</a></p>
+
+  <h1>TP Intégration LoRa + LLM</h1>
+  <p>
+    <span class="badge badge-weight">Pondération : 20%</span>
+    <span class="badge badge-date">Remise : semaine 12</span>
+    <span class="badge badge-capacity">Capacité 1 : 15% + Capacité 2 : 5%</span>
+  </p>
+
+  <p>
+    Travail pratique évalué réalisé aux <strong>semaines 11 et 12</strong>. Il consiste à
+    construire une <strong>liaison LoRa point à point</strong> entre deux T-Beam Supreme,
+    puis à enrichir les données reçues par un appel à un <strong>LLM</strong> (Groq) avant
+    de publier le résultat sur le broker <strong>MQTT</strong>.
+  </p>
+
+  <h2>Objectifs</h2>
+  <ul>
+    <li>Mettre en œuvre une communication LoRa <strong>sans Meshtastic</strong> avec la librairie <strong>RadioLib</strong></li>
+    <li>Concevoir un pipeline <strong>capteur → LoRa → WiFi → LLM → MQTT → actionneur</strong></li>
+    <li>Intégrer un LLM dans une boucle de décision IoT embarquée</li>
+    <li>Gérer les <strong>secrets</strong> (clés API, identifiants WiFi) via <code>config.h</code></li>
+  </ul>
+
+  <h2>Architecture</h2>
+  <div class="architecture">
+    <p><strong>Deux T-Beam Supreme</strong> communiquent en LoRa 915 MHz :</p>
+    <div class="step"><strong>Émetteur</strong> — lit un potentiomètre et transmet la valeur via LoRa (JSON).</div>
+    <div class="step"><strong>Récepteur</strong> — reçoit la trame LoRa, mesure RSSI/SNR.</div>
+    <div class="step"><strong>WiFi + LLM</strong> — le récepteur appelle l'API Groq (<code>llama-3.3-70b-versatile</code>) pour analyser les données.</div>
+    <div class="step"><strong>MQTT</strong> — le résultat structuré (status, action) est publié sur le broker Mosquitto.</div>
+    <div class="step"><strong>Actionneur</strong> — une DEL réagit selon la décision du LLM (<code>on</code> / <code>off</code>).</div>
+  </div>
+
+  <h2>Matériel requis</h2>
+  <ul>
+    <li>2 × LilyGO T-Beam Supreme (ESP32-S3 + SX1262)</li>
+    <li>1 × Potentiomètre 10 kΩ</li>
+    <li>2 × DEL (status émetteur et réaction récepteur)</li>
+    <li>Câbles USB-C, fils de connexion, breadboard</li>
+    <li>Accès à un broker MQTT (Mosquitto) et une clé API Groq</li>
+  </ul>
+
+  <h2>Livrables</h2>
+  <table>
+    <thead>
+      <tr><th>Livrable</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Dépôt Git</td><td>Code émetteur + récepteur, <code>config.example.h</code>, <code>.gitignore</code>, <code>README.md</code></td></tr>
+      <tr><td>Démonstration</td><td>Liaison LoRa fonctionnelle, appel LLM réussi, DEL qui réagit, publication MQTT</td></tr>
+      <tr><td>Documentation</td><td>Schéma d'architecture, procédure de mise en route, exemples de trames</td></tr>
+      <tr><td>Gestion des erreurs</td><td>Retry LLM, reconnexion WiFi, timeout MQTT</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Étapes suggérées</h2>
+  <h3>Semaine 11 — Liaison LoRa et premier appel LLM</h3>
+  <ul>
+    <li>Initialiser RadioLib (SX1262) sur les deux T-Beam avec la même configuration radio</li>
+    <li>Coder l'émetteur : lecture potentiomètre, envoi JSON via LoRa, DEL status</li>
+    <li>Coder le récepteur : réception LoRa, affichage RSSI/SNR</li>
+    <li>Connexion WiFi sur le récepteur, premier appel à l'API Groq</li>
+    <li>Contrôle de la DEL selon la réponse du LLM</li>
+  </ul>
+
+  <h3>Semaine 12 — Intégration MQTT, fiabilité et remise</h3>
+  <ul>
+    <li>Publication MQTT du résultat de l'analyse LLM</li>
+    <li>Gestion robuste des erreurs (retry, timeout, reconnexion)</li>
+    <li>Rédaction du <code>README.md</code> et nettoyage du dépôt</li>
+    <li>Vérification finale : aucun secret dans le code ou l'historique git</li>
+  </ul>
+
+  <div class="warning">
+    <strong>Sécurité :</strong> une clé API présente dans le code source ou l'historique git
+    entraîne une pénalité de <strong>-20 points</strong>. Utilisez systématiquement
+    <code>config.h</code> (ignoré par git) et fournissez un <code>config.example.h</code>.
+  </div>
+
+  <h2>Ressources</h2>
+  <ul>
+    <li><a href="../theorie/Semaine-11/diaporama/slides.md">Diaporama — Semaine 11 : Liaison LoRa point à point et LLM</a></li>
+    <li><a href="../theorie/Semaine-12/diaporama/slides.md">Diaporama — Semaine 12 : Fiabilité et sécurité</a></li>
+    <li><a href="../labo/Labo-04/Laboratoire%2004%20-%20Introduction%20aux%20LLM%20sur%20ESP32.md">Labo 4 — Introduction aux LLM sur ESP32 (préalable)</a></li>
+    <li><a href="../Plan%20de%20cours%20-%20243-4J5-LI.md">Plan de cours — 243-4J5-LI</a></li>
+    <li><a href="https://jgromes.github.io/RadioLib/" target="_blank" rel="noopener">Documentation RadioLib</a></li>
+    <li><a href="https://console.groq.com/docs/quickstart" target="_blank" rel="noopener">Documentation API Groq</a></li>
+  </ul>
+
+  <div class="info">
+    <strong>Critères d'évaluation :</strong> le TP est évalué sur la Capacité 1
+    (conception et intégration matérielle/logicielle — 15%) et la Capacité 2
+    (déploiement, sécurité et fiabilité — 5%). Voir le plan de cours pour le détail.
+  </div>
+</body>
+</html>

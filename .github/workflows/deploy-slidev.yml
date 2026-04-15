@@ -7,6 +7,7 @@ on:
       - 'theorie/**'
       - 'Plan de cours*.md'
       - 'docs/moodle/**'
+      - 'docs/tp-lora-llm.html'
       - '.github/workflows/deploy-slidev.yml'
   workflow_dispatch:
 
@@ -138,7 +139,8 @@ jobs:
             <p>Présentations théoriques du cours - Session H26</p>
             <p>
               <a href="./plan-de-cours.html" style="color:#2563eb;font-weight:500;">📄 Plan de cours</a> |
-              <a href="./moodle/" style="color:#2563eb;font-weight:500;">📋 Résumés Moodle</a>
+              <a href="./moodle/" style="color:#2563eb;font-weight:500;">📋 Résumés Moodle</a> |
+              <a href="./tp-lora-llm.html" style="color:#2563eb;font-weight:500;">🛰️ TP LoRa + LLM</a>
             </p>
             <div class="grid">
               <a href="./semaine-01/"><strong>Semaine 01</strong>Introduction et mise en contexte</a>
