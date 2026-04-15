@@ -737,9 +737,10 @@ layout: section
 
 ```mermaid {scale: 0.55}
 graph LR
-    POT[Potentiomètre] --> TX[T-Beam<br/>émetteur]
-    TX -->|LoRa 915 MHz| RX[T-Beam récepteur<br/>WiFi + LLM + MQTT + DEL]
-    RX -->|WiFi| API[API Groq]
+    POT[Potentiomètre] --> TX[T-Beam émetteur<br/>DEL action + OLED]
+    TX -->|LoRa données| RX[T-Beam récepteur<br/>WiFi + LLM + MQTT<br/>DEL status + OLED]
+    RX -->|LoRa décision| TX
+    RX -->|WiFi| API[API LLM]
     RX -->|WiFi| BRK[Broker MQTT]
 
     style TX fill:#69f

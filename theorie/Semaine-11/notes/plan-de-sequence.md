@@ -21,14 +21,19 @@ Liaison LoRa point à point et intégration LLM (IDE Arduino)
 - Lecture du potentiomètre (ADC)
 - Construction d'un message JSON (ArduinoJson)
 - Envoi via radio.transmit()
-- DEL de status à l'émission
+- Écoute de la réponse LoRa du récepteur (décision du LLM)
+- DEL action : contrôlée par la décision du LLM (on/off)
+- Affichage OLED de la trame et de la décision reçue
 
 ### Récepteur LoRa + WiFi + LLM
 - Réception des messages (radio.receive())
+- DEL status : clignote à chaque réception / appel LLM
 - Connexion WiFi depuis le T-Beam
-- Appel HTTP POST à l'API Groq (format compatible OpenAI)
+- Appel HTTP POST à l'API LLM (format compatible OpenAI)
+- **Structured output obligatoire** via `response_format` / `json_schema` (schéma défini par l'étudiant)
 - Parsing de la réponse JSON
-- Contrôle de la DEL selon l'action du LLM
+- Renvoi de la décision à l'émetteur via radio.transmit()
+- Affichage OLED du message reçu, RSSI/SNR et réponse LLM
 
 ### Sécurité
 - Fichier config.h pour les secrets (même approche que le labo 4)
@@ -46,17 +51,17 @@ Liaison LoRa point à point et intégration LLM (IDE Arduino)
 
 ### Laboratoire (2h)
 1. Émetteur (~45 min)
-   - Initialiser RadioLib (SX1262)
-   - Lire le potentiomètre
-   - Envoyer la valeur via LoRa
-   - DEL qui clignote à l'envoi
+   - Initialiser RadioLib (SX1262) et l'OLED
+   - Lire le potentiomètre et envoyer via LoRa
+   - Afficher la trame sur l'OLED
+   - Écouter la réponse LoRa du récepteur
+   - DEL action : on/off selon la décision du LLM
 2. Récepteur (~1h15)
-   - Initialiser RadioLib (même configuration)
-   - Recevoir les messages LoRa
-   - Connecter au WiFi
-   - Appeler l'API Groq
-   - Contrôler la DEL selon la réponse LLM
-   - Afficher RSSI/SNR dans le moniteur série
+   - Initialiser RadioLib + OLED + WiFi
+   - Recevoir les messages LoRa (DEL status clignote)
+   - Appeler l'API LLM
+   - Renvoyer la décision via LoRa
+   - Afficher message reçu, RSSI/SNR et réponse LLM sur l'OLED
 
 ## Travaux hors classe
 - Finaliser le pipeline (ajout MQTT, gestion d'erreurs)

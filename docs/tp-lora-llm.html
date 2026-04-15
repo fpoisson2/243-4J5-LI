@@ -113,26 +113,27 @@
   <h2>Objectifs</h2>
   <ul>
     <li>Mettre en œuvre une communication LoRa <strong>sans Meshtastic</strong> avec la librairie <strong>RadioLib</strong></li>
-    <li>Concevoir un pipeline <strong>capteur → LoRa → WiFi → LLM → MQTT → actionneur</strong></li>
-    <li>Intégrer un LLM dans une boucle de décision IoT embarquée</li>
+    <li>Concevoir un pipeline bidirectionnel <strong>capteur → LoRa → WiFi → LLM → LoRa retour → actionneur</strong> (+ MQTT)</li>
+    <li>Intégrer un LLM dans une boucle de décision IoT embarquée avec <strong>structured output</strong> (schéma JSON défini par l'étudiant)</li>
     <li>Gérer les <strong>secrets</strong> (clés API, identifiants WiFi) via <code>config.h</code></li>
   </ul>
 
   <h2>Architecture</h2>
   <div class="architecture">
     <p><strong>Deux T-Beam Supreme</strong> communiquent en LoRa 915 MHz :</p>
-    <div class="step"><strong>Émetteur</strong> — lit un potentiomètre et transmet la valeur via LoRa (JSON).</div>
-    <div class="step"><strong>Récepteur</strong> — reçoit la trame LoRa, mesure RSSI/SNR.</div>
-    <div class="step"><strong>WiFi + LLM</strong> — le récepteur appelle l'API Groq (<code>llama-3.3-70b-versatile</code>) pour analyser les données.</div>
+    <div class="step"><strong>Émetteur</strong> — lit un potentiomètre et transmet la valeur via LoRa (JSON). Affiche la trame sur son <strong>OLED</strong> et écoute la réponse LoRa du récepteur.</div>
+    <div class="step"><strong>Récepteur</strong> — reçoit la trame LoRa, mesure RSSI/SNR et affiche sur son <strong>OLED</strong>. Sa <strong>DEL status</strong> clignote à chaque réception et appel LLM.</div>
+    <div class="step"><strong>WiFi + LLM</strong> — le récepteur appelle l'API Groq pour analyser les données.</div>
     <div class="step"><strong>MQTT</strong> — le résultat structuré (status, action) est publié sur le broker Mosquitto.</div>
-    <div class="step"><strong>Actionneur</strong> — une DEL réagit selon la décision du LLM (<code>on</code> / <code>off</code>).</div>
+    <div class="step"><strong>Retour LoRa</strong> — le récepteur renvoie la décision du LLM à l'émetteur via LoRa (liaison bidirectionnelle).</div>
+    <div class="step"><strong>DEL action (émetteur)</strong> — allumée ou éteinte selon la décision du LLM (<code>on</code> / <code>off</code>).</div>
   </div>
 
   <h2>Matériel requis</h2>
   <ul>
-    <li>2 × LilyGO T-Beam Supreme (ESP32-S3 + SX1262)</li>
+    <li>2 × LilyGO T-Beam Supreme (ESP32-S3 + SX1262 + OLED SSD1306 intégré)</li>
     <li>1 × Potentiomètre 10 kΩ</li>
-    <li>2 × DEL (status émetteur et réaction récepteur)</li>
+    <li>2 × DEL — <strong>action</strong> côté émetteur, <strong>status</strong> côté récepteur</li>
     <li>Câbles USB-C, fils de connexion, breadboard</li>
     <li>Accès à un broker MQTT (Mosquitto) et une clé API Groq</li>
   </ul>
@@ -146,6 +147,7 @@
       <tr><td>Dépôt Git</td><td>Code émetteur + récepteur, <code>config.example.h</code>, <code>.gitignore</code>, <code>README.md</code></td></tr>
       <tr><td>Démonstration</td><td>Liaison LoRa fonctionnelle, appel LLM réussi, DEL qui réagit, publication MQTT</td></tr>
       <tr><td>Documentation</td><td>Schéma d'architecture, procédure de mise en route, exemples de trames</td></tr>
+      <tr><td>Structured output</td><td>Appel LLM obligatoirement avec <code>response_format</code> / <code>json_schema</code> (schéma défini par l'étudiant)</td></tr>
       <tr><td>Gestion des erreurs</td><td>Retry LLM, reconnexion WiFi, timeout MQTT</td></tr>
     </tbody>
   </table>
@@ -153,11 +155,11 @@
   <h2>Étapes suggérées</h2>
   <h3>Semaine 11 — Liaison LoRa et premier appel LLM</h3>
   <ul>
-    <li>Initialiser RadioLib (SX1262) sur les deux T-Beam avec la même configuration radio</li>
-    <li>Coder l'émetteur : lecture potentiomètre, envoi JSON via LoRa, DEL status</li>
-    <li>Coder le récepteur : réception LoRa, affichage RSSI/SNR</li>
-    <li>Connexion WiFi sur le récepteur, premier appel à l'API Groq</li>
-    <li>Contrôle de la DEL selon la réponse du LLM</li>
+    <li>Initialiser RadioLib (SX1262) et l'OLED sur les deux T-Beam</li>
+    <li>Coder l'émetteur : lecture potentiomètre, envoi JSON via LoRa, affichage OLED</li>
+    <li>Coder le récepteur : réception LoRa, DEL status, affichage RSSI/SNR sur OLED</li>
+    <li>Connexion WiFi sur le récepteur, premier appel à l'API LLM</li>
+    <li>Retour LoRa de la décision à l'émetteur, DEL action côté émetteur</li>
   </ul>
 
   <h3>Semaine 12 — Intégration MQTT, fiabilité et remise</h3>

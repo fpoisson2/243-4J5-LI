@@ -15,15 +15,18 @@
   <ul style="margin: 10px 0;">
     <li><strong>RadioLib</strong> — librairie pour contrôler directement le SX1262 du T-Beam</li>
     <li><strong>Potentiomètre</strong> — lecture ADC (0-4095) envoyée via LoRa</li>
-    <li><strong>DEL status</strong> — clignote à chaque émission</li>
+    <li><strong>OLED</strong> — affiche la trame envoyée et la décision reçue</li>
+    <li><strong>DEL action</strong> — allumée/éteinte selon la décision du LLM (retour LoRa)</li>
     <li><strong>Format JSON</strong> — message structuré avec ArduinoJson</li>
   </ul>
   <p><strong>Récepteur LoRa + WiFi + LLM :</strong></p>
   <ul style="margin: 10px 0;">
     <li><strong>Réception LoRa</strong> — avec métriques RSSI et SNR</li>
+    <li><strong>OLED</strong> — affiche message reçu, RSSI/SNR et réponse du LLM</li>
+    <li><strong>DEL status</strong> — clignote à chaque réception et appel LLM</li>
     <li><strong>Connexion WiFi</strong> — pour accéder à l'API LLM</li>
-    <li><strong>Appel Groq</strong> — analyse des données par un LLM (comme au labo 4)</li>
-    <li><strong>DEL</strong> — contrôlée par la réponse du LLM (on/off selon l'analyse)</li>
+    <li><strong>Appel LLM</strong> — analyse avec <strong>structured output</strong> obligatoire (schéma JSON défini par l'étudiant)</li>
+    <li><strong>Retour LoRa</strong> — renvoie la décision à l'émetteur (liaison bidirectionnelle)</li>
   </ul>
   <p><strong>Sécurité :</strong></p>
   <ul style="margin: 10px 0;">
@@ -31,7 +34,7 @@
     <li><strong>config.example.h</strong> — template sans valeurs, commité</li>
     <li><strong>Pénalités</strong> — clé API dans le code = -20 points</li>
   </ul>
-  <p><strong>Labo :</strong> coder l'émetteur (potentiomètre → LoRa) et le récepteur (LoRa → WiFi → LLM → DEL) dans l'IDE Arduino.</p>
+  <p><strong>Labo :</strong> coder l'émetteur (potentiomètre → LoRa, DEL action, OLED) et le récepteur (LoRa → WiFi → LLM → retour LoRa, DEL status, OLED) dans l'IDE Arduino.</p>
   <div style="margin-top: 15px; padding: 10px; background: #ffebee; border-left: 4px solid #f44336; border-radius: 4px;">
     <p style="margin: 0 0 8px 0;"><strong>Remise du TP :</strong></p>
     <ul style="margin: 0; padding-left: 20px;">
