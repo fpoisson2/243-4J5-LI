@@ -10,38 +10,34 @@
 </head>
 <body>
 <div style="font-family: 'Segoe UI', system-ui, sans-serif; line-height: 1.6;">
-  <p><strong>Intégration finale</strong> du projet : assembler tous les composants (PCB, LoRa, MQTT, LLM) en un système IoT complet et fonctionnel.</p>
-  <p><strong>Composants à intégrer :</strong></p>
+  <p>Lancement du <strong>projet final Hydro-Limoilou</strong> : déploiement de 8 sites RF (4 voie <strong>LoRa</strong>, 4 voie <strong>LTE</strong>). Chaque site <strong>héberge un répéteur RF</strong> (configuré par l'étudiant·e dans un cours connexe), et le projet en cours déploie l'<strong>infrastructure de télémétrie</strong> qui en surveille les conditions opérationnelles (climat, sécurité, alimentation, intégrité mécanique). Chaque étudiant·e est responsable d'un site avec ses capteurs, son broker MQTT, son écran tactile et son tunnel Cloudflare. Un serveur central VM (simulant un NOC) agrège les 8 sites.</p>
+  <p><strong>Mise en route (CP1) :</strong></p>
   <ul style="margin: 10px 0;">
-    <li><strong>Matériel</strong> — shield PCB soudé, LilyGO A7670G, T-Beam SUPREME</li>
-    <li><strong>Communication</strong> — MQTT broker, gateway LoRa, WiFi/LTE</li>
-    <li><strong>Logiciel</strong> — firmware Arduino, pipeline Python, intégration LLM</li>
+    <li><strong>Mise en situation</strong> — chaque étudiant·e reçoit un site (tour relais, cabinet fluvial, mât météo, sous-station urbaine, etc.) avec une combinaison unique de modules breakout</li>
+    <li><strong>Câblage breadboard</strong> — modules assignés montés sur l'hôte (T-Beam SUPREME pour LoRa, A7670G pour LTE)</li>
+    <li><strong>Première publication MQTT</strong> — au moins un capteur publie sur le bon topic conforme au contrat <code>hydro-limoilou/poste-XX/telemetry/...</code></li>
+    <li><strong>Amorce du shield KiCad</strong> — projet créé, composants placés, début des connexions</li>
   </ul>
-  <p><strong>Tests de performance :</strong></p>
+  <p><strong>Sélection pédagogique :</strong></p>
   <ul style="margin: 10px 0;">
-    <li><strong>Latence bout-en-bout</strong> — cible inférieure à 2 secondes</li>
-    <li><strong>Taux de livraison</strong> — cible supérieure à 99%</li>
-    <li><strong>Tests de charge</strong> — simuler des conditions réelles</li>
+    <li><strong>Voie LTE (#5-8)</strong> — pour les étudiant·es ayant le plus à reprendre sur le shield A7670G + MQTT/LTE de la mi-session</li>
+    <li><strong>Voie LoRa (#1-4)</strong> — pour les étudiant·es ayant le plus à reprendre sur le mesh LoRa du TP de la sem. 9</li>
   </ul>
-  <p><strong>Autonomie énergétique :</strong></p>
-  <ul style="margin: 10px 0;">
-    <li><strong>Profil de consommation</strong> — mesurer chaque composant (ESP32, LTE, LoRa)</li>
-    <li><strong>Deep Sleep</strong> — mode veille à 10 µA entre les transmissions</li>
-    <li><strong>Calcul d'autonomie</strong> — capacité batterie / consommation moyenne</li>
-  </ul>
-  <p><strong>Labo 13 :</strong> assembler le système complet, effectuer les tests de performance et mesurer l'autonomie.</p>
+  <p><strong>Labo 13 :</strong> câbler le breadboard, adapter le firmware Labo 2 pour publier sur les nouveaux topics, démarrer le projet KiCad.</p>
   <div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-left: 4px solid #2196F3; border-radius: 4px;">
     <p style="margin: 0 0 8px 0;"><strong>À faire pour la semaine prochaine :</strong></p>
     <ul style="margin: 0; padding-left: 20px;">
-      <li>Corriger les problèmes identifiés lors des tests</li>
-      <li>Documenter les résultats de performance</li>
-      <li>Commencer la préparation des diapositives de présentation</li>
+      <li>Compléter la publication pour <strong>tous</strong> les capteurs assignés</li>
+      <li>Implémenter au moins une alarme cohérente avec la mise en situation</li>
+      <li>Étendre l'interface tactile sur 3 pages (télémétrie, alarmes, état lien)</li>
+      <li>Configurer Mosquitto (auth + ACL) et activer le tunnel Cloudflare</li>
+      <li>Compléter le schéma KiCad (ERC sans erreurs)</li>
     </ul>
   </div>
   <p style="margin-top: 15px; padding: 10px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 4px;">
-    <strong>Prochaine évaluation :</strong> Projet final IdO — semaine 15 (30%)<br>
-    <em>Matière couverte :</em> PCB assemblé, intégration Meshtastic, LLM, tests de performance<br>
-    <em>Format :</em> présentation orale (15 min) et démonstration live
+    <strong>Évaluation cette semaine :</strong> Projet final — Checkpoint 1 (5%)<br>
+    <em>Critères :</em> câblage breadboard (1%), première publication MQTT (3%), amorce KiCad (1%)<br>
+    <em>Modalité :</em> vérification individuelle en laboratoire en fin de séance
   </p>
 </div>
 <script>

@@ -8,6 +8,7 @@ on:
       - 'Plan de cours*.md'
       - 'docs/moodle/**'
       - 'docs/tp-lora-llm.html'
+      - 'docs/projet-final-hydro-limoilou.html'
       - '.github/workflows/deploy-slidev.yml'
   workflow_dispatch:
 
@@ -138,9 +139,10 @@ jobs:
             <h1>243-4J5-LI - Objets connectés</h1>
             <p>Présentations théoriques du cours - Session H26</p>
             <p>
-              <a href="./plan-de-cours.html" style="color:#2563eb;font-weight:500;">📄 Plan de cours</a> |
-              <a href="./moodle/" style="color:#2563eb;font-weight:500;">📋 Résumés Moodle</a> |
-              <a href="./tp-lora-llm.html" style="color:#2563eb;font-weight:500;">🛰️ TP LoRa + LLM</a>
+              <a href="./plan-de-cours.html" style="color:#2563eb;font-weight:500;">Plan de cours</a> |
+              <a href="./moodle/" style="color:#2563eb;font-weight:500;">Résumés Moodle</a> |
+              <a href="./tp-lora-llm.html" style="color:#2563eb;font-weight:500;">TP LoRa + LLM</a> |
+              <a href="./projet-final-hydro-limoilou.html" style="color:#2563eb;font-weight:500;">Projet final Hydro-Limoilou</a>
             </p>
             <div class="grid">
               <a href="./semaine-01/"><strong>Semaine 01</strong>Introduction et mise en contexte</a>

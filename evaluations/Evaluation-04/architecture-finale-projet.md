@@ -1,203 +1,222 @@
-# Architecture Finale du Projet IoT
-**Cours:** 243-4J5-LI – Objets connectés
+# Architecture finale du projet — Hydro-Limoilou Télémétrie RF
+**Cours :** 243-4J5-LI – Objets connectés
+**Évaluation :** Projet final IdO (35%, semaines 13 à 15)
 
 ---
 
-## 🏗️ Architecture du Projet Final (Réaliste)
+## 1. Contexte
+
+Le projet final simule le déploiement de **8 sites RF** d'un distributeur d'énergie fictif, **Hydro-Limoilou**. Chaque site **héberge un répéteur RF** (configuré par l'étudiant·e dans un cours connexe), et le présent projet déploie l'**infrastructure de télémétrie** qui surveille les conditions opérationnelles de chaque site (climat, sécurité, alimentation, intégrité mécanique).
+
+Chaque étudiant·e est responsable d'un site distinct, avec son propre répéteur RF, ses propres capteurs de télémétrie, son propre nœud de communication, son propre courtier MQTT (sur son Raspberry Pi 5) et son propre écran de monitoring.
+
+Un **serveur central** (VM gérée par l'enseignant) se connecte à chacun des 8 courtiers MQTT pour agréger les données via une **convention de topics standardisée**.
+
+### Articulation avec le cours connexe (configuration des répéteurs)
+
+Chaque étudiant·e configure **son propre répéteur RF** dans un cours parallèle. Le présent projet en assure le **monitoring environnemental et opérationnel** :
+
+- la télémétrie observe les conditions qui peuvent affecter le bon fonctionnement du répéteur (température dans le shelter, vibration du mât d'antenne, intégrité de l'alimentation, intrusion physique)
+- les alarmes signalent les situations qui menacent la disponibilité du répéteur (basculement, inondation, ouverture du cabinet, batterie faible, niveau carburant bas)
+- la convergence vers le serveur central simule un NOC (Network Operations Center) supervisant l'ensemble des 8 répéteurs déployés sur le territoire
+
+---
+
+## 2. Architecture globale
 
 ```mermaid
 graph TB
-    subgraph Device_LTE["📟 LilyGO A7670G + PCB"]
-        PCB["PCB Assemblé<br/>• LEDs (1-4)<br/>• Boutons (1-3)<br/>• Accéléromètre"]
-
-        A7670G["LilyGO A7670G<br/>• ESP32 + LTE Cat-1<br/>• GPS intégré<br/>• Config: WSS:443"]
-
-        PCB <-->|GPIO/I2C| A7670G
+    subgraph Sites_LoRa["Voie LoRa — Sites #1 à #4"]
+        TBd1["T-Beam SUPREME distant<br/>+ shield capteurs<br/>(au site)"]
+        TBg1["T-Beam SUPREME gateway<br/>(au labo, WiFi)"]
+        Pi1["Raspberry Pi 5<br/>Mosquitto + écran tactile"]
+        TBd1 -.LoRa mesh.-> TBg1 -->|MQTT WiFi local| Pi1
     end
 
-    TBeam_Distant["📡 T-Beam Distant<br/>• ESP32-S3 + LoRa<br/>• GPS intégré<br/>• Batterie/Mobile"]
-
-    subgraph Reseau_Local["🏠 Réseau Local du Laboratoire"]
-        TBeam_Local["🔄 T-Beam Local (Gateway)<br/>• ESP32-S3 + LoRa<br/>• WiFi (réseau local)<br/>• Pont LoRa → MQTT"]
-
-        subgraph RaspberryPi["🍓 Raspberry Pi 5"]
-            Mosquitto["Mosquitto Broker<br/>• Port 1883 (local)<br/>• Port 9001 (WSS/TLS)"]
-
-            InterfaceTactile["Interface Tactile Python<br/>• Affichage données<br/>• Contrôle LEDs"]
-
-            Mosquitto --> InterfaceTactile
-        end
+    subgraph Sites_LTE["Voie LTE — Sites #5 à #8"]
+        A1["LilyGO A7670G<br/>+ shield capteurs"]
+        Pi2["Raspberry Pi 5<br/>Mosquitto + écran tactile"]
+        A1 -->|MQTT/WSS via Cloudflare| Pi2
     end
 
-    CloudflareTunnel(["☁️ Cloudflare Tunnel<br/>• Exposition sécurisée<br/>• WSS port 443<br/>• domaine.example.com"])
-
-    Internet(["☁️ Internet / LTE<br/>Réseau cellulaire<br/>+ Cloudflare CDN"])
-
-    ClientDistant["💻 Client Web Distant<br/>• Dashboard<br/>• Monitoring"]
-
-    %% Flux de communication
-
-    %% A7670G se connecte en WSS via Cloudflare sur Internet
-    A7670G -->|"MQTT over WSS<br/>Port 443<br/>wss://domain.example.com"| Internet
-    Internet -->|"Via Cloudflare CDN"| CloudflareTunnel
-    CloudflareTunnel -->|"MQTT local<br/>sensors/*<br/>actuators/*"| Mosquitto
-
-    %% LoRa mesh
-    TBeam_Distant <-->|"LoRa mesh<br/>Longue portée"| TBeam_Local
-
-    %% Gateway local et exposition via tunnel
-    TBeam_Local -->|"MQTT via WiFi local<br/>meshtastic/position"| Mosquitto
-    Mosquitto -->|"Port 9001 WSS/TLS"| CloudflareTunnel
-
-    %% Accès client distant
-    ClientDistant -->|"HTTPS/WSS"| Internet
-    Internet -->|"WSS:443"| CloudflareTunnel
-
-    %% Styles
-    classDef lte fill:#fef3c7,stroke:#f59e0b,stroke-width:3px,color:#78350f
-    classDef lora_remote fill:#ecfeff,stroke:#06b6d4,stroke-width:3px,color:#164e63
-    classDef lora_local fill:#fae8ff,stroke:#a855f7,stroke-width:3px,color:#581c87
-    classDef infra fill:#e5e7eb,stroke:#4b5563,stroke-width:2px,color:#1f2937
-    classDef cloud fill:#e6f3ff,stroke:#3b82f6,stroke-width:2px,stroke-dasharray:5 5,color:#1e3a8a
-    classDef client fill:#f3e8ff,stroke:#9333ea,stroke-width:2px,color:#4c1d95
-    classDef local_net fill:#f0fdf4,stroke:#22c55e,stroke-width:2px,color:#14532d
-
-    class PCB,A7670G lte
-    class TBeam_Distant lora_remote
-    class TBeam_Local lora_local
-    class Mosquitto,InterfaceTactile infra
-    class CloudflareTunnel,Internet cloud
-    class ClientDistant client
-    class Reseau_Local local_net
+    Pi1 -->|Cloudflare Tunnel| VM[("Serveur central — VM<br/>Agrégation des 8 sites<br/>Dashboard global")]
+    Pi2 -->|Cloudflare Tunnel| VM
 ```
+
+### Particularités par voie
+
+| Voie | Hôte | Chemin réseau |
+|------|------|---------------|
+| **LoRa (#1-4)** | T-Beam SUPREME (×2) | Capteurs → T-Beam distant → LoRa mesh → T-Beam gateway WiFi → Mosquitto local sur Pi 5 → Cloudflare Tunnel → VM |
+| **LTE (#5-8)** | LilyGO A7670G (×1) | Capteurs → A7670G → MQTT/WSS direct via réseau cellulaire → Cloudflare → Mosquitto local sur Pi 5 → Cloudflare Tunnel → VM |
 
 ---
 
-## 📊 Flux de Données
+## 3. Mises en situation des 8 sites
 
-### Flux LTE: LilyGO A7670G + PCB → Serveur
-
-```mermaid
-sequenceDiagram
-    participant PCB as Capteurs PCB
-    participant A7670G as LilyGO A7670G
-    participant LTE as Internet/LTE
-    participant CF as Cloudflare<br/>(CDN + Tunnel)
-    participant M as Mosquitto (Pi5)
-    participant UI as Interface Tactile
-
-    PCB->>A7670G: Lecture GPIO/I2C<br/>(boutons, accéléromètre)
-    Note over A7670G: Format JSON
-    A7670G->>LTE: MQTT over WSS:443<br/>wss://domain.example.com
-    LTE->>CF: Via Cloudflare CDN
-    CF->>M: Tunnel → Port 9001<br/>sensors/accel {"x":0.1,"y":0.2}
-    M->>UI: Affichage temps réel
-    Note over UI: Mise à jour écran tactile
-```
-
-### Flux LoRa: T-Beam Distant → T-Beam Local → Serveur
-
-```mermaid
-sequenceDiagram
-    participant TBD as T-Beam Distant<br/>(LoRa)
-    participant TBL as T-Beam Local<br/>(Gateway WiFi)
-    participant M as Mosquitto (Pi5)
-    participant UI as Interface Tactile
-
-    TBD->>TBD: Acquisition GPS
-    Note over TBD: Format Meshtastic
-    TBD->>TBL: Message LoRa<br/>Position GPS
-    Note over TBL: Conversion<br/>LoRa → MQTT
-    TBL->>M: MQTT Publish (WiFi)<br/>meshtastic/position<br/>{"lat":46.8,"lon":-71.2}
-    M->>UI: Affichage position
-    Note over UI: Carte ou liste
-```
+| # | Voie | Site | Mise en situation |
+|---|------|------|-------------------|
+| 1 | LoRa | **Tour relais nord** | Tour de communication SCADA hébergeant un **répéteur RF** au sommet (configuré dans le cours connexe). La télémétrie surveille le shelter d'équipement au pied de la tour + l'état mécanique de la tour exposée au vent (vibrations qui peuvent affecter le pointage de l'antenne du répéteur). |
+| 2 | LoRa | **Cabinet de jonction fluvial** | Cabinet en bord de rivière abritant un **répéteur RF** assurant une liaison côtière. Surveillance d'intrusion + niveau d'eau (risque d'inondation menaçant le répéteur lors des crues). |
+| 3 | LoRa | **Poste de mesure forestier** | Poste isolé en forêt accueillant un **répéteur RF** alimenté par panneau solaire et batterie. Monitoring environnemental + état de l'alimentation autonome (qui doit garantir la disponibilité du répéteur 24/7). |
+| 4 | LoRa | **Mât météo radio** | Mât instrumenté supportant l'antenne d'un **répéteur RF** en zone dégagée. Surveillance du basculement (impact direct sur le pointage du répéteur) + détection de présence à la base. |
+| 5 | LTE | **Sous-station urbaine** | Cabinet électrique au sol en milieu urbain abritant un **répéteur RF** colocalisé. Monitoring climat + intrusion + paramètres énergétiques de la ligne d'alimentation qui alimente le répéteur. |
+| 6 | LTE | **Antenne rooftop centre-ville** | Site sur toit avec **répéteur RF directionnel** et batteries solaires de secours. Surveillance choc/orientation de l'antenne du répéteur + apport solaire (autonomie en cas de panne secteur). |
+| 7 | LTE | **Station de pompage instrumentée** | Station de pompage municipale avec **répéteur RF** colocalisé pour la télémétrie SCADA. Monitoring climat machinerie + sécurité d'accès (portail + présence) protégeant le répéteur. |
+| 8 | LTE | **Refuge technique de campagne** | Refuge isolé contenant un **répéteur RF** + génératrice de secours qui maintient l'alimentation en cas de panne. Monitoring intégrité du refuge (choc, climat) + niveau carburant. |
 
 ---
 
-## 🔧 Composants du Projet Final
+## 4. Assignations capteurs et actionneurs
 
-### Infrastructure (déjà en place)
-- ✅ **Raspberry Pi 5** configuré (Labos 1-2)
-- ✅ **Mosquitto Broker** (local + WSS)
-- ✅ **Cloudflare Tunnel** actif
-- ✅ **Interface tactile Python** fonctionnelle
+Chaque site reçoit une combinaison **unique** de modules breakout (avec headers) à intégrer sur un shield PCB conçu en KiCad. Les shields se montent directement sur l'hôte (T-Beam SUPREME ou LilyGO A7670G).
 
-### LilyGO A7670G + PCB (Communication LTE)
-- ✅ **LilyGO A7670G** (Labos 1-2)
-- 🔄 **PCB assemblé et soudé** (semaine 10)
-- 🔄 **LEDs** fonctionnelles (selon assignation: 1-4)
-- 🔄 **Boutons** fonctionnels (selon assignation: 1-3)
-- 🔄 **Accéléromètre** (MPU6050/ADXL345) via I2C
-- 🔄 **Communication MQTT via LTE** opérationnelle
+| # | Hôte | Modules assignés | Justification du mapping |
+|---|------|------------------|--------------------------|
+| 1 | T-Beam SUPREME | DHT22 + MPU6050 + 2 boutons + 2 LEDs | DHT22 = climat shelter ; MPU6050 = vibration mât ; boutons = test+maintenance ; LEDs = état lien+alarme |
+| 2 | T-Beam SUPREME | BH1750 + HC-SR501 + 1 pot + 1 bouton + 1 LED | BH1750 = lumière intérieure (porte) ; HC-SR501 = intrusion ; pot = niveau d'eau simulé ; bouton = ack alarme ; LED = alarme |
+| 3 | T-Beam SUPREME | DHT22 + BH1750 + 1 bouton + 1 pot + 1 LED | DHT22 = climat ; BH1750 = ensoleillement panneau solaire ; pot = tension batterie simulée ; bouton = test ; LED = état charge |
+| 4 | T-Beam SUPREME | MPU6050 + HC-SR501 + 1 bouton + 1 pot + 2 LEDs | MPU6050 = inclinaison mât ; HC-SR501 = présence base ; pot = vent simulé ; bouton = silence alarme ; LEDs = état mât+détection |
+| 5 | LilyGO A7670G | DHT22 + HC-SR501 + 2 pots + 2 LEDs | DHT22 = climat cabinet ; HC-SR501 = intrusion ; pots = tension+courant simulés ; LEDs = état réseau+alarme |
+| 6 | LilyGO A7670G | MPU6050 + BH1750 + 2 boutons + 2 LEDs | MPU6050 = vibration/orientation antenne ; BH1750 = ensoleillement ; boutons = test+maintenance ; LEDs = état antenne+charge |
+| 7 | LilyGO A7670G | DHT22 + BH1750 + HC-SR501 + 2 LEDs | DHT22 = climat machinerie ; BH1750 = portail ouvert ; HC-SR501 = présence ; LEDs = état pompe+alarme |
+| 8 | LilyGO A7670G | MPU6050 + DHT22 + 2 boutons + 1 pot + 1 LED | MPU6050 = choc/ouverture porte ; DHT22 = climat ; boutons = mode+reset ; pot = niveau carburant ; LED = état alim |
 
-### T-Beam Local (Gateway LoRa → WiFi)
-- ✅ **T-Beam SUPREME #1** (semaines 7-9)
-- ✅ **WiFi configuré** (réseau local du labo)
-- ✅ **LoRa activé** (réception mesh)
-- ✅ **MQTT activé** (envoi vers Mosquitto)
-- 🔄 **Rôle gateway** LoRa → MQTT fonctionnel
+### Notes d'intégration
 
-### T-Beam Distant (Mobile LoRa)
-- ✅ **T-Beam SUPREME #2** (semaines 7-9)
-- ✅ **LoRa configuré** (transmission mesh)
-- ✅ **GPS fonctionnel**
-- 🔄 **Envoi position GPS** via LoRa vers T-Beam local
-- 🔄 **Tests terrain** complétés
+- **Bus I2C primaire du T-Beam SUPREME** (GPIO 17/18) : déjà occupé en interne par OLED, magnéto et BME280. Les modules I2C externes (MPU6050 à 0x68, BH1750 à 0x23) **partagent ce bus** sans conflit d'adresse.
+- **ADC sur T-Beam SUPREME** : limité (essentiellement ADC1 sur GPIO 2-3). Les sites LoRa sont contraints à **1 potentiomètre maximum**.
+- **GPIO digital du T-Beam SUPREME** : 4-5 broches utilisables sur les pads exposés.
+- **LilyGO A7670G (ESP32 standard)** : beaucoup plus de GPIO disponibles, donc les sites LTE peuvent porter jusqu'à 5 modules.
+- Tous les modules sont alimentés en **3.3 V** (sauf HC-SR501 qui supporte 5 V mais sortie compatible 3.3 V).
 
 ---
 
-## 📡 Topics MQTT
+## 5. Sélection pédagogique des étudiants
 
-### Structure simple des topics:
+Le projet final est conçu comme une **occasion de remédiation** : chaque étudiant·e est affecté·e à la voie qui exerce ce qu'il/elle a le moins bien réussi lors des évaluations antérieures. Le projet final devient une **2e chance encadrée** de démontrer la compétence faiblement maîtrisée.
+
+| Évaluation antérieure faiblement réussie | Compétence à redémontrer | Voie attribuée au projet final |
+|------------------------------------------|--------------------------|-------------------------------|
+| **Évaluation sommative de mi-session** (Sem. 7 — Shield PCB pour LilyGO A7670G : intégration capteurs, MQTT/LTE, Python) | Conception et programmation d'un objet connecté avec **A7670G + LTE + MQTT/WSS** | **LTE (#5-8)** |
+| **TP LoRa** (Sem. 9 — Intégration LoRa/Meshtastic : configuration mesh, paramètres radio, gateway WiFi→MQTT) | Configuration et exploitation d'un **réseau LoRa mesh** + pont MQTT | **LoRa (#1-4)** |
+
+### Cas limites
+- Étudiant·e faible aux **deux** évaluations → arbitrage selon la lacune **la plus marquée** (écart au seuil), avec léger biais vers **LoRa** car le projet inclut 2 T-Beam à configurer = davantage d'occasions d'observer la progression
+- Étudiant·e solide aux deux → choix selon les **places restantes** (équilibre 4/4 maintenu) et selon l'intérêt déclaré
+
+### Bénéfices
+- Le projet final n'est pas un nouvel apprentissage à partir de zéro mais un **approfondissement ciblé**
+- Les checkpoints hebdomadaires (sem. 13, 14, 15) deviennent des points d'observation de la progression
+- L'enseignant peut comparer la performance au projet final avec l'évaluation antérieure pour ajuster son jugement global de la capacité concernée
+
+---
+
+## 6. Convention de topics MQTT
+
+La VM centrale doit pouvoir agréger les 8 sites avec un schéma uniforme. Chaque site est identifié par un `site-id` numéroté `poste-01` à `poste-08`.
 
 ```
-mqtt://
-├── etudiant/{prenom-nom}/    # Nœud A7670G + PCB
-│   ├── sensors/
-│   │   ├── buttons           # {"btn1": true, "btn2": false, ...}
-│   │   └── accel             # {"x": 0.12, "y": -0.05, "z": 9.81}
-│   ├── actuators/
-│   │   ├── led1              # {"state": "on" | "off"}
-│   │   └── led2              # {"state": "on" | "off"} ...
-│   └── status                # {"uptime": 3600, "rssi": -65}
-│
-└── meshtastic/               # Nœud T-Beam distant
-    └── position              # {"lat": 46.8, "lon": -71.2, "alt": 100}
+hydro-limoilou/{site-id}/telemetry/{capteur}     # Données périodiques
+hydro-limoilou/{site-id}/status                  # uptime, rssi, link, batterie
+hydro-limoilou/{site-id}/alarm/{type}            # door, water, motion, tilt, ...
+hydro-limoilou/{site-id}/actuators/{nom}         # Commandes descendantes (LED, relais)
 ```
 
----
+### Exemples concrets
 
+```
+hydro-limoilou/poste-01/telemetry/temperature   {"value": 22.4, "unit": "C", "ts": 1739500000}
+hydro-limoilou/poste-01/telemetry/humidity      {"value": 45.2, "unit": "%", "ts": 1739500000}
+hydro-limoilou/poste-01/telemetry/vibration     {"x": 0.02, "y": -0.01, "z": 9.81, "ts": 1739500000}
+hydro-limoilou/poste-01/status                  {"uptime": 3600, "rssi": -67, "link": "lora", "battery_v": 3.9}
+hydro-limoilou/poste-01/alarm/tilt              {"level": "warning", "value": 12.3, "unit": "deg", "ts": 1739500000}
+hydro-limoilou/poste-01/actuators/led_1         {"state": "on"}
+```
 
-## ✅ Résumé du Projet Final
+### Mapping par capteur (noms de topics standardisés)
 
-### Ce que chaque étudiant doit livrer:
+| Capteur | Sous-topic `telemetry/` | Champs payload |
+|---------|------------------------|----------------|
+| DHT22 | `temperature`, `humidity` | `value`, `unit`, `ts` |
+| MPU6050 | `vibration` | `x`, `y`, `z`, `ts` (accélérations m/s²) |
+| BH1750 | `light` | `value`, `unit` (lux), `ts` |
+| HC-SR501 | sous `alarm/motion` | `level`, `ts` |
+| Potentiomètre | `analog_1`, `analog_2` (ou nom selon site, ex. `water_level`, `battery_v`) | `value`, `unit`, `ts` |
+| Bouton | sous `alarm/{nom}` ou via `status` | `state`, `ts` |
+| LED | `actuators/led_N` (descendant) | `state` (`"on"`/`"off"`) |
 
-**1. Infrastructure serveur (déjà en place depuis Labos 1-2):**
-- Raspberry Pi 5 avec Mosquitto Broker
-- Interface tactile Python affichant les données
-- Cloudflare Tunnel pour accès distant sécurisé
-
-**2. Module IoT LTE (LilyGO A7670G + PCB):**
-- PCB assemblé et soudé (semaine 10)
-- LEDs opérationnelles (selon assignation: 1-4)
-- Boutons opérationnels (selon assignation: 1-3)
-- Accéléromètre (MPU6050/ADXL345) fonctionnel
-- Communication MQTT via LTE vers le serveur
-
-**3. Système LoRa mesh (2 T-Beam SUPREME):**
-- **T-Beam local:** Gateway LoRa → MQTT (WiFi réseau local)
-- **T-Beam distant:** Module mobile avec GPS (communication LoRa)
-- Communication mesh LoRa fonctionnelle entre les deux T-Beam
-- Données GPS du T-Beam distant acheminées au serveur
-
-**4. Documentation complète:**
-- Schéma du PCB (KiCad)
-- Code source (Python, Arduino/ESP32)
-- Cartographie de couverture LoRa (GPX)
-- Guide d'utilisation
-- Résultats de tests (RSSI, SNR, portée)
+Un **document séparé** (`contrat-serveur-central.md`) détaille les topics exacts attendus pour chaque site #1-8, les fréquences de publication minimales et les payloads JSON normalisés.
 
 ---
 
-**Fin du document — Architecture Finale du Projet**
+## 7. Composants par étudiant·e
+
+### Infrastructure individuelle (1 par étudiant·e)
+- **Raspberry Pi 5** — broker Mosquitto + interface tactile + tunnel Cloudflare *(déjà en place depuis Labos 1-2)*
+- **Domaine Cloudflare personnel** *(déjà en place)*
+
+### Voie LoRa (étudiant·es #1-4)
+- 2 × **LilyGO T-Beam SUPREME** (1 nœud de site + 1 gateway WiFi)
+- Modules breakout assignés
+- Shield PCB conçu en KiCad (livrable, non fabriqué)
+- Breadboard pour intégration physique
+
+### Voie LTE (étudiant·es #5-8)
+- 1 × **LilyGO A7670G** (réutilisé du mid-session)
+- Modules breakout assignés
+- Shield PCB conçu en KiCad (livrable, non fabriqué)
+- Breadboard pour intégration physique
+
+### Infrastructure centrale (gérée par l'enseignant)
+- **VM** avec script Python d'agrégation MQTT
+- **Dashboard global** affichant l'état des 8 sites en temps réel
+
+---
+
+## 8. Livrables du projet final
+
+Pour chaque étudiant·e, à la fin de la sem. 15 :
+
+1. **Shield PCB** (livrable de conception KiCad, **non fabriqué**) :
+   - Schéma `.kicad_sch` (ERC sans erreurs)
+   - PCB 2 couches `.kicad_pcb` (DRC sans erreurs)
+   - Gerbers + BOM générés
+2. **Firmware** (Arduino/ESP32, dans Git) :
+   - Lecture de tous les capteurs assignés
+   - Publication MQTT sur les bons topics
+   - Gestion des alarmes
+3. **Extension de l'interface tactile** (Python sur Pi 5, dans Git) :
+   - Page **Télémétrie temps réel** (jauges/valeurs des capteurs du site)
+   - Page **Alarmes** (liste + ack)
+   - Page **État du lien** (RSSI/SNR LoRa ou signal LTE, uptime)
+4. **Documentation** (Markdown dans le dépôt) :
+   - Description du site et de la mise en situation
+   - Schéma de câblage breadboard
+   - Liste des topics utilisés (conformité contrat VM)
+   - Procédure de démo et résultats des 3 scénarios de test
+5. **Vidéo de démo** (≤ 5 min) montrant les 3 scénarios :
+   - Nominal (publication continue, dashboard VM voit le site)
+   - Alarme (déclenchement physique → topic alarm publié → affichage tactile + dashboard)
+   - Perte/reprise de lien (coupure WiFi/LTE → reconnexion → republication)
+
+---
+
+## 9. Évaluation
+
+Voir `grille-projet-final.md` pour les critères détaillés.
+
+| Checkpoint | Semaine | Pondération | Focus principal |
+|------------|---------|:-----------:|----------------|
+| **CP1** | 13 | 5% | Intégration matérielle breadboard + 1ère publication MQTT + amorce KiCad |
+| **CP2** | 14 | 10% | Tous les capteurs publient + alarmes + interface tactile + visibilité VM + schéma KiCad complet |
+| **CP3** | 15 | 20% | Démo 3 scénarios + finalisation PCB (DRC + Gerbers) + livrables documentés |
+| | | **35%** | |
+
+Pondération par capacité (Plan de cours) :
+- **Capacité 1 (Concevoir et programmer un objet connecté)** : 10% du cours
+- **Capacité 2 (Maîtriser les protocoles de communication IdO)** : 25% du cours
+
+---
+
+**Fin du document — Architecture finale du projet Hydro-Limoilou**

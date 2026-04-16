@@ -10,39 +10,46 @@
 </head>
 <body>
 <div style="font-family: 'Segoe UI', system-ui, sans-serif; line-height: 1.6;">
-  <p><strong>Validation finale</strong> du projet et <strong>préparation de la présentation</strong>. Derniers ajustements et documentation complète.</p>
-  <p><strong>Tests d'acceptation :</strong></p>
+  <p><strong>Intégration logicielle complète</strong> du projet final Hydro-Limoilou : tous les capteurs publient, alarmes fonctionnelles, interface tactile étendue, site visible côté serveur central VM, schéma KiCad complet.</p>
+  <p><strong>Publication MQTT complète :</strong></p>
   <ul style="margin: 10px 0;">
-    <li><strong>Checklist système</strong> — démarrage, capteurs, actionneurs, MQTT, LoRa, LLM</li>
-    <li><strong>Récupération après panne</strong> — tester les scénarios d'erreur</li>
-    <li><strong>Documentation des limitations</strong> — être honnête sur les limites du système</li>
+    <li><strong>Tous les capteurs assignés</strong> publient sur les bons topics conformes au contrat</li>
+    <li><strong>Topic <code>status</code></strong> publié périodiquement (uptime, RSSI/signal, batterie)</li>
+    <li><strong>Au moins une LED contrôlable</strong> via topic descendant <code>actuators/led_N</code></li>
   </ul>
-  <p><strong>Préparation de la présentation :</strong></p>
+  <p><strong>Alarmes :</strong></p>
   <ul style="margin: 10px 0;">
-    <li><strong>Structure (15 min)</strong> — introduction, architecture, démonstration, résultats, questions</li>
-    <li><strong>Plan B</strong> — vidéo de backup, screenshots, mode dégradé</li>
-    <li><strong>Réponses aux questions</strong> — techniques de gestion et phrases utiles</li>
+    <li><strong>Au moins une alarme</strong> cohérente avec la mise en situation (ex. inclinaison sur mât météo, intrusion sur cabinet fluvial)</li>
+    <li><strong>Hystérésis</strong> pour éviter le clignotement d'alarmes</li>
+    <li><strong>Niveaux</strong> — info, warning, critical</li>
   </ul>
-  <p><strong>Rétrospective :</strong></p>
+  <p><strong>Interface tactile (3 pages) :</strong></p>
   <ul style="margin: 10px 0;">
-    <li><strong>Points forts</strong> — valoriser les réussites avec des métriques</li>
-    <li><strong>Leçons apprises</strong> — défis rencontrés et solutions trouvées</li>
-    <li><strong>Portfolio professionnel</strong> — valoriser le projet pour CV et entretiens</li>
+    <li><strong>Page Télémétrie</strong> — valeurs courantes des capteurs en temps réel</li>
+    <li><strong>Page Alarmes</strong> — liste chronologique + bouton ack</li>
+    <li><strong>Page État du lien</strong> — RSSI/SNR ou signal LTE, uptime</li>
   </ul>
-  <p><strong>Labo 14 :</strong> finaliser les corrections, compléter la documentation, préparer les diapositives et répéter la présentation.</p>
+  <p><strong>Visibilité côté serveur central :</strong></p>
+  <ul style="margin: 10px 0;">
+    <li><strong>Mosquitto sécurisé</strong> — utilisateur <code>central</code> avec ACL restreinte aux topics du site</li>
+    <li><strong>Tunnel Cloudflare actif</strong> en WSS:443</li>
+    <li><strong>Validation</strong> via <code>mosquitto_sub</code> depuis la VM</li>
+  </ul>
+  <p><strong>Labo 14 :</strong> compléter le firmware, étendre l'interface tactile, configurer Mosquitto, transmettre les credentials à l'enseignant, finaliser le schéma KiCad.</p>
   <div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-left: 4px solid #2196F3; border-radius: 4px;">
     <p style="margin: 0 0 8px 0;"><strong>À faire pour la semaine prochaine :</strong></p>
     <ul style="margin: 0; padding-left: 20px;">
-      <li>Finaliser les diapositives et la vidéo de démonstration</li>
-      <li>Répéter la présentation (10-12 min + questions)</li>
-      <li>Préparer tous les livrables pour la remise finale</li>
-      <li>S'assurer que le système fonctionne pour la démonstration live</li>
+      <li>Préparer le scénario de démo (3 scénarios : nominal, alarme, perte/reprise de lien)</li>
+      <li>Finaliser le routage PCB (DRC sans erreurs)</li>
+      <li>Générer les Gerbers et le BOM</li>
+      <li>Compléter la documentation (README, contrat topics, justification QoS)</li>
+      <li>Tourner la vidéo de démo (≤ 5 min)</li>
     </ul>
   </div>
   <p style="margin-top: 15px; padding: 10px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 4px;">
-    <strong>Prochaine évaluation :</strong> Projet final IdO — semaine 15 (30%)<br>
-    <em>Matière couverte :</em> PCB assemblé, intégration Meshtastic, LLM, tests de performance<br>
-    <em>Format :</em> présentation orale (15 min) et démonstration live
+    <strong>Évaluation cette semaine :</strong> Projet final — Checkpoint 2 (10%)<br>
+    <em>Critères :</em> tous les capteurs publient (3%), alarmes (2%), interface tactile (1%), visibilité VM (3%), schéma KiCad ERC OK (1%)<br>
+    <em>Modalité :</em> vérification individuelle en laboratoire en fin de séance
   </p>
 </div>
 <script>

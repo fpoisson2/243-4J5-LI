@@ -10,25 +10,41 @@
 </head>
 <body>
 <div style="font-family: 'Segoe UI', system-ui, sans-serif; line-height: 1.6;">
-  <p><strong>Présentations finales</strong> et remise du projet IoT complet. Évaluation sommative couvrant toutes les compétences développées au cours de la session.</p>
-  <p><strong>Évaluation du projet final (30%) :</strong></p>
+  <p><strong>Démonstration finale</strong> et remise du projet Hydro-Limoilou : tests de robustesse, finalisation du PCB en KiCad, documentation complète, démo des 3 scénarios devant l'enseignant.</p>
+  <p><strong>Démonstration des 3 scénarios :</strong></p>
   <ul style="margin: 10px 0;">
-    <li><strong>Capacité 1 (10%)</strong> — PCB fonctionnel, code Arduino/Python, interface utilisateur</li>
-    <li><strong>Capacité 2 (20%)</strong> — configuration Meshtastic, intégration MQTT, tests de performance, qualité de présentation</li>
+    <li><strong>Scénario nominal</strong> — publication continue, dashboard VM voit le site</li>
+    <li><strong>Scénario alarme</strong> — déclenchement physique → topic alarm publié → affichage tactile + dashboard VM</li>
+    <li><strong>Scénario perte/reprise de lien</strong> — coupure WiFi/LTE puis reconnexion + republication automatique</li>
   </ul>
-  <p><strong>Déroulement des présentations :</strong></p>
+  <p><strong>Finalisation du PCB :</strong></p>
   <ul style="margin: 10px 0;">
-    <li><strong>Format</strong> — 15 minutes par étudiant (10-12 min présentation + 3-5 min questions)</li>
-    <li><strong>Contenu</strong> — introduction, architecture, démonstration live, résultats, défis et solutions</li>
-    <li><strong>Livrables</strong> — code sur GitHub, documentation, fichiers KiCad, vidéo de démonstration</li>
+    <li><strong>Routage 2 couches</strong> — largeurs adaptées, plan de masse, sérigraphie complète</li>
+    <li><strong>DRC sans erreurs</strong> — vérification finale du PCB</li>
+    <li><strong>Gerbers et BOM générés</strong> — livrables prêts pour fabrication (non fabriqué)</li>
   </ul>
-  <p><strong>Compétences acquises :</strong></p>
+  <p><strong>Documentation complète :</strong></p>
   <ul style="margin: 10px 0;">
-    <li><strong>Matériel</strong> — conception PCB (KiCad), soudure, microcontrôleurs ESP32</li>
-    <li><strong>Communication</strong> — MQTT, LoRa, WiFi, LTE, réseau mesh</li>
-    <li><strong>Logiciel</strong> — Arduino, Python, intégration LLM, Git/GitHub</li>
+    <li><strong>Processus de conception</strong> — site, capteurs, choix techniques, README</li>
+    <li><strong>Protocoles et topics</strong> — liste des topics, payloads, configuration Mosquitto, justification QoS</li>
+    <li><strong>Vidéo de démo</strong> — ≤ 5 min présentant les 3 scénarios</li>
   </ul>
-  <p><strong>Félicitations!</strong> Vous êtes maintenant des développeurs IoT!</p>
+  <p><strong>Vérification au CP3 :</strong> à la démonstration finale, l'enseignant <strong>revérifie le bon fonctionnement</strong> des éléments des checkpoints précédents (câblage, publication MQTT, alarmes, interface tactile, visibilité VM). Les notes des CP1 et CP2 ne sont toutefois <strong>pas révisées</strong> — le système doit simplement rester opérationnel pendant la démo finale.</p>
+  <p><strong>Récapitulatif des évaluations du projet final :</strong></p>
+  <ul style="margin: 10px 0;">
+    <li><strong>CP1 (sem. 13)</strong> — 5%</li>
+    <li><strong>CP2 (sem. 14)</strong> — 10%</li>
+    <li><strong>CP3 (sem. 15)</strong> — 20%</li>
+    <li><strong>Total</strong> — 35% (Capacité 1 : 10%, Capacité 2 : 25%)</li>
+  </ul>
+  <p style="margin-top: 15px; padding: 10px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 4px;">
+    <strong>Évaluation cette semaine :</strong> Projet final — Checkpoint 3 (20%)<br>
+    <em>Critères :</em> démo 3 scénarios (7%), PCB finalisé (3%), doc processus (1%), doc protocoles (3%), site visible côté VM (3%), QoS et fiabilité (3%)<br>
+    <em>Modalité :</em> démonstration en direct individuelle (≈ 15 min) + remise des livrables sur Git
+  </p>
+  <p style="margin-top: 15px; padding: 10px; background: #e8f5e9; border-left: 4px solid #4caf50; border-radius: 4px;">
+    <strong>Bonne fin de session !</strong> Compétences acquises : Python, MQTT, LTE, LoRa mesh, KiCad, dashboard tactile, sécurité réseau, documentation technique.
+  </p>
 </div>
 <script>
   function sendHeight() {

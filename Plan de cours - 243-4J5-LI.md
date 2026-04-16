@@ -110,7 +110,7 @@ Les activités pratiques progressent en cinq phases sur 15 semaines:
 
 4. **Phase 4 (Semaines 10-12):** Réception et assemblage du PCB (soudure, tests électriques); automatisation des flux de données avec LLM; infrastructure (API, brokers, monitoring); exploration de l'apport des modèles de langage à l'automatisation et au traitement de données
 
-5. **Phase 5 (Semaines 13-15):** Réalisation d'un projet IdO complet avec PCB assemblé, intégration Meshtastic, tests de performance (QoS, autonomie énergétique), documentation technique et présentation finale
+5. **Phase 5 (Semaines 13-15):** Projet final Hydro-Limoilou — déploiement individuel d'un site de télémétrie RF parmi 8 (4 voie LoRa avec 2 T-Beam SUPREME, 4 voie LTE avec LilyGO A7670G) ; chaque site a ses capteurs propres (modules breakout sur shield conçu en KiCad, non fabriqué) ; chaque site publie via son broker MQTT vers un serveur central VM agrégateur ; interface tactile étendue sur le Pi 5 (télémétrie, alarmes, état lien) ; évaluation sommative en 3 checkpoints hebdomadaires (5% + 10% + 20% = 35%)
 
 Au fil des semaines, vous travaillerez en laboratoire sur la conception, l'assemblage, la programmation, les essais et la documentation technique, avec des évaluations formatives régulières pour soutenir la progression avant les remises sommatives.
 
@@ -145,9 +145,9 @@ Les accommodements ne s'appliquent pas à une démonstration pratique des appren
 | 10 | Réception et soudure PCB; correctifs éventuels | Réception/inspection, revue par les pairs, plan d'assemblage, préparation BOM/stencil; début de la soudure et tests électriques. | Révisions de routage au besoin; préparation de l'atelier de soudure et des procédures de test. | Contrôle des livrables PCB (formatif) |
 | 11 | Automatisation LLM et infrastructure – déclencheurs et pipelines | Automatisation des flux de données avec LLM; infrastructure (API, brokers, monitoring), scripts d'intégration. | Plan de tests détaillé et mise à jour de la documentation. | Dépôt formatif: schéma/PCB et architecture du projet final |
 | 12 | Automatisation LLM et infrastructure – fiabilité et sécurité | Mise en production des automatisations, gestion des erreurs, observabilité, sécurité des secrets et accès. | Implantation des communications et journal des anomalies. | Point d'étape projet (formatif) |
-| 13 | Projet final Meshtastic – intégration matérielle/logicielle | Assemblage complet, intégration Meshtastic, tests de performance, QoS et autonomie énergétique. | Rédaction de la documentation et préparation de la démonstration. | Dépôt formatif: prototype fonctionnel et documentation préliminaire |
-| 14 | Projet final Meshtastic – validation et préparation de la présentation | Tests finaux, corrections et répétition de la présentation. | Finition du rapport et des supports de présentation. | Répétition évaluée (formatif) |
-| 15 | Projet final Meshtastic – présentation et remise | Démonstration, remise du rapport et rétroaction. | Aucune (fin de session) | **Évaluation sommative:** Projet final IdO avec PCB et déploiement (30%: 10% Capacité 1 + 20% Capacité 2) |
+| 13 | Projet final Hydro-Limoilou — Lancement et intégration matérielle (CP1) | Présentation du contexte fictif Hydro-Limoilou (8 sites de télémétrie RF) ; attribution des `site-id` et des modules breakout assignés ; câblage breadboard sur l'hôte (T-Beam SUPREME pour LoRa, A7670G pour LTE) ; première publication MQTT vers le broker local ; amorce du shield KiCad. | Compléter le câblage et le code firmware ; continuer le schéma KiCad. | **Évaluation sommative:** Projet final — Checkpoint 1 (5%: 2% Capacité 1 + 3% Capacité 2) |
+| 14 | Projet final Hydro-Limoilou — Intégration logicielle complète (CP2) | Publication MQTT pour tous les capteurs assignés ; implémentation des alarmes ; extension de l'interface tactile sur 3 pages (télémétrie, alarmes, état lien) ; exposition Cloudflare et validation du site côté serveur central VM ; finalisation du schéma KiCad (ERC sans erreurs). | Préparer le scénario de démo pour la sem. 15 ; commencer la documentation et le routage PCB. | **Évaluation sommative:** Projet final — Checkpoint 2 (10%: 4% Capacité 1 + 6% Capacité 2) |
+| 15 | Projet final Hydro-Limoilou — Démonstration et remise (CP3) | Tests des 3 scénarios (nominal, alarme, perte/reprise de lien) ; finalisation du PCB (DRC, Gerbers, BOM) ; documentation complète (processus + protocoles) ; vidéo de démo ; démonstration en direct devant l'enseignant. | Aucune (fin de session) | **Évaluation sommative:** Projet final — Checkpoint 3 (20%: 4% Capacité 1 + 16% Capacité 2) |
 
 ---
 
@@ -224,7 +224,7 @@ La note finale par capacité ne correspond pas nécessairement à la moyenne ari
 | Laboratoire capteurs et Python | 15% | - |
 | Projet mi-session | 20% | 10% |
 | Laboratoire intégration LLM | 15% | 5% |
-| Projet final | 10% | 25% |
+| **Projet final** (CP1 5% + CP2 10% + CP3 20%) | **10%** | **25%** |
 
 ---
 

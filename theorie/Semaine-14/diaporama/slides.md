@@ -4,7 +4,7 @@ background: https://images.unsplash.com/photo-1518770660439-4636190af475?w=1920
 title: 243-4J5-LI - Objets connectés - Semaine 14
 info: |
   ## Objets connectés
-  Semaine 14 - Validation et préparation de la présentation
+  Semaine 14 - Projet final Hydro-Limoilou (CP2)
 
   Cégep Limoilou - Session H26
 class: text-center
@@ -19,7 +19,7 @@ download: true
 # Objets connectés
 ## 243-4J5-LI
 
-Semaine 14 - Validation et préparation de la présentation
+Semaine 14 — Projet final Hydro-Limoilou (CP2)
 
 <div class="pt-12">
   <span class="px-2 py-1 rounded cursor-pointer" hover="bg-white bg-opacity-10">
@@ -31,104 +31,61 @@ Semaine 14 - Validation et préparation de la présentation
 layout: section
 ---
 
-# Dernière ligne droite!
-## Préparation finale
+# Brève intro
+## (15-20 min) — puis labo libre
 
 ---
 
-# État d'avancement
+# Objectifs CP2 (10%)
 
-### Où en êtes-vous?
-
-<v-click>
-
-```mermaid {scale: 0.5}
-gantt
-    title Projet final - Progression
-    dateFormat  YYYY-MM-DD
-    section Matériel
-    PCB conception     :done, 2024-01-01, 30d
-    Soudure/tests      :done, 2024-02-01, 14d
-    section LoRa
-    Configuration      :done, 2024-02-15, 14d
-    Tests terrain      :done, 2024-03-01, 7d
-    section Logiciel
-    Pipeline LLM       :done, 2024-03-08, 14d
-    Sécurité           :done, 2024-03-22, 7d
-    section Final
-    Intégration        :active, 2024-03-29, 7d
-    Présentation       :2024-04-05, 7d
-```
-
-</v-click>
-
----
-layout: section
----
-
-# Partie 1
-## Validation finale
+| Critère | Capacité | Pondération |
+|---------|:--------:|:-----------:|
+| **2.1** Tous les capteurs publient sur les bons topics | C2 | 3% |
+| **2.2** Alarmes fonctionnelles | C1 | 2% |
+| **2.3** Interface tactile (3 pages) | C1 | 1% |
+| **2.4** Visibilité serveur central | C2 | 3% |
+| **2.5** Schéma KiCad complet (ERC OK) | C1 | 1% |
+| **TOTAL CP2** | | **10%** |
 
 ---
 
-# Checklist avant livraison
+# Sur quoi travailler aujourd'hui
 
-### Ne rien oublier!
+<v-clicks>
+
+1. **Compléter la publication MQTT** pour tous les capteurs assignés (topics conformes au contrat)
+2. **Implémenter au moins une alarme** cohérente avec votre mise en situation et la publier sur `alarm/{type}`
+3. **Étendre l'interface tactile** sur 3 pages : télémétrie, alarmes, état du lien
+4. **Configurer Mosquitto** (auth + ACL) et **activer le tunnel Cloudflare**
+5. **Transmettre les credentials** du compte `central` à l'enseignant
+6. **Compléter le schéma KiCad** (ERC sans erreurs)
+
+</v-clicks>
+
+---
+
+# Rappels rapides
 
 <div class="grid grid-cols-2 gap-4 text-sm">
 
-<div>
+<div class="p-3 bg-blue-500 bg-opacity-20 rounded-lg">
 
-### Matériel
+### Topics à publier
 
-<v-click>
-
-- [ ] PCB fonctionne correctement
-- [ ] Tous les composants testés
-- [ ] Connexions solides
-- [ ] Boîtier/protection (si applicable)
-- [ ] Batterie/alimentation validée
-
-</v-click>
-
-### Communication
-
-<v-click>
-
-- [ ] MQTT stable sur 1h+
-- [ ] LoRa/Meshtastic fonctionnel
-- [ ] Gateway opérationnelle
-- [ ] TLS configuré
-
-</v-click>
+- `hydro-limoilou/poste-XX/telemetry/{capteur}`
+- `hydro-limoilou/poste-XX/status` (toutes les 30 s)
+- `hydro-limoilou/poste-XX/alarm/{type}`
+- `hydro-limoilou/poste-XX/actuators/led_N` (descendant)
 
 </div>
 
-<div>
+<div class="p-3 bg-orange-500 bg-opacity-20 rounded-lg">
 
-### Logiciel
+### Trois pages tactiles
 
-<v-click>
-
-- [ ] Code Arduino sans bugs
-- [ ] Pipeline Python stable
-- [ ] LLM intégré et fonctionnel
-- [ ] Gestion des erreurs complète
-- [ ] Secrets sécurisés
-
-</v-click>
-
-### Documentation
-
-<v-click>
-
-- [ ] README complet
-- [ ] Schémas à jour
-- [ ] API documentée
-- [ ] Guide d'installation
-- [ ] Résultats des tests
-
-</v-click>
+- **Télémétrie** : valeurs courantes des capteurs
+- **Alarmes** : liste + ack
+- **État lien** : RSSI/signal + uptime
 
 </div>
 
@@ -136,454 +93,63 @@ layout: section
 
 ---
 
-# Tests d'acceptation
+# Validation côté serveur central
 
-### Critères de validation
+L'enseignant valide la visibilité du site avec :
 
-<v-click>
-
-| Test | Critère | Résultat |
-|------|---------|:--------:|
-| Démarrage | Boot en < 30s | ⬜ |
-| Capteurs | Lecture correcte de tous | ⬜ |
-| Actionneurs | Réponse aux commandes | ⬜ |
-| MQTT | Connexion stable 1h | ⬜ |
-| LoRa | Communication 2 noeuds | ⬜ |
-| LLM | Analyse fonctionnelle | ⬜ |
-| Erreurs | Récupération après panne | ⬜ |
-| Sécurité | Pas de secrets exposés | ⬜ |
-
-</v-click>
-
----
-
-# Documentation des limitations
-
-### Être honnête sur les limites
-
-<v-click>
-
-### Limitations connues (exemple)
-
-```markdown
-## Limitations connues
-
-### Matériel
-- Portée LoRa réduite en intérieur (~100m)
-- Consommation élevée en mode actif continu
-
-### Logiciel
-- Latence LLM variable (2-10s selon charge)
-- Reconnexion WiFi peut prendre 30s
-
-### Fonctionnalités non implémentées
-- Mode deep sleep (prévu mais pas testé)
-- Interface web (hors scope)
+```bash
+mosquitto_sub \
+  -h prenom-nom.example.com \
+  -p 443 \
+  -u central -P 'mot-de-passe-fort' \
+  -t 'hydro-limoilou/poste-XX/#' -v
 ```
 
-</v-click>
-
 <v-click>
 
-<div class="mt-2 p-2 bg-blue-500 bg-opacity-20 rounded-lg text-center text-sm">
+<div class="mt-3 p-3 bg-green-500 bg-opacity-20 rounded-lg text-sm">
 
-**Documenter les limitations** démontre une compréhension professionnelle du projet.
+Si la commande retourne les topics en continu, le critère 2.4 est atteint.
 
 </div>
 
 </v-click>
+
+---
+
+# Documents de référence
+
+- `evaluations/Evaluation-04/contrat-serveur-central.md` — topics, payloads, Mosquitto
+- `evaluations/Evaluation-04/grille-checkpoint-2.md` — grille détaillée CP2
 
 ---
 layout: section
 ---
 
-# Partie 2
-## Communication technique
+# Au travail
+## Labo libre — l'enseignant circule
 
 ---
 
-# Structure de la présentation
-
-### Plan recommandé (15 min)
+# Pour la sem. 15 (CP3 — 20%)
 
 <v-clicks>
 
-1. **Introduction** (2 min)
-   - Contexte et objectifs
-   - Aperçu du système
-
-2. **Architecture** (3 min)
-   - Schéma global
-   - Composants clés
-   - Choix techniques
-
-3. **Démonstration** (5 min)
-   - Fonctionnement en direct
-   - Scénarios d'utilisation
-
-4. **Résultats et apprentissages** (3 min)
-   - Métriques de performance
-   - Défis rencontrés
-   - Leçons apprises
-
-5. **Questions** (2 min)
+- Démo en direct des **3 scénarios** (nominal, alarme, perte/reprise)
+- **PCB routé** 2 couches, DRC sans erreurs, Gerbers + BOM
+- Documentation complète (processus + protocoles)
+- Vidéo de démo (≤ 5 min)
+- Site reste visible côté VM pendant toute la démo
+- Justification des choix de QoS
 
 </v-clicks>
 
----
-
-# Conseils pour la présentation
-
-### Réussir sa communication
-
-<div class="grid grid-cols-2 gap-4">
-
-<div>
-
-### À faire
-
 <v-click>
 
-- Préparer un **plan B** pour la démo
-- **Répéter** plusieurs fois
-- Parler **clairement** et pas trop vite
-- **Regarder** l'audience
-- Utiliser des **visuels** clairs
-- Chronométrer (15 min max)
+<div class="mt-3 p-3 bg-orange-500 bg-opacity-20 rounded-lg text-sm">
 
-</v-click>
-
-</div>
-
-<div>
-
-### À éviter
-
-<v-click>
-
-- Lire ses notes mot à mot
-- Trop de texte sur les diapos
-- Démo trop longue/complexe
-- Ignorer les questions
-- Paniquer si problème technique
-- Dépasser le temps alloué
-
-</v-click>
-
-</div>
-
-</div>
-
----
-
-# La démonstration
-
-### Préparer un scénario solide
-
-<v-click>
-
-### Scénario type (5 min)
-
-1. **Montrer le système physique** (30s)
-   - PCB, connexions, T-Beam
-
-2. **Démarrage** (30s)
-   - Boot, connexion MQTT
-
-3. **Capteurs → Affichage** (1 min)
-   - Lire un capteur, voir sur l'interface
-
-4. **Commande → Action** (1 min)
-   - Envoyer une commande, LED s'allume
-
-5. **LoRa** (1 min)
-   - Message entre deux noeuds
-
-6. **LLM** (1 min)
-   - Analyse automatique d'une situation
-
-</v-click>
-
----
-
-# Plan B pour la démo
-
-### Quand ça ne marche pas...
-
-<v-clicks>
-
-1. **Vidéo de backup**
-   - Enregistrer une démo fonctionnelle
-   - Prête à être jouée
-
-2. **Screenshots/captures**
-   - Interface en fonctionnement
-   - Messages MQTT
-   - Résultats de tests
-
-3. **Mode dégradé**
-   - Démontrer une partie seulement
-   - Expliquer ce qui devrait se passer
-
-4. **Rester calme**
-   - "Le système a fonctionné ce matin..."
-   - Montrer les preuves (logs, vidéos)
-
-</v-clicks>
-
----
-
-# Répondre aux questions
-
-### Techniques de gestion
-
-<v-click>
-
-### Types de questions
-
-| Type | Stratégie |
-|------|-----------|
-| Clarification | Reformuler et répondre |
-| Technique | Être précis ou admettre ne pas savoir |
-| Critique | Accepter, expliquer les contraintes |
-| Hors sujet | Rediriger poliment |
-
-</v-click>
-
-<v-click>
-
-### Phrases utiles
-
-- "C'est une bonne question, en fait..."
-- "Nous avons choisi X parce que..."
-- "C'est une limitation que nous avons documentée..."
-- "Je ne suis pas certain, je vais vérifier..."
-
-</v-click>
-
----
-layout: section
----
-
-# Partie 3
-## Rétrospective
-
----
-
-# Leçons apprises
-
-### Ce que le projet vous a appris
-
-<v-click>
-
-### Questions à vous poser
-
-- Quelle compétence technique avez-vous le plus développée?
-- Quel a été le plus grand défi?
-- Que feriez-vous différemment?
-- Qu'est-ce qui vous a surpris?
-- Quelle partie avez-vous préférée?
-
-</v-click>
-
-<v-click>
-
-<div class="mt-4 p-2 bg-blue-500 bg-opacity-20 rounded-lg text-center text-sm">
-
-**Partager ses apprentissages** = valeur ajoutée pour la présentation.
+CP3 = le plus lourd. Préparer le routage PCB en parallèle dès aujourd'hui.
 
 </div>
 
 </v-click>
-
----
-
-# Points forts à valoriser
-
-### Mettez en avant vos réussites
-
-<v-click>
-
-### Exemples de points forts
-
-- "Notre PCB a fonctionné du premier coup"
-- "Nous avons atteint 5 km de portée LoRa"
-- "Le pipeline traite 100 messages/min sans erreur"
-- "L'intégration LLM détecte 95% des anomalies"
-- "Le système fonctionne 24h sans intervention"
-
-</v-click>
-
-<v-click>
-
-### Comment les présenter
-
-```markdown
-## Résultats clés
-
-- Latence moyenne: **1.2 secondes** (cible: < 2s) ✅
-- Taux de livraison: **99.5%** (cible: > 99%) ✅
-- Portée LoRa: **3.2 km** en urbain
-- Autonomie: **12 heures** sur batterie 3000mAh
-```
-
-</v-click>
-
----
-
-# Axes d'amélioration
-
-### Pour aller plus loin
-
-<v-click>
-
-### Améliorations possibles
-
-- Mode deep sleep pour économie d'énergie
-- Interface web pour monitoring distant
-- Plus de capteurs sur le shield
-- Réseau mesh avec plus de noeuds
-- Dashboard plus complet
-- Tests automatisés
-
-</v-click>
-
-<v-click>
-
-<div class="mt-4 p-2 bg-green-500 bg-opacity-20 rounded-lg text-center text-sm">
-
-**Identifier des améliorations** montre une vision critique et constructive.
-
-</div>
-
-</v-click>
-
----
-
-# Portfolio professionnel
-
-### Valoriser votre travail
-
-<v-click>
-
-### Ce projet peut servir à
-
-- **CV** : "Conception et réalisation d'un système IoT complet"
-- **Entretien** : Démontrer des compétences concrètes
-- **Portfolio** : GitHub public avec documentation soignée
-- **LinkedIn** : Post avec photos et description
-
-</v-click>
-
-<v-click>
-
-### Éléments à conserver
-
-- Photos du matériel
-- Vidéos de démonstration
-- Code source (nettoyé)
-- Documentation technique
-- Résultats de tests
-
-</v-click>
-
----
-layout: section
----
-
-# Travail de la semaine
-## Finalisation
-
----
-
-# Objectifs du laboratoire
-
-### Dernière ligne droite
-
-<div class="grid grid-cols-2 gap-4">
-
-<div>
-
-### Finalisation (1h30)
-
-<v-clicks>
-
-- [ ] Corrections de dernière minute
-- [ ] Tests d'acceptation
-- [ ] Documentation complète
-- [ ] Nettoyage du code
-
-</v-clicks>
-
-</div>
-
-<div>
-
-### Présentation (1h30)
-
-<v-clicks>
-
-- [ ] Créer les diapositives
-- [ ] Préparer la démo
-- [ ] Enregistrer vidéo backup
-- [ ] Répéter la présentation
-
-</v-clicks>
-
-</div>
-
-</div>
-
----
-
-# Grille d'évaluation (rappel)
-
-### Projet final - 30%
-
-<v-click>
-
-### Capacité 1 (10%)
-
-- PCB fonctionnel et assemblé
-- Code Arduino/Python fonctionnel
-- Interface utilisateur
-- Documentation technique
-
-</v-click>
-
-<v-click>
-
-### Capacité 2 (20%)
-
-- Configuration Meshtastic
-- Intégration MQTT
-- Tests de performance
-- Qualité de la présentation
-- Documentation complète
-
-</v-click>
-
----
-layout: center
-class: text-center
----
-
-# Questions?
-
-<div class="text-xl mt-8">
-Derniers ajustements avant la grande finale!
-</div>
-
-<div class="mt-4 text-sm">
-Semaine prochaine : Présentations finales
-</div>
-
----
-layout: end
----
-
-# Merci!
-
-243-4J5-LI - Objets connectés
-
-Semaine 14

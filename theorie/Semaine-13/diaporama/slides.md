@@ -4,7 +4,7 @@ background: https://images.unsplash.com/photo-1518770660439-4636190af475?w=1920
 title: 243-4J5-LI - Objets connectés - Semaine 13
 info: |
   ## Objets connectés
-  Semaine 13 - Intégration finale du projet
+  Semaine 13 - Projet final Hydro-Limoilou (CP1)
 
   Cégep Limoilou - Session H26
 class: text-center
@@ -19,7 +19,7 @@ download: true
 # Objets connectés
 ## 243-4J5-LI
 
-Semaine 13 - Intégration finale du projet
+Semaine 13 — Projet final Hydro-Limoilou (CP1)
 
 <div class="pt-12">
   <span class="px-2 py-1 rounded cursor-pointer" hover="bg-white bg-opacity-10">
@@ -31,101 +31,84 @@ Semaine 13 - Intégration finale du projet
 layout: section
 ---
 
-# Vue d'ensemble
-## Assemblage du système complet
+# Mise en situation
+## Hydro-Limoilou — Télémétrie RF
 
 ---
 
-# Architecture finale
+# Le contexte
 
-### Tous les composants ensemble
+### Hydro-Limoilou (fictif)
 
-<v-click>
+<v-clicks>
 
-```mermaid {scale: 0.4}
+- Distributeur d'énergie qui exploite **8 sites RF** disséminés sur le territoire
+- **Chaque site héberge un répéteur RF** (que vous configurez dans un cours connexe)
+- Le projet en cours déploie **l'infrastructure de télémétrie** qui surveille les conditions opérationnelles autour du répéteur :
+  - Climat (température, humidité, lumière) — protection du shelter du répéteur
+  - État mécanique (vibrations, inclinaison) — pointage de l'antenne
+  - Sécurité (intrusion, ouverture porte) — protection physique
+  - Énergie (tension batterie, niveau carburant) — disponibilité 24/7
+- Les données convergent vers un **serveur central VM** simulant un NOC qui supervise les 8 répéteurs
+
+</v-clicks>
+
+---
+
+# Architecture cible
+
+```mermaid {scale: 0.5}
 graph TB
-    subgraph "Matériel"
-        PCB[Shield PCB] --> LILY[LilyGO A7670G]
-        TBEAM[T-Beam LoRa]
+    subgraph LoRa["Voie LoRa — Sites #1 à #4"]
+        TBd1["T-Beam distant<br/>+ shield capteurs"]
+        TBg1["T-Beam gateway WiFi"]
+        Pi1["Pi 5<br/>Mosquitto + tactile"]
+        TBd1 -.LoRa.-> TBg1 -->|MQTT WiFi| Pi1
     end
 
-    subgraph "Communication"
-        LILY -->|LTE/WiFi| MQTT[Mosquitto]
-        TBEAM -->|LoRa| GW[Gateway]
-        GW -->|WiFi| MQTT
+    subgraph LTE["Voie LTE — Sites #5 à #8"]
+        A1["LilyGO A7670G<br/>+ shield capteurs"]
+        Pi2["Pi 5<br/>Mosquitto + tactile"]
+        A1 -->|MQTT/WSS| Pi2
     end
 
-    subgraph "Traitement"
-        MQTT --> PIPE[Pipeline Python]
-        PIPE --> LLM[API LLM]
-        PIPE --> DB[(Database)]
-    end
-
-    subgraph "Interface"
-        PIPE --> UI[Interface RPi]
-        PIPE --> ALERT[Alertes]
-    end
-
-    style PCB fill:#6f6
-    style PIPE fill:#f96
-    style LLM fill:#69f
+    Pi1 -->|Cloudflare Tunnel| VM[("Serveur central VM")]
+    Pi2 -->|Cloudflare Tunnel| VM
 ```
-
-</v-click>
 
 ---
 
-# Composants à intégrer
+# Pourquoi 2 voies ?
 
-### Checklist du système
+<div class="grid grid-cols-2 gap-4">
 
-<div class="grid grid-cols-3 gap-3 text-sm">
+<div class="p-3 bg-cyan-500 bg-opacity-20 rounded-lg">
 
-<div class="p-3 bg-blue-500 bg-opacity-20 rounded-lg">
+### Voie LoRa (#1-4)
 
-### Matériel
+<v-clicks>
 
-<v-click>
+- Sites **isolés** ou **en hauteur**
+- Couverture cellulaire faible
+- Mesh local autonome pertinent
+- Tour relais, cabinet fluvial, poste forestier, mât météo
 
-- [ ] PCB shield soudé et testé
-- [ ] LilyGO A7670G fonctionnel
-- [ ] T-Beam SUPREME configuré
-- [ ] Connexions validées
-- [ ] Alimentation stable
-
-</v-click>
+</v-clicks>
 
 </div>
 
-<div class="p-3 bg-green-500 bg-opacity-20 rounded-lg">
+<div class="p-3 bg-amber-500 bg-opacity-20 rounded-lg">
 
-### Communication
+### Voie LTE (#5-8)
 
-<v-click>
+<v-clicks>
 
-- [ ] MQTT broker opérationnel
-- [ ] LTE ou WiFi connecté
-- [ ] Gateway LoRa→MQTT
-- [ ] Topics structurés
-- [ ] TLS activé
+- Sites **urbains** ou **semi-urbains**
+- Couverture cellulaire fiable
+- Latence faible, intégration cloud directe
+- Sous-station, rooftop, station de pompage, refuge
 
-</v-click>
-
-</div>
-
-<div class="p-3 bg-purple-500 bg-opacity-20 rounded-lg">
-
-### Logiciel
-
-<v-click>
-
-- [ ] Firmware Arduino stable
-- [ ] Pipeline Python complet
-- [ ] Intégration LLM
-- [ ] Interface utilisateur
-- [ ] Gestion des erreurs
-
-</v-click>
+</v-clicks>
 
 </div>
 
@@ -135,137 +118,39 @@ graph TB
 layout: section
 ---
 
-# Partie 1
-## Intégration matérielle
+# Sélection des étudiant·es
+## Une remédiation ciblée
 
 ---
 
-# Test du système complet
+# Principe pédagogique
 
-### Validation progressive
+### Le projet final = 2e chance encadrée
 
 <v-clicks>
 
-1. **Alimentation**
-   - Brancher le PCB au LilyGO
-   - Vérifier les tensions (3.3V stable)
-   - Pas de composants qui chauffent
-
-2. **Capteurs**
-   - Lecture accéléromètre I2C
-   - Lecture potentiomètres ADC
-   - Lecture boutons GPIO
-
-3. **Actionneurs**
-   - Contrôle des LEDs
-   - Réponse aux commandes MQTT
-
-4. **Communication**
-   - Connexion au broker
-   - Publication de données
-   - Réception de commandes
+- Chaque étudiant·e est affecté·e à la voie qui exerce ce qu'il/elle a **le moins bien réussi** lors des évaluations antérieures
+- L'objectif : **redémontrer** la compétence faiblement maîtrisée
+- Les 3 checkpoints hebdomadaires deviennent des points d'observation de la progression
 
 </v-clicks>
 
 ---
 
-# Code d'intégration Arduino
+# Critères de sélection
 
-### Structure recommandée
-
-```cpp {all|1-10|12-24|26-34}
-#include <WiFi.h>
-#include <PubSubClient.h>
-#include <Wire.h>
-#include <ArduinoJson.h>
-
-// Modules
-#include "config.h"
-#include "sensors.h"
-#include "actuators.h"
-#include "mqtt_handler.h"
-
-void setup() {
-    Serial.begin(115200);
-
-    // Initialisation des modules
-    initSensors();
-    initActuators();
-    initWiFi();
-    initMQTT();
-
-    Serial.println("Système initialisé!");
-}
-
-void loop() {
-    // Maintenir la connexion MQTT
-    mqttLoop();
-
-    // Lecture et publication des capteurs
-    if (shouldPublish()) {
-        SensorData data = readAllSensors();
-        publishSensorData(data);
-    }
-
-    delay(100);
-}
-```
-
----
-
-# Gestion des modules
-
-### Organisation du code
-
-```cpp
-// sensors.h
-struct SensorData {
-    float accel_x, accel_y, accel_z;
-    int pot1, pot2;
-    bool btn1, btn2;
-};
-
-SensorData readAllSensors() {
-    SensorData data;
-
-    // Accéléromètre
-    readAccelerometer(&data.accel_x, &data.accel_y, &data.accel_z);
-
-    // Potentiomètres
-    data.pot1 = analogRead(POT1_PIN);
-    data.pot2 = analogRead(POT2_PIN);
-
-    // Boutons
-    data.btn1 = digitalRead(BTN1_PIN);
-    data.btn2 = digitalRead(BTN2_PIN);
-
-    return data;
-}
-```
-
----
-
-# Intégration Meshtastic
-
-### Communication LoRa + MQTT
+| Évaluation faible | Compétence à redémontrer | Voie attribuée |
+|---|---|---|
+| **Évaluation mi-session** (Shield PCB + LTE + MQTT) | A7670G + LTE + MQTT/WSS | **LTE (#5-8)** |
+| **TP LoRa** (Meshtastic + mesh + gateway) | LoRa mesh + pont MQTT | **LoRa (#1-4)** |
 
 <v-click>
 
-```mermaid {scale: 0.55}
-sequenceDiagram
-    participant TB as T-Beam
-    participant GW as Gateway
-    participant MQTT as Mosquitto
-    participant PY as Python
+<div class="mt-4 p-3 bg-blue-500 bg-opacity-20 rounded-lg text-sm">
 
-    TB->>GW: Message LoRa (position)
-    GW->>MQTT: Publish msh/.../json
-    MQTT->>PY: Message reçu
-    PY->>PY: Traitement + LLM
-    PY->>MQTT: Commande
-    MQTT->>GW: Message pour TB
-    GW->>TB: Commande LoRa
-```
+**Cas limite** : étudiant·e faible aux deux évaluations → léger biais vers LoRa (deux T-Beam à coordonner = davantage d'occasions d'observer la progression).
+
+</div>
 
 </v-click>
 
@@ -273,325 +158,283 @@ sequenceDiagram
 layout: section
 ---
 
-# Partie 2
-## Tests de performance
+# Les 8 sites
 
 ---
 
-# Métriques à mesurer
+# Sites LoRa (#1-4)
 
-### Évaluer la qualité du système
+Chaque site héberge un **répéteur RF** (configuré dans le cours connexe) — la télémétrie en surveille les conditions opérationnelles.
 
-<v-click>
-
-| Métrique | Cible | Comment mesurer |
-|----------|-------|-----------------|
-| Latence bout-en-bout | < 2s | Timestamp envoi→réception |
-| Taux de livraison | > 99% | Messages reçus/envoyés |
-| Autonomie batterie | > 8h | Test de décharge |
-| Temps de reconnexion | < 30s | Après coupure réseau |
-| Disponibilité | > 99% | Uptime sur 24h |
-
-</v-click>
+| # | Site | Mise en situation |
+|---|------|-------------------|
+| 1 | **Tour relais nord** | Répéteur en sommet de tour SCADA — shelter + vibrations mât |
+| 2 | **Cabinet de jonction fluvial** | Répéteur de liaison côtière — intrusion + niveau d'eau |
+| 3 | **Poste de mesure forestier** | Répéteur autonome solaire — climat + alimentation 24/7 |
+| 4 | **Mât météo radio** | Répéteur sur mât — basculement (pointage antenne) + présence base |
 
 ---
 
-# Tests de charge
+# Sites LTE (#5-8)
 
-### Simuler des conditions réelles
+Chaque site héberge un **répéteur RF** (configuré dans le cours connexe) — la télémétrie en surveille les conditions opérationnelles.
 
-```python
-import asyncio
-import time
-
-async def stress_test(messages_per_second: int, duration: int):
-    """Test de charge du système."""
-    start = time.time()
-    sent = 0
-    received = 0
-    errors = 0
-
-    while time.time() - start < duration:
-        try:
-            # Envoyer un message
-            await send_test_message()
-            sent += 1
-
-            # Attendre la réponse
-            if await wait_for_response(timeout=5):
-                received += 1
-        except Exception:
-            errors += 1
-
-        await asyncio.sleep(1 / messages_per_second)
-
-    print(f"Envoyés: {sent}, Reçus: {received}, Erreurs: {errors}")
-    print(f"Taux de succès: {received/sent*100:.1f}%")
-```
-
----
-
-# Tests de latence
-
-### Mesurer les délais
-
-```python
-import time
-import statistics
-
-def measure_latency(num_samples: int = 100) -> dict:
-    """Mesure la latence du système."""
-    latencies = []
-
-    for _ in range(num_samples):
-        start = time.time()
-
-        # Envoyer et attendre la réponse
-        send_ping()
-        wait_for_pong()
-
-        latency = (time.time() - start) * 1000  # ms
-        latencies.append(latency)
-
-    return {
-        "min": min(latencies),
-        "max": max(latencies),
-        "mean": statistics.mean(latencies),
-        "median": statistics.median(latencies),
-        "p95": sorted(latencies)[int(len(latencies) * 0.95)],
-        "p99": sorted(latencies)[int(len(latencies) * 0.99)]
-    }
-```
+| # | Site | Mise en situation |
+|---|------|-------------------|
+| 5 | **Sous-station urbaine** | Répéteur colocalisé en sous-station — climat + intrusion + énergie |
+| 6 | **Antenne rooftop centre-ville** | Répéteur directionnel sur toit — choc antenne + batteries solaires |
+| 7 | **Station de pompage instrumentée** | Répéteur SCADA en station — climat + sécurité d'accès |
+| 8 | **Refuge technique de campagne** | Répéteur isolé + génératrice de secours — choc + carburant |
 
 ---
 layout: section
 ---
 
-# Partie 3
-## Autonomie énergétique
+# Assignations capteurs
+## Modules breakout sur shield
 
 ---
 
-# Profil de consommation
+# Pool de modules
 
-### Comprendre où va l'énergie
-
-<v-click>
-
-| Composant | Mode actif | Mode veille |
-|-----------|:----------:|:-----------:|
-| ESP32 | 80-240 mA | 10 µA |
-| Module LTE | 200-400 mA | 1 mA |
-| Module LoRa | 120 mA (TX) | 1.5 µA |
-| GPS | 25-50 mA | 10 µA |
-| LEDs | 10-20 mA | 0 |
-
-</v-click>
-
-<v-click>
-
-### Calcul d'autonomie
-
-$$
-Autonomie = \frac{Capacité_{batterie}}{Consommation_{moyenne}}
-$$
-
-**Exemple** : Batterie 3000 mAh, conso moyenne 100 mA
-$$
-\frac{3000}{100} = 30 \text{ heures}
-$$
-
-</v-click>
+| Module | Type | Bus |
+|--------|------|-----|
+| **DHT22** | Température + humidité | 1-Wire (1 GPIO) |
+| **MPU6050** | Accéléromètre 3 axes | I2C (0x68) |
+| **BH1750** | Luminosité | I2C (0x23) |
+| **HC-SR501** | Détecteur PIR mouvement | GPIO digital |
+| **Potentiomètre** | Mesure analogique simulée | ADC |
+| **Bouton** | Entrée digitale | GPIO digital |
+| **LED** | Sortie digitale | GPIO digital |
 
 ---
 
-# Optimisation de la consommation
+# Assignations LoRa (#1-4)
 
-### Stratégies d'économie d'énergie
+| # | Modules assignés |
+|---|-------------------|
+| 1 | DHT22 + MPU6050 + 2 boutons + 2 LEDs |
+| 2 | BH1750 + HC-SR501 + 1 pot + 1 bouton + 1 LED |
+| 3 | DHT22 + BH1750 + 1 bouton + 1 pot + 1 LED |
+| 4 | MPU6050 + HC-SR501 + 1 bouton + 1 pot + 2 LEDs |
 
-<v-clicks>
+<div class="mt-4 p-3 bg-yellow-500 bg-opacity-20 rounded-lg text-sm">
 
-1. **Deep Sleep** entre les transmissions
-   ```cpp
-   esp_deep_sleep_start();  // ~10 µA
-   ```
+**T-Beam SUPREME** : ADC limité (max 1 pot). Capteurs I2C partagent le bus primaire 17/18 sans conflit.
 
-2. **Réduire la fréquence** d'envoi
-   - Toutes les 5 min au lieu de toutes les secondes
-
-3. **Éteindre les périphériques** inutilisés
-   - GPS seulement si nécessaire
-   - LEDs seulement pour feedback
-
-4. **Optimiser le code radio**
-   - SF plus bas si possible
-   - Puissance TX adaptée à la distance
-
-</v-clicks>
+</div>
 
 ---
 
-# Modes de veille ESP32
+# Assignations LTE (#5-8)
 
-### Options disponibles
+| # | Modules assignés |
+|---|-------------------|
+| 5 | DHT22 + HC-SR501 + 2 pots + 2 LEDs |
+| 6 | MPU6050 + BH1750 + 2 boutons + 2 LEDs |
+| 7 | DHT22 + BH1750 + HC-SR501 + 2 LEDs |
+| 8 | MPU6050 + DHT22 + 2 boutons + 1 pot + 1 LED |
 
-<v-click>
+<div class="mt-4 p-3 bg-green-500 bg-opacity-20 rounded-lg text-sm">
 
-| Mode | Consommation | Réveil par |
-|------|:------------:|------------|
-| Active | 80-240 mA | - |
-| Modem Sleep | 20 mA | CPU actif |
-| Light Sleep | 0.8 mA | Timer, GPIO, WiFi |
-| Deep Sleep | 10 µA | Timer, GPIO, ULP |
-| Hibernation | 5 µA | Timer, GPIO |
+**LilyGO A7670G** : ESP32 standard, plus de GPIO disponibles → jusqu'à 5 modules.
 
-</v-click>
+</div>
 
-<v-click>
+---
+layout: section
+---
 
-### Code Deep Sleep
+# Convention MQTT
+## Le contrat avec le serveur central
 
-```cpp
-#define SLEEP_DURATION_US 300000000  // 5 minutes
+---
 
-void goToSleep() {
-    esp_sleep_enable_timer_wakeup(SLEEP_DURATION_US);
-    esp_deep_sleep_start();
-}
+# Schéma de topics
+
+```
+hydro-limoilou/{site-id}/telemetry/{capteur}     # Mesures périodiques
+hydro-limoilou/{site-id}/status                  # État du nœud
+hydro-limoilou/{site-id}/alarm/{type}            # Évènements ponctuels
+hydro-limoilou/{site-id}/actuators/{nom}         # Commandes descendantes
 ```
 
+<v-click>
+
+### Site-id
+
+`poste-01` à `poste-08` selon la position attribuée.
+
 </v-click>
+
+---
+
+# Exemples de payloads
+
+```json
+// hydro-limoilou/poste-01/telemetry/temperature
+{"value": 22.4, "unit": "C", "ts": 1739500000}
+
+// hydro-limoilou/poste-01/telemetry/vibration
+{"x": 0.02, "y": -0.01, "z": 9.81, "ts": 1739500005}
+
+// hydro-limoilou/poste-01/status
+{"uptime": 3600, "rssi": -67, "link": "lora", "battery_v": 3.92, "ts": 1739500030}
+
+// hydro-limoilou/poste-01/alarm/vibration
+{"level": "warning", "value": 1.45, "unit": "m/s2", "ts": 1739500045}
+```
+
+<div class="mt-3 p-3 bg-blue-500 bg-opacity-20 rounded-lg text-sm">
+
+Document complet : `evaluations/Evaluation-04/contrat-serveur-central.md`
+
+</div>
+
+---
+
+# Sous-topics analogiques par site
+
+Le potentiomètre est nommé selon la **mise en situation** :
+
+| # | Site | Sous-topic | Plage simulée |
+|---|------|------------|---------------|
+| 2 | Cabinet fluvial | `water_level` | 0 - 200 cm |
+| 3 | Poste forestier | `battery_v` | 10 - 14 V |
+| 4 | Mât météo | `wind_speed` | 0 - 120 km/h |
+| 5 | Sous-station | `voltage_line`, `current_line` | 200-260 V, 0-100 A |
+| 8 | Refuge technique | `fuel_level` | 0 - 100 % |
 
 ---
 layout: section
 ---
 
 # Travail de la semaine
-## Intégration et tests
+## Checkpoint 1 (CP1) — 5%
 
 ---
 
-# Objectifs du laboratoire
-
-### Finaliser l'intégration
-
-<div class="grid grid-cols-2 gap-4">
-
-<div>
-
-### Intégration (2h)
+# Objectifs CP1
 
 <v-clicks>
 
-- [ ] Assembler tous les composants
-- [ ] Tester les connexions
-- [ ] Valider la communication
-- [ ] Résoudre les conflits
+1. **Câbler le breadboard** avec tous les modules assignés sur l'hôte (T-Beam SUPREME ou A7670G)
+2. **Adapter le firmware** pour publier au moins **un capteur** sur le bon topic vers le broker local du Pi 5
+3. **Amorcer le projet KiCad** du shield (composants placés, début de connexions)
 
 </v-clicks>
 
-</div>
-
-<div>
-
-### Tests (1h)
-
-<v-clicks>
-
-- [ ] Tests de latence
-- [ ] Tests de fiabilité
-- [ ] Mesure de consommation
-- [ ] Documentation des résultats
-
-</v-clicks>
-
-</div>
-
-</div>
-
----
-
-# Checklist d'intégration
-
-### Validation système
-
 <v-click>
 
-### Matériel
+<div class="mt-4 p-3 bg-green-500 bg-opacity-20 rounded-lg">
 
-- [ ] PCB fonctionne sur batterie
-- [ ] Tous les capteurs répondent
-- [ ] Tous les actionneurs fonctionnent
-- [ ] Connexions stables
+Validation par l'enseignant **en fin de séance**.
 
-</v-click>
-
-<v-click>
-
-### Logiciel
-
-- [ ] Firmware stable (pas de crash sur 1h)
-- [ ] Pipeline traite les données
-- [ ] LLM répond correctement
-- [ ] Interface affiche les données
-
-</v-click>
-
-<v-click>
-
-### Performance
-
-- [ ] Latence acceptable (< 5s)
-- [ ] Pas de perte de messages
-- [ ] Autonomie mesurée
+</div>
 
 </v-click>
 
 ---
 
-# Préparation de la présentation
+# Critères CP1
 
-### Ce qu'il faut préparer
+| Critère | Capacité | Pondération |
+|---------|:--------:|:-----------:|
+| **1.1** Câblage breadboard conforme | C1 | 1% |
+| **1.2** Première publication MQTT | C2 | 3% |
+| **1.3** Amorce KiCad | C1 | 1% |
+| **TOTAL CP1** | | **5%** |
+
+<div class="mt-4 p-3 bg-blue-500 bg-opacity-20 rounded-lg text-sm">
+
+Grille détaillée : `evaluations/Evaluation-04/grille-checkpoint-1.md`
+
+</div>
+
+---
+
+# Démarrage rapide
+
+### Procédure suggérée
 
 <v-clicks>
 
-1. **Démonstration fonctionnelle**
-   - Scénario préparé
-   - Plan B si problème
-
-2. **Documentation technique**
-   - Architecture du système
-   - Choix techniques justifiés
-   - Résultats des tests
-
-3. **Support visuel**
-   - Diapositives claires
-   - Schémas explicatifs
-   - Photos/vidéos du système
+1. Récupérer son site-id et sa liste de modules
+2. Câbler **un module à la fois** sur le breadboard (vérifier alim 3.3 V / GND / signaux)
+3. Tester chaque module isolément avec un sketch Arduino simple
+4. Adapter le firmware Labo 2 pour publier sur `hydro-limoilou/poste-XX/telemetry/{capteur}`
+5. Vérifier côté Pi 5 :
+   ```bash
+   mosquitto_sub -h localhost -t 'hydro-limoilou/poste-XX/#' -v
+   ```
+6. Créer le projet KiCad et placer les composants
 
 </v-clicks>
 
 ---
-layout: center
-class: text-center
+
+# Pièges fréquents
+
+<v-clicks>
+
+- **Alim 5 V vs 3.3 V** : tous les modules en 3.3 V (sauf HC-SR501 qui supporte 5 V)
+- **Adresse I2C en conflit** : MPU6050 = 0x68, BH1750 = 0x23, ne pas utiliser 0x76 (BME280 interne T-Beam)
+- **Topic non conforme** : respecter strictement `hydro-limoilou/poste-XX/telemetry/...`
+- **Payload non JSON** : utiliser `ArduinoJson` ou format manuel rigoureux
+- **Pas de timestamp** : inclure `ts` (Unix int) dès la première publication
+
+</v-clicks>
+
 ---
 
-# Questions?
+# Documents de référence
 
-<div class="text-xl mt-8">
-Prochaine étape : Intégration complète!
+| Document | Contenu |
+|----------|---------|
+| `architecture-finale-projet.md` | Architecture, mises en situation, assignations |
+| `contrat-serveur-central.md` | Topics, payloads, fréquences |
+| `grille-checkpoint-1.md` | Grille détaillée CP1 (cette semaine) |
+| `grille-projet-final.md` | Récapitulatif global des 3 checkpoints |
+
+Tous dans `evaluations/Evaluation-04/`.
+
+---
+layout: section
+---
+
+# Pour la semaine 14
+## Préparer CP2 (10%) — puis CP3 (20%) en sem. 15
+
+---
+
+# À anticiper
+
+<v-clicks>
+
+- **Tous** les capteurs publient (pas juste un)
+- Au moins **une alarme** déclenchable et publiée sur `alarm/{type}`
+- Interface tactile **étendue à 3 pages** : télémétrie / alarmes / état lien
+- **Tunnel Cloudflare** actif → site visible depuis serveur central VM
+- **Schéma KiCad complet** (ERC sans erreurs)
+
+</v-clicks>
+
+<v-click>
+
+<div class="mt-4 p-3 bg-orange-500 bg-opacity-20 rounded-lg text-sm">
+
+Le CP2 vaut **10%** — ne pas attendre le dernier moment.
+
 </div>
 
-<div class="mt-4 text-sm">
-Semaine prochaine : Préparation de la présentation finale
+</v-click>
+
+---
+
+# Questions ?
+
+<div class="text-center pt-12">
+
+À la semaine prochaine pour le **CP2** !
+
 </div>
-
----
-layout: end
----
-
-# Merci!
-
-243-4J5-LI - Objets connectés
-
-Semaine 13
