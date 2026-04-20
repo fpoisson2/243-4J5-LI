@@ -23,14 +23,14 @@ Chaque site est identifié par un `site-id` numéroté de `poste-01` à `poste-0
 
 | # | Voie | site-id | Site (mise en situation) |
 |---|------|---------|--------------------------|
-| 1 | LoRa | `poste-01` | Tour relais nord |
-| 2 | LoRa | `poste-02` | Cabinet de jonction fluvial |
-| 3 | LoRa | `poste-03` | Poste de mesure forestier |
-| 4 | LoRa | `poste-04` | Mât météo radio |
-| 5 | LTE | `poste-05` | Sous-station urbaine |
-| 6 | LTE | `poste-06` | Antenne rooftop centre-ville |
-| 7 | LTE | `poste-07` | Station de pompage instrumentée |
-| 8 | LTE | `poste-08` | Refuge technique de campagne |
+| 1 | LoRa | `poste-01` | Pylône de transport 315 kV (rural) |
+| 2 | LoRa | `poste-02` | Barrage au fil de l'eau — poste de vanne |
+| 3 | LoRa | `poste-03` | Centrale solaire photovoltaïque isolée |
+| 4 | LoRa | `poste-04` | Pylône de distribution 25 kV |
+| 5 | LTE | `poste-05` | Poste électrique de transformation urbain |
+| 6 | LTE | `poste-06` | Poste électrique à toit ouvert (centre-ville) |
+| 7 | LTE | `poste-07` | Centrale thermique de secours |
+| 8 | LTE | `poste-08` | Barrage hydroélectrique — refuge technique |
 
 ---
 
@@ -112,14 +112,14 @@ Publiés **une seule fois** au déclenchement (QoS ≥ 1, rétention non activé
 
 | # | Site | Types d'alarme attendus |
 |---|------|-------------------------|
-| 1 | Tour relais nord | `vibration` (vent), `motion` |
-| 2 | Cabinet fluvial | `water` (niveau), `motion`, `door` |
-| 3 | Poste forestier | `battery_low`, `temperature` |
-| 4 | Mât météo | `tilt`, `motion` |
-| 5 | Sous-station | `motion`, `voltage`, `current` |
-| 6 | Antenne rooftop | `tilt`, `light` (anomalie ensoleillement) |
-| 7 | Station de pompage | `motion`, `door` |
-| 8 | Refuge technique | `tilt` (choc), `fuel_low`, `temperature` |
+| 1 | Pylône 315 kV | `vibration` (vent), `motion` |
+| 2 | Barrage — poste de vanne | `water` (niveau), `motion`, `door` |
+| 3 | Centrale solaire isolée | `battery_low`, `temperature` |
+| 4 | Pylône 25 kV | `tilt`, `motion` |
+| 5 | Poste urbain | `motion`, `voltage`, `current` |
+| 6 | Poste rooftop | `tilt`, `light` (anomalie ensoleillement) |
+| 7 | Centrale thermique | `motion`, `door` |
+| 8 | Barrage — refuge technique | `tilt` (choc), `fuel_low`, `temperature` |
 
 ### 3.5 Topics `actuators/{nom}` (descendants)
 

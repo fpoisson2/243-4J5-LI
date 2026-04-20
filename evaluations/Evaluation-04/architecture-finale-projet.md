@@ -56,14 +56,14 @@ graph TB
 
 | # | Voie | Site | Mise en situation |
 |---|------|------|-------------------|
-| 1 | LoRa | **Tour relais nord** | Tour de communication SCADA hébergeant un **répéteur RF** au sommet (configuré dans le cours connexe). La télémétrie surveille le shelter d'équipement au pied de la tour + l'état mécanique de la tour exposée au vent (vibrations qui peuvent affecter le pointage de l'antenne du répéteur). |
-| 2 | LoRa | **Cabinet de jonction fluvial** | Cabinet en bord de rivière abritant un **répéteur RF** assurant une liaison côtière. Surveillance d'intrusion + niveau d'eau (risque d'inondation menaçant le répéteur lors des crues). |
-| 3 | LoRa | **Poste de mesure forestier** | Poste isolé en forêt accueillant un **répéteur RF** alimenté par panneau solaire et batterie. Monitoring environnemental + état de l'alimentation autonome (qui doit garantir la disponibilité du répéteur 24/7). |
-| 4 | LoRa | **Mât météo radio** | Mât instrumenté supportant l'antenne d'un **répéteur RF** en zone dégagée. Surveillance du basculement (impact direct sur le pointage du répéteur) + détection de présence à la base. |
-| 5 | LTE | **Sous-station urbaine** | Cabinet électrique au sol en milieu urbain abritant un **répéteur RF** colocalisé. Monitoring climat + intrusion + paramètres énergétiques de la ligne d'alimentation qui alimente le répéteur. |
-| 6 | LTE | **Antenne rooftop centre-ville** | Site sur toit avec **répéteur RF directionnel** et batteries solaires de secours. Surveillance choc/orientation de l'antenne du répéteur + apport solaire (autonomie en cas de panne secteur). |
-| 7 | LTE | **Station de pompage instrumentée** | Station de pompage municipale avec **répéteur RF** colocalisé pour la télémétrie SCADA. Monitoring climat machinerie + sécurité d'accès (portail + présence) protégeant le répéteur. |
-| 8 | LTE | **Refuge technique de campagne** | Refuge isolé contenant un **répéteur RF** + génératrice de secours qui maintient l'alimentation en cas de panne. Monitoring intégrité du refuge (choc, climat) + niveau carburant. |
+| 1 | LoRa | **Pylône de transport 315 kV (rural)** | Pylône haute tension en zone rurale supportant un **répéteur RF** colocalisé sur la structure. La télémétrie surveille le shelter d'équipement au pied du pylône + l'état mécanique de la structure exposée au vent (vibrations des haubans qui peuvent affecter le pointage de l'antenne du répéteur). |
+| 2 | LoRa | **Barrage au fil de l'eau — poste de vanne** | Poste de commande de vanne en crête de barrage abritant un **répéteur RF** assurant la liaison SCADA côtière. Surveillance d'intrusion dans le local + niveau d'eau en amont (risque de crue menaçant l'équipement lors des débits élevés). |
+| 3 | LoRa | **Centrale solaire photovoltaïque isolée** | Centrale solaire autonome hébergeant un **répéteur RF** alimenté directement par les panneaux et le banc de batteries. Monitoring environnemental des onduleurs + état de l'alimentation (qui doit garantir la disponibilité du répéteur 24/7). |
+| 4 | LoRa | **Pylône de distribution 25 kV** | Pylône en béton supportant un transformateur de distribution et l'antenne d'un **répéteur RF** en zone dégagée. Surveillance du basculement du pylône (impact direct sur le pointage du répéteur) + détection de présence à la base (vandalisme/animaux). |
+| 5 | LTE | **Poste électrique de transformation urbain** | Poste de transformation 25 kV/600 V au sol en milieu urbain abritant un **répéteur RF** colocalisé. Monitoring climat de la salle des transformateurs + intrusion + paramètres énergétiques (tension/courant) de la ligne d'alimentation qui alimente le répéteur. |
+| 6 | LTE | **Poste électrique à toit ouvert (centre-ville)** | Poste de sectionnement sur toit d'édifice avec **répéteur RF directionnel** et batteries solaires de secours. Surveillance choc/orientation de l'antenne du répéteur + apport solaire (autonomie en cas de panne secteur du poste). |
+| 7 | LTE | **Centrale thermique de secours** | Centrale thermique diesel de secours accueillant un **répéteur RF** colocalisé pour la télémétrie SCADA. Monitoring climat machinerie (alternateurs, moteurs) + sécurité d'accès (portail + présence) protégeant la centrale et le répéteur. |
+| 8 | LTE | **Barrage hydroélectrique — refuge technique** | Refuge technique en pied de barrage contenant un **répéteur RF** + génératrice de secours qui maintient l'alimentation en cas de panne. Monitoring intégrité du refuge (choc, climat) + niveau de carburant de la génératrice. |
 
 ---
 

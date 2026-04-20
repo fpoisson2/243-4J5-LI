@@ -168,10 +168,10 @@ Chaque site héberge un **répéteur RF** (configuré dans le cours connexe) —
 
 | # | Site | Mise en situation |
 |---|------|-------------------|
-| 1 | **Tour relais nord** | Répéteur en sommet de tour SCADA — shelter + vibrations mât |
-| 2 | **Cabinet de jonction fluvial** | Répéteur de liaison côtière — intrusion + niveau d'eau |
-| 3 | **Poste de mesure forestier** | Répéteur autonome solaire — climat + alimentation 24/7 |
-| 4 | **Mât météo radio** | Répéteur sur mât — basculement (pointage antenne) + présence base |
+| 1 | **Pylône 315 kV (rural)** | Répéteur colocalisé sur pylône haute tension — shelter + vibrations structure |
+| 2 | **Barrage — poste de vanne** | Répéteur SCADA en crête de barrage — intrusion + niveau d'eau amont |
+| 3 | **Centrale solaire isolée** | Répéteur autonome solaire — climat onduleurs + alimentation 24/7 |
+| 4 | **Pylône 25 kV** | Répéteur sur pylône de distribution — basculement (pointage antenne) + présence base |
 
 ---
 
@@ -181,10 +181,10 @@ Chaque site héberge un **répéteur RF** (configuré dans le cours connexe) —
 
 | # | Site | Mise en situation |
 |---|------|-------------------|
-| 5 | **Sous-station urbaine** | Répéteur colocalisé en sous-station — climat + intrusion + énergie |
-| 6 | **Antenne rooftop centre-ville** | Répéteur directionnel sur toit — choc antenne + batteries solaires |
-| 7 | **Station de pompage instrumentée** | Répéteur SCADA en station — climat + sécurité d'accès |
-| 8 | **Refuge technique de campagne** | Répéteur isolé + génératrice de secours — choc + carburant |
+| 5 | **Poste électrique urbain** | Répéteur colocalisé en poste de transformation — climat + intrusion + énergie |
+| 6 | **Poste rooftop (centre-ville)** | Répéteur directionnel sur toit — choc antenne + batteries solaires |
+| 7 | **Centrale thermique de secours** | Répéteur SCADA en centrale diesel — climat + sécurité d'accès |
+| 8 | **Barrage — refuge technique** | Répéteur isolé + génératrice de secours — choc + carburant |
 
 ---
 layout: section
