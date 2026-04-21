@@ -37,7 +37,7 @@ download: true
 
 Chaque site héberge un **répéteur RF** (configuré dans le cours connexe de télécom).
 
-**Votre mission** : déployer l'**infrastructure IdO de télémétrie** qui surveille ces 8 sites et faire converger toutes les données vers un **centre de supervision (NOC)**.
+**Votre mission** : déployer l'**infrastructure IdO de télémétrie** qui surveille ces 8 sites et faire converger toutes les données vers un **Centre de conduite du réseau (CCR)**, à l'image de celui [d'Hydro-Québec](https://www.hydroquebec.com/comprendre/transport/conduite-reseau.html).
 
 </div>
 
@@ -67,7 +67,7 @@ Semaines 13 à 15 — 35 % de la note finale
 - Le présent projet assure le **monitoring environnemental et opérationnel** de ce répéteur :
   - télémétrie : climat shelter, vibration mât, alimentation, intrusion
   - alarmes : basculement, inondation, ouverture cabinet, batterie faible
-  - convergence centrale : simule un **NOC** supervisant les 8 répéteurs
+  - convergence centrale : simule un **CCR** (Centre de conduite du réseau) supervisant les 8 répéteurs — cf. les 160 stations de télémesure + 22 500 points d'acquisition du CCR réel d'Hydro-Québec
 
 </v-clicks>
 

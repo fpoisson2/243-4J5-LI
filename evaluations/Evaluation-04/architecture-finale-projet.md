@@ -18,7 +18,7 @@ Chaque étudiant·e configure **son propre répéteur RF** dans un cours parall�
 
 - la télémétrie observe les conditions qui peuvent affecter le bon fonctionnement du répéteur (température dans le shelter, vibration du mât d'antenne, intégrité de l'alimentation, intrusion physique)
 - les alarmes signalent les situations qui menacent la disponibilité du répéteur (basculement, inondation, ouverture du cabinet, batterie faible, niveau carburant bas)
-- la convergence vers le serveur central simule un NOC (Network Operations Center) supervisant l'ensemble des 8 répéteurs déployés sur le territoire
+- la convergence vers le serveur central simule un **CCR** — Centre de conduite du réseau, équivalent du [CCR d'Hydro-Québec](https://www.hydroquebec.com/comprendre/transport/conduite-reseau.html) qui supervise 24/7 le réseau de transport (160 stations de télémesure, 22 500 points d'acquisition, automatismes de commande à distance). Le projet met les étudiant·es à la place des répartiteurs, avec une vue agrégée des 8 sites.
 
 ---
 

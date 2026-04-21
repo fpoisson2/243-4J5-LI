@@ -150,7 +150,7 @@
   </p>
 
   <div class="info">
-    <strong>Le projet final</strong> simule le déploiement de <strong>8 sites RF</strong> d'un distributeur d'énergie fictif, Hydro-Limoilou. Chaque site héberge un <strong>répéteur RF</strong> (configuré par l'étudiant·e dans un cours connexe), et le présent projet déploie l'<strong>infrastructure de télémétrie</strong> qui en surveille les conditions opérationnelles. Un <strong>serveur central VM</strong> simulant un NOC agrège les 8 sites.
+    <strong>Le projet final</strong> simule le déploiement de <strong>8 sites RF</strong> d'un distributeur d'énergie fictif, Hydro-Limoilou. Chaque site héberge un <strong>répéteur RF</strong> (configuré par l'étudiant·e dans un cours connexe), et le présent projet déploie l'<strong>infrastructure de télémétrie</strong> qui en surveille les conditions opérationnelles. Un <strong>serveur central VM</strong> simule un <strong>CCR (Centre de conduite du réseau)</strong> qui agrège les 8 sites, à l'image du <a href="https://www.hydroquebec.com/comprendre/transport/conduite-reseau.html" target="_blank">CCR d'Hydro-Québec</a>.
   </div>
 
   <div class="toc">
@@ -175,7 +175,7 @@
   <ul>
     <li>la télémétrie observe les conditions qui peuvent affecter le bon fonctionnement du répéteur (température dans le shelter, vibration du mât d'antenne, intégrité de l'alimentation, intrusion physique)</li>
     <li>les alarmes signalent les situations qui menacent la disponibilité du répéteur (basculement, inondation, ouverture du cabinet, batterie faible, niveau carburant bas)</li>
-    <li>la convergence vers le serveur central simule un <strong>NOC</strong> (Network Operations Center) supervisant l'ensemble des 8 répéteurs déployés sur le territoire</li>
+    <li>la convergence vers le serveur central simule un <strong>CCR</strong> (Centre de conduite du réseau) supervisant l'ensemble des 8 répéteurs déployés sur le territoire — cf. le <a href="https://www.hydroquebec.com/comprendre/transport/conduite-reseau.html" target="_blank">CCR d'Hydro-Québec</a> : 160 stations de télémesure, 22 500 points d'acquisition, automatismes de commande à distance 24/7</li>
   </ul>
 
   <h2 id="architecture">2. Architecture globale</h2>
