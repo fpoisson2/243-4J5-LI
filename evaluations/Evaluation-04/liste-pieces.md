@@ -8,7 +8,7 @@
 
 ## 1. Décompte par étudiant·e (modules assignés)
 
-| # | DHT22 | MPU6050 | BH1750 | HC-SR501 | Pot | Bouton | LED |
+| # | BME280 | MPU6050 | BH1750 | EKMC (PIR) | Pot | Bouton | LED |
 |:-:|:-----:|:-------:|:------:|:--------:|:---:|:------:|:---:|
 | 1 (LoRa) | 1 | 1 | 0 | 0 | 0 | 2 | 2 |
 | 2 (LoRa) | 0 | 0 | 1 | 1 | 1 | 1 | 1 |
@@ -37,12 +37,12 @@ Probablement **déjà inventoriés** depuis les Labos précédents — vérifier
 
 Marge de rechange ≈ 40% (composants fragiles, fils dupont peu fiables, casses fréquentes).
 
-| Module | Référence courante | Fonctionnel | Rechange | **Total** | Fournisseur suggéré |
-|--------|---------------------|:-----------:|:--------:|:---------:|---------------------|
-| **DHT22** (température + humidité) | AM2302 sur PCB | 5 | 3 | **8** | AliExpress, Amazon, DigiKey |
-| **MPU6050** (accéléromètre + gyro I2C) | GY-521 | 4 | 3 | **7** | AliExpress, Amazon |
-| **BH1750** (luminosité I2C) | GY-302 | 4 | 3 | **7** | AliExpress, Amazon |
-| **HC-SR501** (PIR détecteur de mouvement) | HC-SR501 standard | 4 | 3 | **7** | AliExpress, Amazon |
+| Module | Référence retenue | Fonctionnel | Rechange | **Total** | Fournisseur |
+|--------|--------------------|:-----------:|:--------:|:---------:|-------------|
+| **BME280** (température + humidité + pression) | **Adafruit 2652** — I2C/SPI, 3-5 V | 5 | 3 | **8** | Adafruit, DigiKey, Mouser |
+| **MPU6050** (accéléromètre + gyro 6 axes) | **Adafruit 3886** — I2C STEMMA QT/Qwiic | 4 | 3 | **7** | Adafruit, DigiKey, Mouser |
+| **BH1750** (luminosité ambiante) | **DFRobot SEN0097** — I2C, 3-5 V | 4 | 3 | **7** | DFRobot, DigiKey, Mouser |
+| **EKMC4607112K** (PIR très basse conso) | **SparkFun 17372** — 170 µA, 3-6 V | 4 | 3 | **7** | SparkFun, DigiKey, Mouser |
 
 ---
 
@@ -99,10 +99,10 @@ Hypothèse : les hôtes (T-Beam SUPREME, A7670G) et l'infrastructure Pi 5 sont *
 
 | Catégorie | Quantité | Coût unitaire estimé (CAD) | Coût total estimé |
 |-----------|:--------:|:--------------------------:|:-----------------:|
-| DHT22 | 8 | 5 $ | 40 $ |
-| MPU6050 (GY-521) | 7 | 3 $ | 21 $ |
-| BH1750 (GY-302) | 7 | 3 $ | 21 $ |
-| HC-SR501 | 7 | 3 $ | 21 $ |
+| BME280 (Adafruit 2652) | 8 | 20 $ | 160 $ |
+| MPU6050 (Adafruit 3886, STEMMA QT) | 7 | 15 $ | 105 $ |
+| BH1750 (DFRobot SEN0097) | 7 | 12 $ | 84 $ |
+| EKMC4607112K (SparkFun 17372) | 7 | 18 $ | 126 $ |
 | Potentiomètre 10 kΩ | 12 | 1 $ | 12 $ |
 | Boutons tactiles (lot 50) | 1 lot | 8 $ | 8 $ |
 | LEDs assorties (kit 100) | 1 kit | 10 $ | 10 $ |
@@ -111,9 +111,9 @@ Hypothèse : les hôtes (T-Beam SUPREME, A7670G) et l'infrastructure Pi 5 sont *
 | Fils dupont (3 packs × 10) | 30 | 5 $ | 150 $ |
 | Batteries 18650 (rechange) | 4 | 8 $ | 32 $ |
 | Câbles USB-C (rechange) | 3 | 5 $ | 15 $ |
-| **TOTAL approximatif** | | | **≈ 400 $** |
+| **TOTAL approximatif** | | | **≈ 772 $** |
 
-> Les coûts sont indicatifs ; ajuster selon fournisseur (AliExpress moins cher mais lead time long, Amazon/DigiKey plus rapides).
+> Les coûts sont indicatifs (prix de marque Adafruit/SparkFun/DFRobot via DigiKey/Mouser). Possibilité de réduire ~40 % en recherchant les puces génériques (BME280 GY-BME280 ≈ 5 $, etc.), mais les références officielles facilitent l'entretien à long terme.
 
 ---
 

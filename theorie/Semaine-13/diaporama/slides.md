@@ -199,10 +199,10 @@ layout: section
 
 | Module | Type | Bus |
 |--------|------|-----|
-| **DHT22** | Température + humidité | 1-Wire (1 GPIO) |
-| **MPU6050** | Accéléromètre 3 axes | I2C (0x68) |
-| **BH1750** | Luminosité | I2C (0x23) |
-| **HC-SR501** | Détecteur PIR mouvement | GPIO digital |
+| **BME280** (Adafruit 2652) | T° + humidité + **pression** | I2C (0x76 / 0x77) ou SPI |
+| **MPU6050** (Adafruit 3886) | Accéléro + gyro 6 axes | I2C STEMMA QT (0x68) |
+| **BH1750** (DFRobot SEN0097) | Luminosité | I2C (0x23) |
+| **EKMC4607112K** (SparkFun 17372) | PIR ultra-basse conso (170 µA) | GPIO digital |
 | **Potentiomètre** | Mesure analogique simulée | ADC |
 | **Bouton** | Entrée digitale | GPIO digital |
 | **LED** | Sortie digitale | GPIO digital |
@@ -213,10 +213,10 @@ layout: section
 
 | # | Modules assignés |
 |---|-------------------|
-| 1 | DHT22 + MPU6050 + 2 boutons + 2 LEDs |
-| 2 | BH1750 + HC-SR501 + 1 pot + 1 bouton + 1 LED |
-| 3 | DHT22 + BH1750 + 1 bouton + 1 pot + 1 LED |
-| 4 | MPU6050 + HC-SR501 + 1 bouton + 1 pot + 2 LEDs |
+| 1 | BME280 + MPU6050 + 2 boutons + 2 LEDs |
+| 2 | BH1750 + EKMC + 1 pot + 1 bouton + 1 LED |
+| 3 | BME280 + BH1750 + 1 bouton + 1 pot + 1 LED |
+| 4 | MPU6050 + EKMC + 1 bouton + 1 pot + 2 LEDs |
 
 <div class="mt-4 p-3 bg-yellow-500 bg-opacity-20 rounded-lg text-sm">
 
@@ -230,10 +230,10 @@ layout: section
 
 | # | Modules assignés |
 |---|-------------------|
-| 5 | DHT22 + HC-SR501 + 2 pots + 2 LEDs |
+| 5 | BME280 + EKMC + 2 pots + 2 LEDs |
 | 6 | MPU6050 + BH1750 + 2 boutons + 2 LEDs |
-| 7 | DHT22 + BH1750 + HC-SR501 + 2 LEDs |
-| 8 | MPU6050 + DHT22 + 2 boutons + 1 pot + 1 LED |
+| 7 | BME280 + BH1750 + EKMC + 2 LEDs |
+| 8 | MPU6050 + BME280 + 2 boutons + 1 pot + 1 LED |
 
 <div class="mt-4 p-3 bg-green-500 bg-opacity-20 rounded-lg text-sm">
 
@@ -377,8 +377,9 @@ Grille détaillée : `evaluations/Evaluation-04/grille-checkpoint-1.md`
 
 <v-clicks>
 
-- **Alim 5 V vs 3.3 V** : tous les modules en 3.3 V (sauf HC-SR501 qui supporte 5 V)
-- **Adresse I2C en conflit** : MPU6050 = 0x68, BH1750 = 0x23, ne pas utiliser 0x76 (BME280 interne T-Beam)
+- **Alim** : tous les modules en 3.3 V (BME280/MPU6050/BH1750 tolèrent 3-5 V ; EKMC accepte 3-6 V)
+- **I2C — conflit d'adresses BME280** : T-Beam SUPREME a un BME280 interne à **0x77**. Le BME280 externe (Adafruit 2652) doit être configuré à **0x76** (strap SDO → GND)
+- **I2C — autres adresses** : MPU6050 = 0x68, BH1750 = 0x23 (sans conflit)
 - **Topic non conforme** : respecter strictement `hydro-limoilou/poste-XX/telemetry/...`
 - **Payload non JSON** : utiliser `ArduinoJson` ou format manuel rigoureux
 - **Pas de timestamp** : inclure `ts` (Unix int) dès la première publication

@@ -24,13 +24,15 @@ Chaque étudiant·e configure **son propre répéteur RF** dans un cours parall�
 
 ## 2. Architecture globale
 
+Le serveur central est un **client MQTT** (pas un broker). Il est hébergé sur une VM gérée par l'enseignant et s'abonne en parallèle aux **8 brokers Mosquitto** hébergés sur les Pi 5 des étudiant·es.
+
 ```mermaid
 graph TB
     subgraph Sites_LoRa["Voie LoRa — Sites #1 à #4"]
         TBd1["T-Beam SUPREME distant<br/>+ shield capteurs<br/>(au site)"]
         TBg1["T-Beam SUPREME gateway<br/>(au labo, WiFi)"]
         Pi1["Raspberry Pi 5<br/>Mosquitto + écran tactile"]
-        TBd1 -.LoRa mesh.-> TBg1 -->|MQTT WiFi local| Pi1
+        TBd1 -.LoRa P2P.-> TBg1 -->|MQTT WiFi local| Pi1
     end
 
     subgraph Sites_LTE["Voie LTE — Sites #5 à #8"]
@@ -39,16 +41,29 @@ graph TB
         A1 -->|MQTT/WSS via Cloudflare| Pi2
     end
 
-    Pi1 -->|Cloudflare Tunnel| VM[("Serveur central — VM<br/>Agrégation des 8 sites<br/>Dashboard global")]
-    Pi2 -->|Cloudflare Tunnel| VM
+    Pi1 -->|Cloudflare Tunnel — voie primaire| Client[("Client central — VM<br/>8 connexions MQTT parallèles<br/>Dashboard agrégé")]
+    Pi1 -.WAN privé — voie secours.-> Client
+    Pi2 -->|Cloudflare Tunnel — voie primaire| Client
+    Pi2 -.WAN privé — voie secours.-> Client
 ```
 
 ### Particularités par voie
 
-| Voie | Hôte | Chemin réseau |
-|------|------|---------------|
-| **LoRa (#1-4)** | T-Beam SUPREME (×2) | Capteurs → T-Beam distant → LoRa mesh → T-Beam gateway WiFi → Mosquitto local sur Pi 5 → Cloudflare Tunnel → VM |
-| **LTE (#5-8)** | LilyGO A7670G (×1) | Capteurs → A7670G → MQTT/WSS direct via réseau cellulaire → Cloudflare → Mosquitto local sur Pi 5 → Cloudflare Tunnel → VM |
+| Voie | Hôte | Chemin réseau (capteur → broker) | Chemin réseau (client central → broker) |
+|------|------|----------------------------------|------------------------------------------|
+| **LoRa (#1-4)** | T-Beam SUPREME (×2) | Capteurs → T-Beam distant → **LoRa point-à-point** → T-Beam gateway WiFi → Mosquitto local (Pi 5) | Cloudflare Tunnel (primaire) **+** WAN privé inter-labo (secours) |
+| **LTE (#5-8)** | LilyGO A7670G (×1) | Capteurs → A7670G → MQTT/WSS direct via réseau cellulaire → Mosquitto local (Pi 5) | Cloudflare Tunnel (primaire) **+** WAN privé inter-labo (secours) |
+
+### Redondance du lien client ↔ broker (2 voies)
+
+Chaque broker Mosquitto doit être joignable par **deux chemins réseau indépendants** :
+
+- **Voie primaire** : Cloudflare Tunnel (WSS:443), déjà en place depuis Labos 1-2.
+- **Voie secours** : **WAN privé** monté dans le cours de télécom associé (routeur + VPN site-à-site). Même broker Mosquitto, même identifiants, adressage IP distinct sur la voie privée.
+
+Le client central (VM) comme le dashboard web utilisent l'option MQTT `servers: [primaire, secours]` : en cas d'échec de connexion sur la voie primaire, la bascule s'effectue automatiquement vers la voie secours au prochain cycle de reconnexion. Le dashboard affiche explicitement quelle voie est active (`PRIMAIRE` / `WAN PRIVÉ`).
+
+Cette redondance est un livrable du cours de télécom connexe mais se vérifie côté 243-4J5-LI via le critère CP3 3.6 (QoS et fiabilité MQTT).
 
 ---
 
@@ -73,22 +88,22 @@ Chaque site reçoit une combinaison **unique** de modules breakout (avec headers
 
 | # | Hôte | Modules assignés | Justification du mapping |
 |---|------|------------------|--------------------------|
-| 1 | T-Beam SUPREME | DHT22 + MPU6050 + 2 boutons + 2 LEDs | DHT22 = climat shelter ; MPU6050 = vibration mât ; boutons = test+maintenance ; LEDs = état lien+alarme |
-| 2 | T-Beam SUPREME | BH1750 + HC-SR501 + 1 pot + 1 bouton + 1 LED | BH1750 = lumière intérieure (porte) ; HC-SR501 = intrusion ; pot = niveau d'eau simulé ; bouton = ack alarme ; LED = alarme |
-| 3 | T-Beam SUPREME | DHT22 + BH1750 + 1 bouton + 1 pot + 1 LED | DHT22 = climat ; BH1750 = ensoleillement panneau solaire ; pot = tension batterie simulée ; bouton = test ; LED = état charge |
-| 4 | T-Beam SUPREME | MPU6050 + HC-SR501 + 1 bouton + 1 pot + 2 LEDs | MPU6050 = inclinaison mât ; HC-SR501 = présence base ; pot = vent simulé ; bouton = silence alarme ; LEDs = état mât+détection |
-| 5 | LilyGO A7670G | DHT22 + HC-SR501 + 2 pots + 2 LEDs | DHT22 = climat cabinet ; HC-SR501 = intrusion ; pots = tension+courant simulés ; LEDs = état réseau+alarme |
+| 1 | T-Beam SUPREME | BME280 + MPU6050 + 2 boutons + 2 LEDs | BME280 = climat shelter ; MPU6050 = vibration mât ; boutons = test+maintenance ; LEDs = état lien+alarme |
+| 2 | T-Beam SUPREME | BH1750 + EKMC + 1 pot + 1 bouton + 1 LED | BH1750 = lumière intérieure (porte) ; EKMC = intrusion ; pot = niveau d'eau simulé ; bouton = ack alarme ; LED = alarme |
+| 3 | T-Beam SUPREME | BME280 + BH1750 + 1 bouton + 1 pot + 1 LED | BME280 = climat ; BH1750 = ensoleillement panneau solaire ; pot = tension batterie simulée ; bouton = test ; LED = état charge |
+| 4 | T-Beam SUPREME | MPU6050 + EKMC + 1 bouton + 1 pot + 2 LEDs | MPU6050 = inclinaison mât ; EKMC = présence base ; pot = vent simulé ; bouton = silence alarme ; LEDs = état mât+détection |
+| 5 | LilyGO A7670G | BME280 + EKMC + 2 pots + 2 LEDs | BME280 = climat cabinet ; EKMC = intrusion ; pots = tension+courant simulés ; LEDs = état réseau+alarme |
 | 6 | LilyGO A7670G | MPU6050 + BH1750 + 2 boutons + 2 LEDs | MPU6050 = vibration/orientation antenne ; BH1750 = ensoleillement ; boutons = test+maintenance ; LEDs = état antenne+charge |
-| 7 | LilyGO A7670G | DHT22 + BH1750 + HC-SR501 + 2 LEDs | DHT22 = climat machinerie ; BH1750 = portail ouvert ; HC-SR501 = présence ; LEDs = état pompe+alarme |
-| 8 | LilyGO A7670G | MPU6050 + DHT22 + 2 boutons + 1 pot + 1 LED | MPU6050 = choc/ouverture porte ; DHT22 = climat ; boutons = mode+reset ; pot = niveau carburant ; LED = état alim |
+| 7 | LilyGO A7670G | BME280 + BH1750 + EKMC + 2 LEDs | BME280 = climat machinerie ; BH1750 = portail ouvert ; EKMC = présence ; LEDs = état pompe+alarme |
+| 8 | LilyGO A7670G | MPU6050 + BME280 + 2 boutons + 1 pot + 1 LED | MPU6050 = choc/ouverture porte ; BME280 = climat ; boutons = mode+reset ; pot = niveau carburant ; LED = état alim |
 
 ### Notes d'intégration
 
-- **Bus I2C primaire du T-Beam SUPREME** (GPIO 17/18) : déjà occupé en interne par OLED, magnéto et BME280. Les modules I2C externes (MPU6050 à 0x68, BH1750 à 0x23) **partagent ce bus** sans conflit d'adresse.
+- **Bus I2C primaire du T-Beam SUPREME** (GPIO 17/18) : déjà occupé en interne par OLED, magnéto et un **BME280 interne** (0x77). Le BME280 **externe** (Adafruit 2652) doit donc être configuré à **0x76** (strap SDO → GND) pour éviter le conflit. Les modules I2C externes MPU6050 (0x68) et BH1750 (0x23) **partagent ce bus** sans conflit.
 - **ADC sur T-Beam SUPREME** : limité (essentiellement ADC1 sur GPIO 2-3). Les sites LoRa sont contraints à **1 potentiomètre maximum**.
 - **GPIO digital du T-Beam SUPREME** : 4-5 broches utilisables sur les pads exposés.
 - **LilyGO A7670G (ESP32 standard)** : beaucoup plus de GPIO disponibles, donc les sites LTE peuvent porter jusqu'à 5 modules.
-- Tous les modules sont alimentés en **3.3 V** (sauf HC-SR501 qui supporte 5 V mais sortie compatible 3.3 V).
+- **Alimentation** : tous les modules breakout fonctionnent directement en **3.3 V** (BME280, MPU6050, BH1750 : 3-5 V tolérants ; EKMC4607112K : 3-6 V, sortie logique compatible 3.3 V).
 
 ---
 
@@ -99,7 +114,7 @@ Le projet final est conçu comme une **occasion de remédiation** : chaque étud
 | Évaluation antérieure faiblement réussie | Compétence à redémontrer | Voie attribuée au projet final |
 |------------------------------------------|--------------------------|-------------------------------|
 | **Évaluation sommative de mi-session** (Sem. 7 — Shield PCB pour LilyGO A7670G : intégration capteurs, MQTT/LTE, Python) | Conception et programmation d'un objet connecté avec **A7670G + LTE + MQTT/WSS** | **LTE (#5-8)** |
-| **TP LoRa** (Sem. 9 — Intégration LoRa/Meshtastic : configuration mesh, paramètres radio, gateway WiFi→MQTT) | Configuration et exploitation d'un **réseau LoRa mesh** + pont MQTT | **LoRa (#1-4)** |
+| **TP LoRa** (Sem. 9 — Intégration LoRa point-à-point : configuration radio, paramètres SF/BW, gateway WiFi→MQTT) | Configuration et exploitation d'une **liaison LoRa P2P** + pont MQTT | **LoRa (#1-4)** |
 
 ### Cas limites
 - Étudiant·e faible aux **deux** évaluations → arbitrage selon la lacune **la plus marquée** (écart au seuil), avec léger biais vers **LoRa** car le projet inclut 2 T-Beam à configurer = davantage d'occasions d'observer la progression
@@ -119,6 +134,7 @@ La VM centrale doit pouvoir agréger les 8 sites avec un schéma uniforme. Chaqu
 ```
 hydro-limoilou/{site-id}/telemetry/{capteur}     # Données périodiques
 hydro-limoilou/{site-id}/status                  # uptime, rssi, link, batterie
+hydro-limoilou/{site-id}/status/llm              # Résumé texte généré par un LLM local (nouveau)
 hydro-limoilou/{site-id}/alarm/{type}            # door, water, motion, tilt, ...
 hydro-limoilou/{site-id}/actuators/{nom}         # Commandes descendantes (LED, relais)
 ```
@@ -130,18 +146,23 @@ hydro-limoilou/poste-01/telemetry/temperature   {"value": 22.4, "unit": "C", "ts
 hydro-limoilou/poste-01/telemetry/humidity      {"value": 45.2, "unit": "%", "ts": 1739500000}
 hydro-limoilou/poste-01/telemetry/vibration     {"x": 0.02, "y": -0.01, "z": 9.81, "ts": 1739500000}
 hydro-limoilou/poste-01/status                  {"uptime": 3600, "rssi": -67, "link": "lora", "battery_v": 3.9}
+hydro-limoilou/poste-01/status/llm              {"summary": "Vibrations nominales, climat ok.", "model": "qwen2.5:3b", "ts": 1739500090}
 hydro-limoilou/poste-01/alarm/tilt              {"level": "warning", "value": 12.3, "unit": "deg", "ts": 1739500000}
 hydro-limoilou/poste-01/actuators/led_1         {"state": "on"}
 ```
+
+### Note — résumé LLM (topic `status/llm`)
+
+Chaque appareil doit **exécuter un appel LLM local** (ex. Ollama + qwen2.5:3b sur la passerelle Pi 5 ou modèle embarqué ESP32) à intervalle régulier pour produire un résumé texte des dernières lectures de capteurs, et publier ce résumé sur `status/llm`. Le dashboard central affiche ce résumé dans le panneau du site. Voir §3.6 du contrat serveur central pour le schéma et la fréquence.
 
 ### Mapping par capteur (noms de topics standardisés)
 
 | Capteur | Sous-topic `telemetry/` | Champs payload |
 |---------|------------------------|----------------|
-| DHT22 | `temperature`, `humidity` | `value`, `unit`, `ts` |
-| MPU6050 | `vibration` | `x`, `y`, `z`, `ts` (accélérations m/s²) |
-| BH1750 | `light` | `value`, `unit` (lux), `ts` |
-| HC-SR501 | sous `alarm/motion` | `level`, `ts` |
+| **BME280** (Adafruit 2652) | `temperature`, `humidity`, `pressure` | `value`, `unit` (`"C"`, `"%"`, `"hPa"`), `ts` |
+| **MPU6050** (Adafruit 3886, STEMMA QT) | `vibration` | `x`, `y`, `z`, `ts` (accélérations m/s²) |
+| **BH1750** (DFRobot SEN0097) | `light` | `value`, `unit` (lux), `ts` |
+| **EKMC4607112K** (SparkFun 17372, PIR ultra-basse conso) | sous `alarm/motion` | `level`, `ts` |
 | Potentiomètre | `analog_1`, `analog_2` (ou nom selon site, ex. `water_level`, `battery_v`) | `value`, `unit`, `ts` |
 | Bouton | sous `alarm/{nom}` ou via `status` | `state`, `ts` |
 | LED | `actuators/led_N` (descendant) | `state` (`"on"`/`"off"`) |
