@@ -51,7 +51,9 @@ jobs:
         env:
           NODE_OPTIONS: --max_old_space_size=4096
         run: |
-          for i in $(seq -w 1 15); do
+          # Semaines 13-15 n'ont pas de diaporama : la présentation du projet
+          # final est exclusivement dans Semaine-12/diaporama/slides.md.
+          for i in $(seq -w 1 12); do
             echo "Building Semaine-$i..."
             pnpm slidev build Semaine-$i/diaporama/slides.md \
               --base /semaine-$i/ \
@@ -156,10 +158,7 @@ jobs:
               <a href="./semaine-09/"><strong>Semaine 09</strong>Gateway LoRa-MQTT</a>
               <a href="./semaine-10/"><strong>Semaine 10</strong>Assemblage PCB</a>
               <a href="./semaine-11/"><strong>Semaine 11</strong>Intégration LLM</a>
-              <a href="./semaine-12/"><strong>Semaine 12</strong>Automatisation IoT</a>
-              <a href="./semaine-13/"><strong>Semaine 13</strong>Projet final - Partie 1</a>
-              <a href="./semaine-14/"><strong>Semaine 14</strong>Projet final - Partie 2</a>
-              <a href="./semaine-15/"><strong>Semaine 15</strong>Présentation et bilan</a>
+              <a href="./semaine-12/"><strong>Semaine 12</strong>Projet final Hydro-Limoilou</a>
             </div>
             <div class="footer">
               Francis Poisson - Cégep Limoilou

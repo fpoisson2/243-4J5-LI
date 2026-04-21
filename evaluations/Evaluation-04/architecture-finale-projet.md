@@ -30,15 +30,16 @@ Le serveur central est un **client MQTT** (pas un broker). Il est hébergé sur 
 graph TB
     subgraph Sites_LoRa["Voie LoRa — Sites #1 à #4"]
         TBd1["T-Beam SUPREME distant<br/>+ shield capteurs<br/>(au site)"]
-        TBg1["T-Beam SUPREME gateway<br/>(au labo, WiFi)"]
-        Pi1["Raspberry Pi 5<br/>Mosquitto + écran tactile"]
-        TBd1 -.LoRa P2P.-> TBg1 -->|MQTT WiFi local| Pi1
+        TBg1["T-Beam SUPREME gateway<br/>(au labo)"]
+        Pi1["Raspberry Pi 5<br/>Mosquitto + GUI tactile"]
+        TBd1 -.LoRa P2P.-> TBg1
+        TBg1 -->|MQTT via Internet public<br/>Cloudflare Tunnel| Pi1
     end
 
     subgraph Sites_LTE["Voie LTE — Sites #5 à #8"]
         A1["LilyGO A7670G<br/>+ shield capteurs"]
-        Pi2["Raspberry Pi 5<br/>Mosquitto + écran tactile"]
-        A1 -->|MQTT/WSS via Cloudflare| Pi2
+        Pi2["Raspberry Pi 5<br/>Mosquitto + GUI tactile"]
+        A1 -->|MQTT/WSS via 4G/LTE<br/>→ Internet public → Cloudflare Tunnel| Pi2
     end
 
     Pi1 -->|Cloudflare Tunnel — voie primaire| Client[("Client central — VM<br/>8 connexions MQTT parallèles<br/>Dashboard agrégé")]
@@ -47,12 +48,14 @@ graph TB
     Pi2 -.WAN privé — voie secours.-> Client
 ```
 
+**Point clé** : ni le T-Beam gateway ni le A7670G ne sont sur le même LAN que le Pi 5 du site. Les deux publient sur le broker Mosquitto du Pi 5 en passant **par Internet public** (endpoint WSS exposé par Cloudflare Tunnel). Le Pi 5 héberge aussi une **interface graphique tactile locale** (3 pages Python : télémétrie temps réel, alarmes, état du lien) — voir §8 livrables.
+
 ### Particularités par voie
 
-| Voie | Hôte | Chemin réseau (capteur → broker) | Chemin réseau (client central → broker) |
-|------|------|----------------------------------|------------------------------------------|
-| **LoRa (#1-4)** | T-Beam SUPREME (×2) | Capteurs → T-Beam distant → **LoRa point-à-point** → T-Beam gateway WiFi → Mosquitto local (Pi 5) | Cloudflare Tunnel (primaire) **+** WAN privé inter-labo (secours) |
-| **LTE (#5-8)** | LilyGO A7670G (×1) | Capteurs → A7670G → MQTT/WSS direct via réseau cellulaire → Mosquitto local (Pi 5) | Cloudflare Tunnel (primaire) **+** WAN privé inter-labo (secours) |
+| Voie | Hôte | Chemin réseau (capteur → broker Pi 5) | Chemin réseau (client central → broker Pi 5) |
+|------|------|---------------------------------------|-----------------------------------------------|
+| **LoRa (#1-4)** | T-Beam SUPREME (×2) | Capteurs → T-Beam distant → **LoRa P2P** → T-Beam gateway → **Internet public (WSS/Cloudflare Tunnel)** → Mosquitto sur Pi 5 | Cloudflare Tunnel (primaire) **+** WAN privé inter-labo (secours) |
+| **LTE (#5-8)** | LilyGO A7670G (×1) | Capteurs → A7670G → **4G/LTE → Internet public (WSS/Cloudflare Tunnel)** → Mosquitto sur Pi 5 | Cloudflare Tunnel (primaire) **+** WAN privé inter-labo (secours) |
 
 ### Redondance du lien client ↔ broker (2 voies)
 
