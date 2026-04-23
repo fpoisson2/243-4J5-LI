@@ -59,15 +59,19 @@ Semaines 13 à 15 — 35 % de la note finale
 
 ---
 
-# Articulation avec le cours connexe
+# Articulation avec les autres cours
 
 <v-clicks>
 
-- Chaque étudiant·e configure **son propre répéteur RF** dans un cours parallèle de télécom
-- Le présent projet assure le **monitoring environnemental et opérationnel** de ce répéteur :
+- **4J5** — Télémétrie (présent cours) : supervision de l'installation
+- **4P3** — Gestion du projet
+- **4K4** — WAN privé
+- **4Q5** — Répéteur : chaque étudiant·e configure son propre répéteur RF
+- **4L4** — Liaison optique
+- Le présent projet assure le **monitoring environnemental et opérationnel de l'installation** :
   - télémétrie : climat shelter, vibration mât, alimentation, intrusion
   - alarmes : basculement, inondation, ouverture cabinet, batterie faible
-  - convergence centrale : simule un **CCR** (Centre de conduite du réseau) supervisant les 8 répéteurs — cf. les 160 stations de télémesure + 22 500 points d'acquisition du CCR réel d'Hydro-Québec
+  - convergence centrale : simule un **CCR** (Centre de conduite du réseau) supervisant les 8 sites — cf. les 160 stations de télémesure + 22 500 points d'acquisition du CCR réel d'Hydro-Québec
 
 </v-clicks>
 
