@@ -21,7 +21,6 @@ class TouchReader(threading.Thread):
         if not self.device:
             raise RuntimeError("Aucun périphérique touchscreen trouvé.")
 
-        # On récupère les infos d'axes pour calibrer
         abs_x = self.device.absinfo(ecodes.ABS_MT_POSITION_X)
         abs_y = self.device.absinfo(ecodes.ABS_MT_POSITION_Y)
 
@@ -32,10 +31,6 @@ class TouchReader(threading.Thread):
         self.current_y = (self.min_y + self.max_y) // 2
 
     def _find_touch_device(self):
-        """
-        Essaie de trouver un device dont le nom contient 'touch' ou 'ft5406'
-        (fréquent sur les écrans Raspberry Pi).
-        """
         for path in list_devices():
             dev = InputDevice(path)
             name = dev.name.lower()
@@ -51,11 +46,8 @@ class TouchReader(threading.Thread):
                     self.current_x = event.value
                 elif event.code == ecodes.ABS_MT_POSITION_Y:
                     self.current_y = event.value
-
             elif event.type == ecodes.EV_KEY and event.code == ecodes.BTN_TOUCH:
-                # 1 = touch down, 0 = touch up
                 if event.value == 1:
-                    # On push un "tap" dans la queue avec les coordonnées brutes
                     self.event_queue.put(("tap", self.current_x, self.current_y))
 
 
@@ -67,7 +59,7 @@ class LEDControlUI:
         self.touch_reader = touch_reader
         self.event_queue = event_queue
         self.running = True
-        self.status_message = "Prêt - Contrôle des LEDs via MQTT"
+        self.status_message = "READY - Arcade tactile en ligne"
 
         # Configuration MQTT
         self.mqtt_config = mqtt_config
@@ -78,6 +70,8 @@ class LEDControlUI:
         device_id = mqtt_config.get("device_id", "esp32-XXXX")
         self.led1_topic = f"{device_id}/led/1/set"
         self.led2_topic = f"{device_id}/led/2/set"
+        self.led1_state_topic = f"{device_id}/led/1/state"
+        self.led2_state_topic = f"{device_id}/led/2/state"
 
         self._init_mqtt()
 
@@ -148,8 +142,12 @@ class LEDControlUI:
             device_id = self.mqtt_config.get("device_id", "esp32-XXXX")
             button1_topic = f"{device_id}/button/1/state"
             button2_topic = f"{device_id}/button/2/state"
+            led1_state_topic = f"{device_id}/led/1/state"
+            led2_state_topic = f"{device_id}/led/2/state"
             client.subscribe(button1_topic)
             client.subscribe(button2_topic)
+            client.subscribe(led1_state_topic)
+            client.subscribe(led2_state_topic)
 
         else:
             self.mqtt_connected = False
@@ -175,6 +173,10 @@ class LEDControlUI:
         """Callback appelé lors de la réception d'un message MQTT"""
         topic = msg.topic
         payload = msg.payload.decode('utf-8', errors='ignore')
+        if topic == self.led1_state_topic and payload in ("ON", "OFF"):
+            self.led1_state = payload == "ON"
+        elif topic == self.led2_state_topic and payload in ("ON", "OFF"):
+            self.led2_state = payload == "ON"
         self._add_feedback(f"← {topic}: {payload}")
 
     def _add_feedback(self, message):
@@ -200,304 +202,219 @@ class LEDControlUI:
         else:
             self.status_message = "MQTT non connecté"
 
-    def _draw_big_text(self, text, start_row, center_col, attr):
-        """
-        Dessine du texte en ASCII art 3x5 (chaque lettre fait 3 colonnes x 5 lignes)
-        """
-        # Police ASCII art simplifiée pour ON/OFF
-        font = {
-            'O': [
-                "███",
-                "█ █",
-                "█ █",
-                "█ █",
-                "███"
-            ],
-            'N': [
-                "███",
-                "█ █",
-                "█ █",
-                "█ █",
-                "█ █"
-            ],
-            'F': [
-                "███",
-                "█  ",
-                "██ ",
-                "█  ",
-                "█  "
-            ],
-            ' ': [
-                "   ",
-                "   ",
-                "   ",
-                "   ",
-                "   "
-            ]
-        }
-
-        # Calculer la largeur totale
-        total_width = len(text) * 4  # 3 pour la lettre + 1 d'espacement
-        start_col = center_col - total_width // 2
-
-        # Dessiner chaque ligne
-        h, w = self.stdscr.getmaxyx()
-        for line_idx in range(5):
-            row = start_row + line_idx
-            if 0 <= row < h:
-                col = start_col
-                line_text = ""
-                for char in text.upper():
-                    if char in font:
-                        line_text += font[char][line_idx] + " "
-                    else:
-                        line_text += "    "
-
-                if col >= 0 and col + len(line_text) < w:
-                    self.stdscr.attron(attr)
-                    self.stdscr.addstr(row, col, line_text)
-                    self.stdscr.attroff(attr)
-
     def _init_colors(self):
         curses.start_color()
         curses.use_default_colors()
-        curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_YELLOW)   # bouton QUIT (jaune vif)
-        curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_GREEN)    # bouton actif
-        curses.init_pair(3, curses.COLOR_BLACK, curses.COLOR_YELLOW)   # texte status (jaune sur noir)
-        curses.init_pair(4, curses.COLOR_YELLOW, curses.COLOR_RED)     # LED ROUGE ON (jaune sur rouge)
-        curses.init_pair(5, curses.COLOR_BLACK, curses.COLOR_GREEN)    # LED VERTE ON (noir sur vert)
-        curses.init_pair(6, curses.COLOR_YELLOW, curses.COLOR_BLUE)    # LED ROUGE OFF (jaune sur bleu foncé)
-        curses.init_pair(7, curses.COLOR_WHITE, curses.COLOR_BLUE)     # LED VERTE OFF (blanc sur bleu foncé)
-        curses.init_pair(8, curses.COLOR_WHITE, curses.COLOR_BLACK)    # Bordures blanches sur noir
-        curses.init_pair(9, curses.COLOR_BLACK, curses.COLOR_CYAN)     # Titre (noir sur cyan)
+        curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
+        curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
+        curses.init_pair(3, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+        curses.init_pair(4, curses.COLOR_CYAN, curses.COLOR_BLACK)
+        curses.init_pair(5, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
+        curses.init_pair(6, curses.COLOR_WHITE, curses.COLOR_BLACK)
+        curses.init_pair(7, curses.COLOR_BLACK, curses.COLOR_RED)
+        curses.init_pair(8, curses.COLOR_BLACK, curses.COLOR_GREEN)
+        curses.init_pair(9, curses.COLOR_WHITE, curses.COLOR_BLUE)
+        curses.init_pair(10, curses.COLOR_BLACK, curses.COLOR_YELLOW)
+        curses.init_pair(11, curses.COLOR_YELLOW, curses.COLOR_RED)
+        curses.init_pair(12, curses.COLOR_WHITE, curses.COLOR_GREEN)
 
     def _build_buttons(self, h, w):
-        """
-        Construit 3 gros boutons toggle: LED1, LED2, QUIT
-        Format toggle switch avec état visible
-        """
         self.buttons = []
-        # Boutons ÉNORMES pour faciliter l'utilisation tactile
-        btn_width = min(70, w - 6)  # Plus larges
-        btn_height = 12  # TRÈS hauts!
+        usable_w = w - 6
+        btn_gap = 4
+        btn_width = max(20, (usable_w - btn_gap) // 2)
+        quit_h = 3
+        btn_height = max(8, h - 18 - quit_h)
+        start_col = 3
+        btn_row = 9
 
-        # Position verticale de départ - bien centré verticalement
-        total_height = 3 * btn_height + 2 * 3  # 3 boutons + 2 espacements
-        start_row = max(6, (h - total_height - 4) // 2 + 4)  # +4 pour le titre et status
+        self.buttons.append({
+            "name": "LED1", "label": "LED ROUGE",
+            "state_attr": "led1_state",
+            "row": btn_row, "col": start_col,
+            "height": btn_height, "width": btn_width,
+            "active": False, "topic": self.led1_topic,
+            "color_on": 1, "color_off": 1,
+        })
+        self.buttons.append({
+            "name": "LED2", "label": "LED VERTE",
+            "state_attr": "led2_state",
+            "row": btn_row, "col": start_col + btn_width + btn_gap,
+            "height": btn_height, "width": btn_width,
+            "active": False, "topic": self.led2_topic,
+            "color_on": 2, "color_off": 2,
+        })
+        quit_row = btn_row + btn_height + 1
+        self.buttons.append({
+            "name": "QUIT", "label": "EXIT GAME",
+            "state_attr": None,
+            "row": quit_row, "col": start_col,
+            "height": quit_h, "width": usable_w,
+            "active": False, "topic": None,
+            "color_on": 10, "color_off": 10,
+        })
 
-        # Configuration des boutons toggle
-        buttons_config = [
-            {
-                "name": "LED1",
-                "label": "LED ROUGE",
-                "state_attr": "led1_state",
-                "topic": self.led1_topic,
-                "color_on": 4,   # Rouge
-                "color_off": 6,  # Jaune/gris
-            },
-            {
-                "name": "LED2",
-                "label": "LED VERTE",
-                "state_attr": "led2_state",
-                "topic": self.led2_topic,
-                "color_on": 5,   # Vert
-                "color_off": 7,  # Bleu/gris
-            },
-            {
-                "name": "QUIT",
-                "label": "QUITTER",
-                "state_attr": None,
-                "topic": None,
-                "color_on": 1,
-                "color_off": 1,
-            },
-        ]
-
-        for i, btn_cfg in enumerate(buttons_config):
-            row = start_row + i * (btn_height + 3)  # Espacement de 3 lignes
-            col = (w - btn_width) // 2
-            self.buttons.append({
-                "name": btn_cfg["name"],
-                "label": btn_cfg["label"],
-                "state_attr": btn_cfg["state_attr"],
-                "row": row,
-                "col": col,
-                "height": btn_height,
-                "width": btn_width,
-                "active": False,
-                "topic": btn_cfg["topic"],
-                "color_on": btn_cfg["color_on"],
-                "color_off": btn_cfg["color_off"],
-            })
+    def _safe_addstr(self, row, col, text, attr=0):
+        h, w = self.stdscr.getmaxyx()
+        if row < 0 or row >= h or not text:
+            return
+        if col < 0:
+            text = text[-col:]
+            col = 0
+        if col >= w:
+            return
+        text = text[:max(0, w - col - 1)]
+        if not text:
+            return
+        try:
+            if attr:
+                self.stdscr.attron(attr)
+            self.stdscr.addstr(row, col, text)
+            if attr:
+                self.stdscr.attroff(attr)
+        except curses.error:
+            pass
 
     def _draw(self):
         self.stdscr.erase()
         h, w = self.stdscr.getmaxyx()
+        t = time.time()
 
-        # Titre ÉNORME avec contraste élevé
-        title_line1 = "█████████████████████████████████████████"
-        title_line2 = "███   C O N T R Ô L E   L E D s   ███"
-        title_line3 = "█████████████████████████████████████████"
+        # ═══ OUTER BORDER (gradient neon frame) ═══
+        border_attr = curses.color_pair(5) | curses.A_BOLD
+        self._safe_addstr(0, 0, "▓" * (w - 1), border_attr)
+        self._safe_addstr(h - 1, 0, "▓" * (w - 1), border_attr)
+        for r in range(1, h - 1):
+            self._safe_addstr(r, 0, "▓▓", border_attr)
+            self._safe_addstr(r, w - 3, "▓▓", border_attr)
 
-        self.stdscr.attron(curses.color_pair(9) | curses.A_BOLD)  # Cyan sur noir
-        if len(title_line1) < w:
-            self.stdscr.addstr(0, max(0, (w - len(title_line1)) // 2), title_line1)
-        if len(title_line2) < w:
-            self.stdscr.addstr(1, max(0, (w - len(title_line2)) // 2), title_line2)
-        self.stdscr.attroff(curses.color_pair(9) | curses.A_BOLD)
+        # ═══ ASCII ART TITLE ═══
+        title = [
+            "█   ████ ████   ████ ████ █  █ █████ ████  ████ █    ",
+            "█   █    █  █   █    █  █ ██ █   █   █   █ █  █ █    ",
+            "█   ███  █  █   █    █  █ █ ██   █   ████  █  █ █    ",
+            "█   █    █  █   █    █  █ █  █   █   █  █  █  █ █    ",
+            "████ ████ ████   ████ ████ █  █   █   █  █  ████ ████ ",
+        ]
+        title_attr = curses.color_pair(3) | curses.A_BOLD
+        if w > 58:
+            for i, line in enumerate(title):
+                self._safe_addstr(1 + i, max(3, (w - len(line)) // 2), line, title_attr)
+            sub_row = 6
+        else:
+            fallback = "★ ★ ★  L E D   C O N T R O L  ★ ★ ★"
+            self._safe_addstr(1, max(3, (w - len(fallback)) // 2), fallback, title_attr)
+            sub_row = 3
 
-        # Indicateur de connexion - ÉNORME et très visible avec contraste élevé
+        sub = "A R C A D E    C O N T R O L    P A N E L"
+        self._safe_addstr(sub_row, max(3, (w - len(sub)) // 2), sub,
+                          curses.color_pair(5) | curses.A_BOLD)
+
+        # ═══ ANIMATED STAR SEPARATOR ═══
+        phase = int(t * 4) % 4
+        pats = ["★ · ✦ · ", "· ★ · ✦ ", "✦ · ★ · ", "· ✦ · ★ "]
+        sep = (pats[phase] * ((w - 6) // len(pats[phase]) + 1))[:w - 7]
+        self._safe_addstr(sub_row + 1, 3, sep, curses.color_pair(3))
+
+        # ═══ STATUS INDICATORS ═══
         if self.mqtt_connected:
-            conn_status = "▓▓▓  M Q T T   C O N N E C T É  ▓▓▓"
-            conn_color = curses.color_pair(5) | curses.A_BOLD  # Noir sur vert
+            self._safe_addstr(8, 3, " ● LINK ONLINE ",
+                              curses.color_pair(2) | curses.A_BOLD)
         else:
-            conn_status = "▓▓▓  M Q T T   D É C O N N E C T É  ▓▓▓"
-            conn_color = curses.color_pair(4) | curses.A_BOLD  # Jaune sur rouge
+            icon = "●" if int(t * 2) % 2 else "○"
+            self._safe_addstr(8, 3, f" {icon} LINK OFFLINE ",
+                              curses.color_pair(1) | curses.A_BOLD)
+        credit = f"CREDIT {int(t) % 100:02d}"
+        self._safe_addstr(8, w - len(credit) - 4, credit,
+                          curses.color_pair(3) | curses.A_BOLD)
 
-        self.stdscr.attron(conn_color)
-        if len(conn_status) < w:
-            self.stdscr.addstr(2, max(0, (w - len(conn_status)) // 2), conn_status)
-        self.stdscr.attroff(conn_color)
-
-        # Zone de feedback MQTT (coin supérieur droit) - Contraste élevé
-        feedback_title = "╔══ MQTT DEBUG ══╗"
-        feedback_start_row = 4
-        if w > 80:
-            feedback_col = w - 38
-        else:
-            feedback_col = 2
-
-        # Titre en cyan sur noir pour meilleure visibilité
-        self.stdscr.attron(curses.color_pair(9) | curses.A_BOLD)
-        if feedback_col + len(feedback_title) < w:
-            self.stdscr.addstr(feedback_start_row, feedback_col, feedback_title[:w - feedback_col - 1])
-        self.stdscr.attroff(curses.color_pair(9) | curses.A_BOLD)
-
-        # Afficher les 5 derniers messages MQTT avec contraste
-        for i, msg in enumerate(self.mqtt_feedback[-5:]):
-            row = feedback_start_row + 1 + i
-            if row < h - 3 and feedback_col < w:
-                display_msg = msg[:min(35, w - feedback_col - 1)]
-                # Messages en blanc brillant
-                self.stdscr.attron(curses.A_BOLD)
-                self.stdscr.addstr(row, feedback_col, display_msg)
-                self.stdscr.attroff(curses.A_BOLD)
-
-        # Status bar en bas - TRÈS GROS et TRÈS VISIBLE avec contraste élevé
-        status_msg = self.status_message[:w-10]  # Limiter à la largeur
-        status_bar = f"▶▶▶  {status_msg}  ◀◀◀"
-
-        # Noir sur jaune (très contrasté!)
-        self.stdscr.attron(curses.color_pair(3) | curses.A_BOLD)
-        if len(status_bar) < w:
-            self.stdscr.addstr(h - 2, max(0, (w - len(status_bar)) // 2), status_bar[:w-2])
-        self.stdscr.attroff(curses.color_pair(3) | curses.A_BOLD)
-
-        # Ligne d'aide - en bas
-        help_text = "Touchez l'écran ou appuyez sur 'q'"
-        if len(help_text) < w:
-            self.stdscr.addstr(h - 1, max(0, (w - len(help_text)) // 2), help_text)
-
-        # Construire les boutons
+        # ═══ BUILD BUTTON LAYOUT ═══
         self._build_buttons(h, w)
 
-        # Dessin des boutons toggle avec bordures
+        # ═══ DRAW ARCADE BUTTONS ═══
         for btn in self.buttons:
-            # Déterminer l'état du bouton (ON/OFF) pour les LEDs
             is_on = False
             if btn["state_attr"]:
                 is_on = getattr(self, btn["state_attr"], False)
 
-            # Choisir la couleur selon l'état
-            color_pair = btn["color_on"] if is_on else btn["color_off"]
-            attr = curses.color_pair(color_pair)
-            attr |= curses.A_BOLD  # Toujours en gras
+            cpair = btn["color_on"] if is_on else btn["color_off"]
+            fill = curses.color_pair(cpair) | curses.A_BOLD
+            if btn["state_attr"] and not is_on:
+                fill |= curses.A_DIM
+            rt = btn["row"]
+            rb = rt + btn["height"] - 1
+            cl = btn["col"]
+            bw = btn["width"]
 
-            # Dessiner la bordure blanche ÉPAISSE avec double lignes
-            border_attr = curses.color_pair(8) | curses.A_BOLD  # Blanc sur noir
-            row_top = btn["row"]
-            row_bottom = btn["row"] + btn["height"] - 1
-            col_left = btn["col"]
-            col_right = btn["col"] + btn["width"] - 1
+            if btn["name"] in ("LED1", "LED2"):
+                # Rounded arcade button using block characters
+                pad1 = min(6, max(2, bw // 6))
+                pad2 = min(3, max(1, bw // 10))
 
-            # Ligne du haut DOUBLE
-            if 0 <= row_top < h:
-                self.stdscr.attron(border_attr)
-                self.stdscr.addstr(row_top, col_left, "╔" + "═" * (btn["width"] - 2) + "╗")
-                self.stdscr.attroff(border_attr)
+                # Top curve (narrow → wide)
+                self._safe_addstr(rt, cl + pad1, "▄" * (bw - 2 * pad1), fill)
+                self._safe_addstr(rt + 1, cl + pad2, "█" * (bw - 2 * pad2), fill)
+                # Full-width body
+                for r in range(rt + 2, rb - 1):
+                    self._safe_addstr(r, cl, "█" * bw, fill)
+                # Bottom curve (wide → narrow)
+                self._safe_addstr(rb - 1, cl + pad2, "█" * (bw - 2 * pad2), fill)
+                self._safe_addstr(rb, cl + pad1, "▀" * (bw - 2 * pad1), fill)
 
-            # Lignes du milieu avec fond coloré
-            for r in range(row_top + 1, row_bottom):
-                if 0 <= r < h:
-                    # Bordure gauche DOUBLE
-                    self.stdscr.attron(border_attr)
-                    self.stdscr.addstr(r, col_left, "║")
-                    self.stdscr.attroff(border_attr)
+                # Label with stars
+                label = f"★ {btn['label']} ★"
+                lc = cl + max(0, (bw - len(label)) // 2)
+                self._safe_addstr(rt + 3, lc, label, fill | curses.A_REVERSE)
 
-                    # Fond coloré
-                    self.stdscr.attron(attr)
-                    self.stdscr.addstr(r, col_left + 1, " " * (btn["width"] - 2))
-                    self.stdscr.attroff(attr)
+                # Glowing state indicator (inner circle)
+                state_txt = "  O N  " if is_on else " O F F "
+                glow_w = len(state_txt) + 6
+                glow_bar = "█" * glow_w
+                glow_mid = "███" + state_txt + "███"
+                mid = rt + btn["height"] // 2
+                gc = cl + (bw - glow_w) // 2
+                self._safe_addstr(mid - 2, gc + 2, "▄" * (glow_w - 4), fill)
+                self._safe_addstr(mid - 1, gc, glow_bar, fill)
+                self._safe_addstr(mid,     gc, glow_mid, fill | curses.A_REVERSE)
+                self._safe_addstr(mid + 1, gc, glow_bar, fill)
+                self._safe_addstr(mid + 2, gc + 2, "▀" * (glow_w - 4), fill)
 
-                    # Bordure droite DOUBLE
-                    self.stdscr.attron(border_attr)
-                    self.stdscr.addstr(r, col_right, "║")
-                    self.stdscr.attroff(border_attr)
+                # Touch hint
+                hint = "[ T O U C H ]"
+                hc = cl + (bw - len(hint)) // 2
+                self._safe_addstr(rb - 3, hc, hint, fill | curses.A_REVERSE)
 
-            # Ligne du bas DOUBLE
-            if 0 <= row_bottom < h:
-                self.stdscr.attron(border_attr)
-                self.stdscr.addstr(row_bottom, col_left, "╚" + "═" * (btn["width"] - 2) + "╝")
-                self.stdscr.attroff(border_attr)
-
-            # Afficher le label du bouton en GROS et GRAS
-            label = "  " + btn['label'] + "  "  # Espaces de padding
-
-            label_col = btn["col"] + max(0, (btn["width"] - len(label)) // 2)
-            label_row = btn["row"] + 2  # Position fixe près du haut
-            if 0 <= label_row < h and label_col + len(label) < w:
-                self.stdscr.attron(attr | curses.A_UNDERLINE)
-                self.stdscr.addstr(label_row, label_col, label)
-                self.stdscr.attroff(attr | curses.A_UNDERLINE)
-
-            # Afficher l'état ON/OFF en VRAIMENT GROS (ASCII art multi-lignes)
-            if btn["state_attr"]:  # Uniquement pour les LEDs
-                state_row = btn["row"] + btn["height"] // 2 - 2
-                center_col = btn["col"] + btn["width"] // 2
-
-                if is_on:
-                    # Dessiner "ON" en gros ASCII art
-                    self._draw_big_text("ON", state_row, center_col, attr | curses.A_REVERSE)
-                else:
-                    # Dessiner "OFF" en gros ASCII art
-                    self._draw_big_text("OFF", state_row, center_col, attr)
             else:
-                # Pour le bouton QUIT - texte centré en GROS avec contraste max
-                quit_row = btn["row"] + btn["height"] // 2 - 2
-                quit_text1 = "╔═════════════════════╗"
-                quit_text2 = "║  CLIQUEZ ICI POUR  ║"
-                quit_text3 = "║                    ║"
-                quit_text4 = "║   Q U I T T E R    ║"
-                quit_text5 = "╚═════════════════════╝"
+                # Quit bar – flat rounded
+                pad = min(3, max(1, bw // 15))
+                self._safe_addstr(rt, cl + pad, "▄" * (bw - 2 * pad), fill)
+                for r in range(rt + 1, rb):
+                    self._safe_addstr(r, cl, "█" * bw, fill)
+                self._safe_addstr(rb, cl + pad, "▀" * (bw - 2 * pad), fill)
+                qt = "★  G A M E   O V E R  ·  P R E S S   T O   Q U I T  ★"
+                if len(qt) > bw - 4:
+                    qt = "★ PRESS TO QUIT ★"
+                qc = cl + max(0, (bw - len(qt)) // 2)
+                qr = rt + btn["height"] // 2
+                self._safe_addstr(qr, qc, qt, fill | curses.A_REVERSE)
 
-                for i, text in enumerate([quit_text1, quit_text2, quit_text3, quit_text4, quit_text5]):
-                    row = quit_row + i
-                    col = btn["col"] + max(0, (btn["width"] - len(text)) // 2)
-                    if 0 <= row < h and col + len(text) < w:
-                        # Noir sur jaune pour maximum de contraste
-                        self.stdscr.attron(attr)
-                        self.stdscr.addstr(row, col, text)
-                        self.stdscr.attroff(attr)
+        # ═══ MQTT GAME LOG (last 2 messages) ═══
+        log_attr = curses.color_pair(4)
+        for i, msg in enumerate(self.mqtt_feedback[-2:]):
+            self._safe_addstr(h - 4 + i, 4, f"  > {msg}"[:w - 8], log_attr)
+
+        # ═══ STATUS BAR ═══
+        status = f"► {self.status_message}"[:w - 30]
+        self._safe_addstr(h - 2, 3, status, curses.color_pair(4) | curses.A_BOLD)
+        help_txt = "TOUCH TO PLAY · Q=QUIT"
+        self._safe_addstr(h - 2, max(3, w - len(help_txt) - 4), help_txt,
+                          curses.color_pair(6))
 
         self.stdscr.refresh()
 
     def _touch_to_rowcol(self, x_raw, y_raw):
-        """
-        Map coordonnées brutes evdev -> lignes/colonnes du terminal curses.
-        """
         h, w = self.stdscr.getmaxyx()
 
-        # protection division par zéro
         dx = max(1, self.touch_reader.max_x - self.touch_reader.min_x)
         dy = max(1, self.touch_reader.max_y - self.touch_reader.min_y)
 
@@ -507,7 +424,6 @@ class LEDControlUI:
         col = int(x_norm * (w - 1))
         row = int(y_norm * (h - 1))
 
-        # clamp
         row = max(0, min(h - 1, row))
         col = max(0, min(w - 1, col))
         return row, col
@@ -515,7 +431,6 @@ class LEDControlUI:
     def _handle_touch_tap(self, x_raw, y_raw):
         row, col = self._touch_to_rowcol(x_raw, y_raw)
 
-        # Vérifier sur quel bouton on a tapé
         clicked_btn = None
         for btn in self.buttons:
             if (btn["row"] <= row < btn["row"] + btn["height"] and
@@ -527,20 +442,16 @@ class LEDControlUI:
             self.status_message = f"Touché hors bouton: row={row}, col={col}"
             return
 
-        # Traiter le clic selon le bouton
         btn_name = clicked_btn["name"]
-
         if btn_name == "QUIT":
             self.status_message = "Arrêt demandé..."
             self.running = False
         elif btn_name == "LED1":
-            # Toggle LED1
             self.led1_state = not self.led1_state
             message = "ON" if self.led1_state else "OFF"
             self._publish_mqtt(clicked_btn["topic"], message)
             self.status_message = f"LED ROUGE: {message}"
         elif btn_name == "LED2":
-            # Toggle LED2
             self.led2_state = not self.led2_state
             message = "ON" if self.led2_state else "OFF"
             self._publish_mqtt(clicked_btn["topic"], message)
@@ -576,8 +487,9 @@ class LEDControlUI:
                 event = None
 
             if event:
-                kind, x_raw, y_raw = event
+                kind = event[0]
                 if kind == "tap":
+                    _, x_raw, y_raw = event
                     self._handle_touch_tap(x_raw, y_raw)
 
             time.sleep(0.01)
