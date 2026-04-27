@@ -2,11 +2,11 @@
 
 **Cours :** 243-4J5-LI – Objets connectés
 **Évaluation :** Projet final IdO (semaines 13-15)
-**Cohorte :** 8 étudiant·es (4 voie LoRa + 4 voie LTE)
+**Cohorte :** 8 étudiants (4 voie LoRa + 4 voie LTE)
 
 ---
 
-## 1. Décompte par étudiant·e (modules assignés)
+## 1. Décompte par étudiant (modules assignés)
 
 | # | BME280 | MPU6050 | BH1750 | EKMC (PIR) | Pot | Bouton | LED |
 |:-:|:-----:|:-------:|:------:|:--------:|:---:|:------:|:---:|
@@ -28,8 +28,8 @@ Probablement **déjà inventoriés** depuis les Labos précédents — vérifier
 
 | Composant | Fonctionnel | Rechange | **Total** | Notes |
 |-----------|:-----------:|:--------:|:---------:|-------|
-| **LilyGO T-Beam SUPREME** (ESP32-S3 + LoRa SX1262 + GPS) | 8 (= 4 étudiant·es × 2) | 2 | **10** | Voie LoRa : 1 nœud distant + 1 gateway WiFi par étudiant·e |
-| **LilyGO A7670G** (ESP32 + LTE Cat-1 + GPS) | 4 | 1 | **5** | Voie LTE : 1 par étudiant·e (réutilisé du mid-session) |
+| **LilyGO T-Beam SUPREME** (ESP32-S3 + LoRa SX1262 + GPS) | 8 (= 4 étudiants × 2) | 2 | **10** | Voie LoRa : 1 nœud distant + 1 gateway WiFi par étudiant |
+| **LilyGO A7670G** (ESP32 + LTE Cat-1 + GPS) | 4 | 1 | **5** | Voie LTE : 1 par étudiant (réutilisé du mid-session) |
 
 ---
 
@@ -63,7 +63,7 @@ Marge de rechange élevée : ces composants sont consommables et faciles à perd
 
 | Accessoire | Fonctionnel | Rechange | **Total** | Notes |
 |------------|:-----------:|:--------:|:---------:|-------|
-| **Breadboard** 830 points (full-size) | 8 | 2 | **10** | 1 par étudiant·e ; éviter les modèles bas de gamme (mauvais contacts) |
+| **Breadboard** 830 points (full-size) | 8 | 2 | **10** | 1 par étudiant ; éviter les modèles bas de gamme (mauvais contacts) |
 | **Set fils dupont** mâle-mâle (40 fils, 20 cm) | 8 | 2 | **10** | Pack de 40 |
 | **Set fils dupont** mâle-femelle (40 fils, 20 cm) | 8 | 2 | **10** | Pack de 40 — utile pour les modules breakout |
 | **Set fils dupont** femelle-femelle (40 fils, 20 cm) | 8 | 2 | **10** | Pack de 40 |

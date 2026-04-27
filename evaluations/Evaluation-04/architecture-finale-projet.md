@@ -6,25 +6,25 @@
 
 ## 1. Contexte
 
-Le projet final simule le déploiement de **8 sites RF** d'un distributeur d'énergie fictif, **Hydro-Limoilou**. Chaque site **héberge un répéteur RF** (configuré par l'étudiant·e dans un cours connexe), et le présent projet déploie l'**infrastructure de télémétrie** qui surveille les conditions opérationnelles de chaque site (climat, sécurité, alimentation, intégrité mécanique).
+Le projet final simule le déploiement de **8 sites RF** d'un distributeur d'énergie fictif, **Hydro-Limoilou**. Chaque site **héberge un répéteur RF** (configuré dans le cours 243-4Q5-LI), et le présent projet déploie l'**infrastructure de télémétrie** qui surveille les conditions opérationnelles de chaque site (climat, sécurité, alimentation, intégrité mécanique).
 
-Chaque étudiant·e est responsable d'un site distinct, avec son propre répéteur RF, ses propres capteurs de télémétrie, son propre nœud de communication, son propre courtier MQTT (sur son Raspberry Pi 5) et son propre écran de monitoring.
+Chaque étudiant est responsable d'un site distinct, avec son propre répéteur RF, ses propres capteurs de télémétrie, son propre nœud de communication, son propre courtier MQTT (sur son Raspberry Pi 5) et son propre écran de monitoring.
 
 Un **serveur central** (VM gérée par l'enseignant) se connecte à chacun des 8 courtiers MQTT pour agréger les données via une **convention de topics standardisée**.
 
 ### Articulation avec le cours connexe (configuration des répéteurs)
 
-Chaque étudiant·e configure **son propre répéteur RF** dans un cours parallèle. Le présent projet en assure le **monitoring environnemental et opérationnel** :
+Chaque étudiant configure **son propre répéteur RF** dans un cours parallèle. Le présent projet en assure le **monitoring environnemental et opérationnel** :
 
 - la télémétrie observe les conditions qui peuvent affecter le bon fonctionnement du répéteur (température dans le shelter, vibration du mât d'antenne, intégrité de l'alimentation, intrusion physique)
 - les alarmes signalent les situations qui menacent la disponibilité du répéteur (basculement, inondation, ouverture du cabinet, batterie faible, niveau carburant bas)
-- la convergence vers le serveur central simule un **CCR** — Centre de conduite du réseau, équivalent du [CCR d'Hydro-Québec](https://www.hydroquebec.com/comprendre/transport/conduite-reseau.html) qui supervise 24/7 le réseau de transport (160 stations de télémesure, 22 500 points d'acquisition, automatismes de commande à distance). Le projet met les étudiant·es à la place des répartiteurs, avec une vue agrégée des 8 sites.
+- la convergence vers le serveur central simule un **CCR** — Centre de conduite du réseau, équivalent du [CCR d'Hydro-Québec](https://www.hydroquebec.com/comprendre/transport/conduite-reseau.html) qui supervise 24/7 le réseau de transport (160 stations de télémesure, 22 500 points d'acquisition, automatismes de commande à distance). Le projet met les étudiants à la place des répartiteurs, avec une vue agrégée des 8 sites.
 
 ---
 
 ## 2. Architecture globale
 
-Le serveur central est un **client MQTT** (pas un broker). Il est hébergé sur une VM gérée par l'enseignant et s'abonne en parallèle aux **8 brokers Mosquitto** hébergés sur les Pi 5 des étudiant·es.
+Le serveur central est un **client MQTT** (pas un broker). Il est hébergé sur une VM gérée par l'enseignant et s'abonne en parallèle aux **8 brokers Mosquitto** hébergés sur les Pi 5 des étudiants.
 
 ```mermaid
 graph TB
@@ -112,7 +112,7 @@ Chaque site reçoit une combinaison **unique** de modules breakout (avec headers
 
 ## 5. Sélection pédagogique des étudiants
 
-Le projet final est conçu comme une **occasion de remédiation** : chaque étudiant·e est affecté·e à la voie qui exerce ce qu'il/elle a le moins bien réussi lors des évaluations antérieures. Le projet final devient une **2e chance encadrée** de démontrer la compétence faiblement maîtrisée.
+Le projet final est conçu comme une **occasion de remédiation** : chaque étudiant est affecté à la voie qui exerce ce qu'il a le moins bien réussi lors des évaluations antérieures. Le projet final devient une **2e chance encadrée** de démontrer la compétence faiblement maîtrisée.
 
 | Évaluation antérieure faiblement réussie | Compétence à redémontrer | Voie attribuée au projet final |
 |------------------------------------------|--------------------------|-------------------------------|
@@ -120,8 +120,8 @@ Le projet final est conçu comme une **occasion de remédiation** : chaque étud
 | **TP LoRa** (Sem. 9 — Intégration LoRa point-à-point : configuration radio, paramètres SF/BW, gateway WiFi→MQTT) | Configuration et exploitation d'une **liaison LoRa P2P** + pont MQTT | **LoRa (#1-4)** |
 
 ### Cas limites
-- Étudiant·e faible aux **deux** évaluations → arbitrage selon la lacune **la plus marquée** (écart au seuil), avec léger biais vers **LoRa** car le projet inclut 2 T-Beam à configurer = davantage d'occasions d'observer la progression
-- Étudiant·e solide aux deux → choix selon les **places restantes** (équilibre 4/4 maintenu) et selon l'intérêt déclaré
+- Étudiant faible aux **deux** évaluations → arbitrage selon la lacune **la plus marquée** (écart au seuil), avec léger biais vers **LoRa** car le projet inclut 2 T-Beam à configurer = davantage d'occasions d'observer la progression
+- Étudiant solide aux deux → choix selon les **places restantes** (équilibre 4/4 maintenu) et selon l'intérêt déclaré
 
 ### Bénéfices
 - Le projet final n'est pas un nouvel apprentissage à partir de zéro mais un **approfondissement ciblé**
@@ -174,19 +174,19 @@ Un **document séparé** (`contrat-serveur-central.md`) détaille les topics exa
 
 ---
 
-## 7. Composants par étudiant·e
+## 7. Composants par étudiant
 
-### Infrastructure individuelle (1 par étudiant·e)
+### Infrastructure individuelle (1 par étudiant)
 - **Raspberry Pi 5** — broker Mosquitto + interface tactile + tunnel Cloudflare *(déjà en place depuis Labos 1-2)*
 - **Domaine Cloudflare personnel** *(déjà en place)*
 
-### Voie LoRa (étudiant·es #1-4)
+### Voie LoRa (étudiants #1-4)
 - 2 × **LilyGO T-Beam SUPREME** (1 nœud de site + 1 gateway WiFi)
 - Modules breakout assignés
 - Shield PCB conçu en KiCad (livrable, non fabriqué)
 - Breadboard pour intégration physique
 
-### Voie LTE (étudiant·es #5-8)
+### Voie LTE (étudiants #5-8)
 - 1 × **LilyGO A7670G** (réutilisé du mid-session)
 - Modules breakout assignés
 - Shield PCB conçu en KiCad (livrable, non fabriqué)
@@ -200,7 +200,7 @@ Un **document séparé** (`contrat-serveur-central.md`) détaille les topics exa
 
 ## 8. Livrables du projet final
 
-Pour chaque étudiant·e, à la fin de la sem. 15 :
+Pour chaque étudiant, à la fin de la sem. 15 :
 
 1. **Shield PCB** (livrable de conception KiCad, **non fabriqué**) :
    - Schéma `.kicad_sch` (ERC sans erreurs)

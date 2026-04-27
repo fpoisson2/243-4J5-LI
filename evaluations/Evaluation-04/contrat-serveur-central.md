@@ -1,7 +1,7 @@
 # Contrat technique avec le serveur central — Hydro-Limoilou
 **Cours :** 243-4J5-LI – Objets connectés
 **Évaluation :** Projet final IdO
-**Audience :** étudiant·es (publication des données) + enseignant (souscription côté VM)
+**Audience :** étudiants (publication des données) + enseignant (souscription côté VM)
 
 ---
 
@@ -9,7 +9,7 @@
 
 Ce document fixe le **contrat technique** que chaque site doit respecter pour que le **serveur central VM** (géré par l'enseignant) puisse :
 
-1. Se connecter au courtier MQTT du Pi 5 de l'étudiant·e via Cloudflare Tunnel
+1. Se connecter au courtier MQTT du Pi 5 de l'étudiant via Cloudflare Tunnel
 2. Souscrire aux topics du site avec une convention uniforme
 3. Agréger les 8 sites dans un dashboard global
 
@@ -193,7 +193,7 @@ hydro-limoilou/poste-01/alarm/vibration         {"level": "warning", "value": 1.
 
 ---
 
-## 6. Exposition du courtier (côté étudiant·e)
+## 6. Exposition du courtier (côté étudiant)
 
 Chaque Pi 5 doit rendre son courtier Mosquitto accessible au serveur central via **Cloudflare Tunnel** (déjà en place depuis Labos 1-2).
 

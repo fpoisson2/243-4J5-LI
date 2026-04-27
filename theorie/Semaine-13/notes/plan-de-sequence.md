@@ -17,7 +17,7 @@ Projet final Hydro-Limoilou — Lancement, intégration matérielle, amorce KiCa
 - Mise en situation Hydro-Limoilou (8 sites de télémétrie RF)
 - Architecture cible : 8 sites indépendants + serveur central VM agrégateur
 - Distinction des deux voies (LoRa #1-4, LTE #5-8)
-- Sélection pédagogique des étudiant·es (remédiation ciblée)
+- Sélection pédagogique des étudiants (remédiation ciblée)
 
 ### Convention de topics et contrat technique
 - Schéma `hydro-limoilou/{site-id}/{telemetry|status|alarm|actuators}/...`
@@ -74,9 +74,9 @@ Voir [grille-checkpoint-1.md](../../../evaluations/Evaluation-04/grille-checkpoi
 - Code firmware Labo 2 (à adapter pour les nouveaux topics et capteurs)
 
 ## Notes pour l'enseignant
-- Préparer les kits par étudiant·e selon les assignations (modules breakout)
+- Préparer les kits par étudiant selon les assignations (modules breakout)
 - Distribuer les credentials Mosquitto pour le compte `central` (à transmettre au CP2)
 - Confirmer l'adresse de la VM agrégateur en début de séance
 - Prévoir du matériel de remplacement (modules cassés, dupont supplémentaires)
-- Vérifier en fin de séance que chaque étudiant·e a au moins **un message** visible côté broker local
+- Vérifier en fin de séance que chaque étudiant a au moins **un message** visible côté broker local
 - Adapter le rythme : la moitié de la classe en LoRa, l'autre en LTE — prévoir circulations différenciées

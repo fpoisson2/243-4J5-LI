@@ -17,7 +17,7 @@ Projet final Hydro-Limoilou — Intégration logicielle complète (CP2)
 ## Activités
 
 ### Brève intro (15-20 min)
-- Tour de table rapide : où en est chaque étudiant·e après le CP1
+- Tour de table rapide : où en est chaque étudiant après le CP1
 - Rappel des 5 critères du CP2 et de leurs livrables
 - Rappel de la procédure de transmission des credentials Mosquitto à l'enseignant
 - Réponse aux questions éventuelles
@@ -34,7 +34,7 @@ Travail individuel sur les postes. Ordre suggéré :
 L'enseignant circule pour soutenir, débloquer et valider individuellement.
 
 ### Checkpoint CP2 individuel (en fin de séance)
-Vérification critère par critère devant l'étudiant·e.
+Vérification critère par critère devant l'étudiant.
 
 ## Travaux hors classe
 - Préparer le scénario de la démo (3 scénarios à présenter en sem. 15)
@@ -61,7 +61,7 @@ Voir [grille-checkpoint-2.md](../../../evaluations/Evaluation-04/grille-checkpoi
 
 ## Notes pour l'enseignant
 - Préparer un script de validation côté VM pour tester rapidement chaque site
-- Disposer d'une liste pré-formatée pour collecter les credentials de chaque étudiant·e
+- Disposer d'une liste pré-formatée pour collecter les credentials de chaque étudiant
 - Vérifier que chaque site est visible côté VM **avant** la fin de la séance (pour donner la note CP2 immédiatement)
-- Anticiper les difficultés sur la voie LoRa (deux T-Beam à coordonner) : prévoir 50% du temps de circulation pour ces étudiant·es
-- Pour les étudiant·es en retard sur le CP1, encourager le rattrapage en début de séance
+- Anticiper les difficultés sur la voie LoRa (deux T-Beam à coordonner) : prévoir 50% du temps de circulation pour ces étudiants
+- Pour les étudiants en retard sur le CP1, encourager le rattrapage en début de séance

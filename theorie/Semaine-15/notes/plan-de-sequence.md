@@ -33,7 +33,7 @@ Travail individuel sur les postes :
 L'enseignant circule pour débloquer.
 
 ### Démos individuelles (≈ 2 h)
-Passage individuel devant l'enseignant (≈ 15 min par étudiant·e) :
+Passage individuel devant l'enseignant (≈ 15 min par étudiant) :
 1. Préparation : système démarré, dashboard VM ouvert
 2. Présentation rapide du site et de la mise en situation (3 min)
 3. Démonstration des 3 scénarios (10 min)
@@ -70,7 +70,7 @@ Voir [grille-checkpoint-3.md](../../../evaluations/Evaluation-04/grille-checkpoi
 - Documentation KiCad (DRC, génération Gerbers/BOM)
 
 ## Notes pour l'enseignant
-- Préparer un horaire de passage pour les démos individuelles (≈ 15 min × 8 étudiant·es = 2 h)
+- Préparer un horaire de passage pour les démos individuelles (≈ 15 min × 8 étudiants = 2 h)
 - Garder un tableau de bord de la VM ouvert pendant toutes les démos pour valider 3.5
 - Consigner les notes au fur et à mesure dans la grille
 - Prévoir 5 min de rétroaction immédiate après chaque démo

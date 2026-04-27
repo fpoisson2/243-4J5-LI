@@ -66,7 +66,7 @@ Semaines 13 à 15 — 35 % de la note finale
 - **4J5** — Télémétrie (présent cours) : supervision de l'installation
 - **4P3** — Gestion du projet
 - **4K4** — WAN privé
-- **4Q5** — Répéteur : chaque étudiant·e configure son propre répéteur RF
+- **4Q5** — Répéteur : chaque étudiant configure son propre répéteur RF
 - **4L4** — Liaison optique
 - Le présent projet assure le **monitoring environnemental et opérationnel de l'installation** :
   - télémétrie : climat shelter, vibration mât, alimentation, intrusion
@@ -107,7 +107,7 @@ graph TB
 
 <v-clicks>
 
-- **1 broker Mosquitto par site**, hébergé sur le Raspberry Pi 5 de l'étudiant·e
+- **1 broker Mosquitto par site**, hébergé sur le Raspberry Pi 5 de l'étudiant
 - Le **serveur central est un *client* MQTT** (pas un broker) — il s'abonne en parallèle aux 8 brokers
 - Capteurs → broker Pi 5 passent par **Internet public** (pas de LAN local commun)
 - **Redondance réseau à 2 voies** : Cloudflare Tunnel (primaire) + WAN privé inter-labo (secours)

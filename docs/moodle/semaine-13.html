@@ -10,18 +10,18 @@
 </head>
 <body>
 <div style="font-family: 'Segoe UI', system-ui, sans-serif; line-height: 1.6;">
-  <p>Lancement du <strong>projet final Hydro-Limoilou</strong> : déploiement de 8 sites RF (4 voie <strong>LoRa</strong>, 4 voie <strong>LTE</strong>). Chaque site <strong>héberge un répéteur RF</strong> (configuré par l'étudiant·e dans un cours connexe), et le projet en cours déploie l'<strong>infrastructure de télémétrie</strong> qui en surveille les conditions opérationnelles (climat, sécurité, alimentation, intégrité mécanique). Chaque étudiant·e est responsable d'un site avec ses capteurs, son broker MQTT, son écran tactile et son tunnel Cloudflare. Un serveur central VM simulant un <strong>CCR (Centre de conduite du réseau)</strong> agrège les 8 sites — cf. le <a href="https://www.hydroquebec.com/comprendre/transport/conduite-reseau.html" target="_blank">CCR d'Hydro-Québec</a>.</p>
+  <p>Lancement du <strong>projet final Hydro-Limoilou</strong> : déploiement de 8 sites RF (4 voie <strong>LoRa</strong>, 4 voie <strong>LTE</strong>). Chaque site <strong>héberge un répéteur RF</strong> (configuré dans le cours 243-4Q5-LI), et le projet en cours déploie l'<strong>infrastructure de télémétrie</strong> qui en surveille les conditions opérationnelles (climat, sécurité, alimentation, intégrité mécanique). Chaque étudiant est responsable d'un site avec ses capteurs, son broker MQTT, son écran tactile et son tunnel Cloudflare. Un serveur central VM simulant un <strong>CCR (Centre de conduite du réseau)</strong> agrège les 8 sites — cf. le <a href="https://www.hydroquebec.com/comprendre/transport/conduite-reseau.html" target="_blank">CCR d'Hydro-Québec</a>.</p>
   <p><strong>Mise en route (CP1) :</strong></p>
   <ul style="margin: 10px 0;">
-    <li><strong>Mise en situation</strong> — chaque étudiant·e reçoit un site (tour relais, cabinet fluvial, mât météo, sous-station urbaine, etc.) avec une combinaison unique de modules breakout</li>
+    <li><strong>Mise en situation</strong> — chaque étudiant reçoit un site (tour relais, cabinet fluvial, mât météo, sous-station urbaine, etc.) avec une combinaison unique de modules breakout</li>
     <li><strong>Câblage breadboard</strong> — modules assignés montés sur l'hôte (T-Beam SUPREME pour LoRa, A7670G pour LTE)</li>
     <li><strong>Première publication MQTT</strong> — au moins un capteur publie sur le bon topic conforme au contrat <code>hydro-limoilou/poste-XX/telemetry/...</code></li>
     <li><strong>Amorce du shield KiCad</strong> — projet créé, composants placés, début des connexions</li>
   </ul>
   <p><strong>Sélection pédagogique :</strong></p>
   <ul style="margin: 10px 0;">
-    <li><strong>Voie LTE (#5-8)</strong> — pour les étudiant·es ayant le plus à reprendre sur le shield A7670G + MQTT/LTE de la mi-session</li>
-    <li><strong>Voie LoRa (#1-4)</strong> — pour les étudiant·es ayant le plus à reprendre sur le mesh LoRa du TP de la sem. 9</li>
+    <li><strong>Voie LTE (#5-8)</strong> — pour les étudiants ayant le plus à reprendre sur le shield A7670G + MQTT/LTE de la mi-session</li>
+    <li><strong>Voie LoRa (#1-4)</strong> — pour les étudiants ayant le plus à reprendre sur le mesh LoRa du TP de la sem. 9</li>
   </ul>
   <p><strong>Labo 13 :</strong> câbler le breadboard, adapter le firmware Labo 2 pour publier sur les nouveaux topics, démarrer le projet KiCad.</p>
   <div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-left: 4px solid #2196F3; border-radius: 4px;">
