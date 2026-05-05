@@ -263,7 +263,13 @@ hydro-limoilou/{site-id}/actuators/{nom}         # Commandes descendantes</code>
 {"uptime": 3600, "rssi": -67, "link": "lora", "battery_v": 3.92, "ts": 1739500030}
 
 // hydro-limoilou/poste-01/alarm/vibration
-{"level": "warning", "value": 1.45, "unit": "m/s2", "ts": 1739500045}</code></pre>
+{"level": "warning", "value": 1.45, "unit": "m/s2", "ts": 1739500045}
+
+// hydro-limoilou/poste-06/telemetry/btn_1  (publié sur chaque transition, QoS 1, sans rétention)
+{"state": "pressed", "ts": 1739500010}
+{"state": "released", "ts": 1739500011}</code></pre>
+
+  <p>Les boutons-poussoirs sont publiés sur <code>telemetry/btn_1</code>, <code>telemetry/btn_2</code>, etc. La numérotation est indépendante du site (selon le nombre de boutons câblés, voir tableau matériel). Voir <a href="https://github.com/fpoisson2/243-4J5-LI/blob/main/evaluations/Evaluation-04/contrat-serveur-central.md#31-sous-topics-standardisés-telemetry" target="_blank">contrat §3.1</a> pour le détail.</p>
 
   <h2 id="checkpoints">7. Checkpoints d'évaluation</h2>
 

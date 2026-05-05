@@ -174,6 +174,7 @@ Rétention **activée** (le client central doit pouvoir afficher le dernier rés
 | `telemetry/temperature`, `humidity`, `pressure`, `light` | 1 / 30 s | 1 / 10 s |
 | `telemetry/vibration` | 1 / 5 s | 1 / 1 s (échantillon brut ou moyenne glissante) |
 | `telemetry/{analogique}` | 1 / 10 s | 1 / 2 s |
+| `telemetry/btn_*` | événementiel (sur transition) | événementiel + anti-rebond logiciel |
 | `status` | 1 / 60 s | 1 / 30 s |
 | `status/llm` | 1 / 5 min | 1 / 2 min (ou sur évènement) |
 | `alarm/*` | événementiel | événementiel + ack |
@@ -195,6 +196,7 @@ Rétention **activée** (le client central doit pouvoir afficher le dernier rés
 hydro-limoilou/poste-01/telemetry/temperature   {"value": 22.4, "unit": "C", "ts": 1739500000}
 hydro-limoilou/poste-01/telemetry/humidity      {"value": 45.2, "unit": "%", "ts": 1739500000}
 hydro-limoilou/poste-01/telemetry/vibration     {"x": 0.02, "y": -0.01, "z": 9.81, "ts": 1739500005}
+hydro-limoilou/poste-01/telemetry/btn_1         {"state": "pressed", "ts": 1739500010}
 hydro-limoilou/poste-01/status                  {"uptime": 3600, "rssi": -67, "link": "lora", "battery_v": 3.92, "ts": 1739500030}
 hydro-limoilou/poste-01/alarm/vibration         {"level": "warning", "value": 1.45, "unit": "m/s2", "ts": 1739500045}
 ```
