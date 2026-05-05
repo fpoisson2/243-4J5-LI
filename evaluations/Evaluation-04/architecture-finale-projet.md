@@ -148,6 +148,7 @@ hydro-limoilou/{site-id}/actuators/{nom}         # Commandes descendantes (LED, 
 hydro-limoilou/poste-01/telemetry/temperature   {"value": 22.4, "unit": "C", "ts": 1739500000}
 hydro-limoilou/poste-01/telemetry/humidity      {"value": 45.2, "unit": "%", "ts": 1739500000}
 hydro-limoilou/poste-01/telemetry/vibration     {"x": 0.02, "y": -0.01, "z": 9.81, "ts": 1739500000}
+hydro-limoilou/poste-01/telemetry/btn_1         {"state": "pressed", "ts": 1739500010}
 hydro-limoilou/poste-01/status                  {"uptime": 3600, "rssi": -67, "link": "lora", "battery_v": 3.9}
 hydro-limoilou/poste-01/status/llm              {"summary": "Vibrations nominales, climat ok.", "model": "qwen2.5:3b", "ts": 1739500090}
 hydro-limoilou/poste-01/alarm/tilt              {"level": "warning", "value": 12.3, "unit": "deg", "ts": 1739500000}
@@ -167,7 +168,7 @@ Chaque appareil doit **exécuter un appel LLM local** (ex. Ollama + qwen2.5:3b s
 | **BH1750** (DFRobot SEN0097) | `light` | `value`, `unit` (lux), `ts` |
 | **EKMC4607112K** (SparkFun 17372, PIR ultra-basse conso) | sous `alarm/motion` | `level`, `ts` |
 | Potentiomètre | `analog_1`, `analog_2` (ou nom selon site, ex. `water_level`, `battery_v`) | `value`, `unit`, `ts` |
-| Bouton | sous `alarm/{nom}` ou via `status` | `state`, `ts` |
+| Bouton-poussoir | `btn_1`, `btn_2` (numérotation indépendante du site) | `state` (`"pressed"` / `"released"`), `ts` — événementiel, QoS 1, sans rétention |
 | LED | `actuators/led_N` (descendant) | `state` (`"on"`/`"off"`) |
 
 Un **document séparé** (`contrat-serveur-central.md`) détaille les topics exacts attendus pour chaque site #1-8, les fréquences de publication minimales et les payloads JSON normalisés.
