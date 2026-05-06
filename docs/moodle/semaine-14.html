@@ -31,9 +31,7 @@
   </ul>
   <p><strong>Visibilité côté serveur central :</strong></p>
   <ul style="margin: 10px 0;">
-    <li><strong>Mosquitto sécurisé</strong> — utilisateur <code>central</code> avec ACL restreinte aux topics du site</li>
-    <li><strong>Tunnel Cloudflare actif</strong> en WSS:443</li>
-    <li><strong>Validation</strong> via <code>mosquitto_sub</code> depuis la VM</li>
+    <li><strong>Tunnel Cloudflare actif</strong> en WSS:443 permettant au serveur central (client MQTT) de se connecter au broker du site</li>
   </ul>
   <p><strong>Labo 14 :</strong> compléter le firmware, étendre l'interface tactile, configurer Mosquitto, transmettre les credentials à l'enseignant, finaliser le schéma KiCad.</p>
   <div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-left: 4px solid #2196F3; border-radius: 4px;">
